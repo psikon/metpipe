@@ -1,0 +1,6 @@
+# Ignore all files ending with ~
+*~
+# Ignore following directories
+results/
+download/
+program/
