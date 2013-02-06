@@ -1,0 +1,12 @@
+[Preprocessing]
+
+[Assembly]
+program = metavelvet
+threads = 6
+k-mer = 85
+prefix = spice
+[Annotate]
+program = blast
+threads =
+percent =
+outfmt	=  

@@ -1,9 +1,12 @@
 #!/bin/bash
 
-while getopts hsc opt
+while getopts hscq opt
 	do
 		case $opt in
 			\?) echo "Invalid option :-$OPTARG"; exit 0;;
+			c) less citations.txt; exit 0;;			
+			q) echo "Quiet install enabled"
+			   quiet="y";;
 			s) echo "Components of metpipe:
 [Read Quality Check and Trimming]
 - FastQC
@@ -24,14 +27,15 @@ exit 0;;
 This is the install script of the pipeline. All relevant programms will be checked and installed if not existing.
 
 Requirments: boost
-             python 2.6+ (stitch)
-			 perl (blast database download)ls 
+             python 2.6+
+             perl
               
 USAGE: $0 [-h]
 
  -h show help screen 
  -q silent install install all required components
  -s show all included programms
+ -c show all citations for the used programs
 "
 exit 0;
 		esac
@@ -54,8 +58,13 @@ while true
 			echo "Installation of FastQC found"
 			break
 		fi
-	echo -n "FastQC not found. Needed for quality checks.\nDownload and install it? <y|n> :"
-	read CONFIRM
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "FastQC not found. Needed for quality checks.\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			cd program/
@@ -72,17 +81,21 @@ while true
 		*) echo Please enter only y or n
 		esac
 	done
-ls
 
 while true
 	do
 		# checking for install
-		if [ -f program/fast ]; then
+		if [ -f program/trim_galore/trim_galore ]; then
 			echo "Installation of Trim Galore! found"
 			break
 		fi
-	echo -n "Trim Galore! not found. Needed for quality trimming.\nDownload and install it? <y|n> :"
-	read CONFIRM
+		
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "Trim Galore! not found. Needed for quality trimming.\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			cd program/
@@ -100,8 +113,7 @@ while true
 		*) echo Please enter only y or n
 		esac
 	done
-ls
-# Installation of stitch for concatinate the reads
+
 while true
 	do
 		# checking for install
@@ -109,8 +121,14 @@ while true
 			echo "Installation of stitch found"
 			break
 		fi
-	echo -n "stitch not found. Needed for concatination (optional).\n Download and install it? <y|n> :"
-	read CONFIRM
+
+
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "stitch not found. Needed for concatination (optional).\n Download and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			mkdir program/stitch
@@ -137,8 +155,13 @@ while true
 			echo "Installation of blastn found"
 			break
 		fi
-	echo -n "blastn not found. Needed for annotation! \n Download and install it? <y|n> :"
-	read CONFIRM
+
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "blastn not found. Needed for annotation! \n Download and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			cd program/
@@ -164,8 +187,13 @@ while true
 			echo "nt Database found for blast"
 		break
 		fi
-	echo -n "nt database not found. Needed for annotation! \nDownload and install it? <y|n> :"
-	read CONFIRM
+		
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "nt database not found. Needed for annotation! \nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			mkdir program/db/
@@ -188,8 +216,13 @@ while true
 			echo "16SMircobial Database found for blast"
 			break
 		fi
-	echo -n "16SMicrobial database not found. (optional for 16S analysis)\nDownload and install it? <y|n> :"
-	read CONFIRM
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="n"
+		else
+			echo -n "16SMicrobial database not found. (optional for 16S analysis)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			mkdir program/db/
@@ -212,8 +245,13 @@ while true
 			echo "Installation of MetaVelvet found"
 			break
 		fi
-	echo -n "MetaVelvet not found. Download and install it? <y|n> :"
-	read CONFIRM
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "MetaVelvet not found. Download and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			cd program/
@@ -249,8 +287,13 @@ while true
 			echo "Installation of Abyss found"
 			break
 		fi
-	echo -n "Abyss not found. (optional for assembly)\nDownload and install it? <y|n> :"
-	read CONFIRM
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="n"
+		else
+			echo -n "Abyss not found. (optional for assembly)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			cd program/
@@ -291,12 +334,40 @@ while true
 		esac
 	done
 
-echo "\n Checking Installations"
-echo "Read preprocessing"
-	if [ -f program/fastqc/fastqc ]; then
-			echo "Installation of Abyss found"
+while true
+	do
+		if [ -f program/fastx/fastq_to_fasta ]; then
+			echo "Installation of FastX toolkit found"
 			break
-	fi 
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "FastX toolkit not found. (required)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				# Download and uncompress the binaries 
+				wget http://hannonlab.cshl.edu/fastx_toolkit/fastx_toolkit_0.0.13_binaries_Linux_2.6_amd64.tar.bz2
+				tar -xjf fastx_*
+				rm fastx_*
+				mv bin/ fastx
+			cd ..
+			break;;
+		n|N|no|NO|No)
+		break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+
+echo "\n Checking Installations"
+echo "[Read preprocessing]"
+	
 
 
 exit 0;
