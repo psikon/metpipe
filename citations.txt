@@ -1,0 +1,21 @@
+
+[Preprocessing]
+
+
+[Concatination of the Reads]
+
+Stitch, Austin G. Davis-Richardson, https://github.com/audy/stitch 
+
+[Assembler]
+
+ABySS: A parallel assembler for short read sequence data. Simpson JT, Wong K, Jackman SD, Schein JE, Jones SJ, Birol I. Genome Research, 2009-June. (Genome Research, PubMed)
+
+Namiki T*, Hachiya T*, Tanaka H, Sakakibara Y. (2012) MetaVelvet : An extension of Velvet assembler to de novo metagenome assembly from short sequence reads, Nucleic Acids Res., in press. (Summplementary figures and tables)
+
+Velvet: algorithms for de novo short read assembly using de Bruijn graphs. D.R. Zerbino and E. Birney. Genome Research 18:821-829. 
+
+[Annotate]
+
+[Misc]
+
+
