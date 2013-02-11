@@ -23,7 +23,7 @@ while getopts hscq opt
 - MetaCV
 "
 exit 0;;
-			h) echo "
+			-h) echo "
 This is the install script of the pipeline. All relevant programms will be checked and installed if not existing.
 
 Requirments: boost
@@ -46,9 +46,12 @@ echo "Installation of the metPipe Programms.\n"
 # create needed directories
 if ! [ -d program ]; then
 	mkdir program/
+	mkdir program/db/
 fi 
 
 
+
+##### Preprocessing Tools #####
 
 # Installation of FastQC for quality checks
 while true
@@ -114,10 +117,12 @@ while true
 		esac
 	done
 
+##### Assembly Tools #####
+
 while true
 	do
 		# checking for install
-		if [ -f program/stitch/stitch.py ]; then
+		if [ -f program/stitch/stitch/stitch.py ]; then
 			echo "Installation of stitch found"
 			break
 		fi
@@ -132,104 +137,10 @@ while true
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			mkdir program/stitch
-			cd program/stitch/
-				# Download of stitch (python scripts)
-				wget https://github.com/audy/stitch/blob/master/stitch/stitch.py
-				wget https://github.com/audy/stitch/blob/master/stitch/__init__.py
-				wget https://github.com/audy/stitch/blob/master/stitch/fasta.py
-				wget https://github.com/audy/stitch/blob/master/stitch/length_filter.py
-			cd ../
-			break;;
-		n|N|no|NO|No)
-			break;
-		;;
-		*) echo Please enter only y or n
-		esac
-	done
-
-# Installation of blastn for annotation of the reads
-while true
-	do	
-		# checking for install
-		if [ -f program/blast/bin/blastn ]; then
-			echo "Installation of blastn found"
-			break
-		fi
-
-		if [ "$quiet" = "y" ]; then	
-			CONFIRM="y"
-		else
-			echo -n "blastn not found. Needed for annotation! \n Download and install it? <y|n> :"
-			read CONFIRM
-		fi
-	case $CONFIRM in
-		y|Y|YES|yes|Yes) 
 			cd program/
-				# Download and unpack program
-				wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.2.27+-x64-linux.tar.gz
-				tar xzfv ncbi-blast*
-				rm ncbi-blast-2.2.27+-x64-linux.tar.gz
-				mv ncbi-blast-2.2.27+ blast
+				# Download of stitch (python scripts)
+				git clone https://github.com/audy/stitch.git
 			cd ..
-			break;;
-		n|N|no|NO|No)
-			break;
-		;;
-		*) echo Please enter only y or n
-		esac
-	done
-
-# Checking and install the databases of blast
-while true
-	do
-		# checking for install
-		if [ -f program/db/nt.nal ]; then
-			echo "nt Database found for blast"
-		break
-		fi
-		
-		if [ "$quiet" = "y" ]; then	
-			CONFIRM="y"
-		else
-			echo -n "nt database not found. Needed for annotation! \nDownload and install it? <y|n> :"
-			read CONFIRM
-		fi
-	case $CONFIRM in
-		y|Y|YES|yes|Yes) 
-			mkdir program/db/
-			cd program/db
-				# download and compress the databases with the provided blast script
-				perl ../blast/bin/update_blastdb.pl nt --decompress --passive
-				cd ../..
-			break;;
-		n|N|no|NO|No)
-		break;
-		;;
-		*) echo Please enter only y or n
-		esac
-	done
-
-while true
-	do
-		# checking for install
-		if [ -f program/db/16SMicrobial.nhr ]; then
-			echo "16SMircobial Database found for blast"
-			break
-		fi
-	
-		if [ "$quiet" = "y" ]; then	
-			CONFIRM="n"
-		else
-			echo -n "16SMicrobial database not found. (optional for 16S analysis)\nDownload and install it? <y|n> :"
-			read CONFIRM
-		fi
-	case $CONFIRM in
-		y|Y|YES|yes|Yes) 
-			mkdir program/db/
-			cd program/db
-				# download and compress the databases with the provided blast script
-				perl ../blast/bin/update_blastdb.pl 16SMicrobial --decompress --passive
-			cd ../..
 			break;;
 		n|N|no|NO|No)
 			break;
@@ -273,6 +184,39 @@ while true
 						# Compile MetaVelvet with MiSeq k-mers
 						make 'MAXKMERLENGTH=251' 
 			cd ../..
+			break;;
+		n|N|no|NO|No)
+			break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+while true
+	do
+		# checking for install
+		if [ -f program/meta-idba/bin/metaidba ]; then
+			echo "Installation of Meta-IDBA found"
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "Meta-IDBA not found. Download and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				# Download and uncompress Meta-IDBA assembler
+				wget http://hku-idba.googlecode.com/files/idba-0.19.tar.gz
+				tar xzfv idba-*
+				rm idba-0.19.tar.gz
+				mv idba-* meta-idba
+				cd meta-idba/
+					./configure && make
+			cd ..
 			break;;
 		n|N|no|NO|No)
 			break;
@@ -334,6 +278,218 @@ while true
 		esac
 	done
 
+##### Annotate Tools #####
+
+# Installation of blastn for annotation of the reads
+while true
+	do	
+		# checking for install
+		if [ -f program/blast/bin/blastn ]; then
+			echo "Installation of blastn found"
+			break
+		fi
+
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "blastn not found. Needed for annotation! \n Download and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				# Download and unpack program
+				wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.2.27+-x64-linux.tar.gz
+				tar xzfv ncbi-blast*
+				rm ncbi-blast-2.2.27+-x64-linux.tar.gz
+				mv ncbi-blast-2.2.27+ blast
+			cd ..
+			break;;
+		n|N|no|NO|No)
+			break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+# Checking and install the databases of blast
+while true
+	do
+		# checking for install
+		if [ -f program/db/nt.nal ]; then
+			echo "nt Database found for blast"
+		break
+		fi
+		
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "nt database not found. Needed for annotation! \nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/db
+				# download and decompress the databases with the provided blast script
+				perl ../blast/bin/update_blastdb.pl nt --decompress --passive
+				cd ../..
+			break;;
+		n|N|no|NO|No)
+		break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+while true
+	do
+		# checking for install
+		if [ -f program/db/16SMicrobial.nhr ]; then
+			echo "16SMircobial Database found for blast"
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="n"
+		else
+			echo -n "16SMicrobial database not found. (optional for 16S analysis)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/db
+				# download and decompress the databases with the provided blast script
+				perl ../blast/bin/update_blastdb.pl 16SMicrobial --decompress --passive
+			cd ../..
+			break;;
+		n|N|no|NO|No)
+			break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+##### Classify Tools #####
+
+
+# Installation of MetaCV
+while true
+	do
+		# checking for install
+		if [ -f program/metacv/metacv ]; then
+			echo "Installation of MetaCV found"
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="n"
+		else
+			echo -n "MetaCV not found. (optional classify)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program
+				wget http://heanet.dl.sourceforge.net/project/metacv/metacv_2_3_0.tgz
+				tar xzfv metacv_*
+				rm metacv_2_3_0.tgz
+				mv metacv_* metacv
+				cd metacv/
+					make
+			cd ../..
+			break;;
+		n|N|no|NO|No)
+			break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+while true
+	do
+		# checking for MetaCV Database
+		if [ -f program/db/ ]; then
+			echo "MetaCV database found"
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="n"
+		else
+			echo -n "MetaCV database not found. (optional for classify with MetaCV)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/db/
+				# download and decompress the database for MetaCV
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part00
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part01
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part02
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part03
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part04
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part05
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part06
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
+				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part07
+				fi
+				cat db.part* | tar xvfzp
+				rm db.part*
+			cd ../..
+			break;;
+		n|N|no|NO|No)
+			break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+while true
+	do
+		# checking for Phylosift installation
+		if [ -f program/phylosift/phylosift ]; then
+			echo "Phylosift installation found"
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="n"
+		else
+			echo -n "Phylosift installation not found. (optional for classify)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				wget http://edhar.genomecenter.ucdavis.edu/~koadman/phylosift/releases/phylosift_v1.0.0_01.tar.bz2
+				tar -xvf phylosift*
+				rm phylosift_v1.0.0_01.tar.bz2
+				mv phylosift* phylosift
+			cd ..
+			break;;
+		n|N|no|NO|No)
+			break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+##### Misc Tools #####
+
 while true
 	do
 		if [ -f program/fastx/fastq_to_fasta ]; then
@@ -352,9 +508,7 @@ while true
 			cd program/
 				# Download and uncompress the binaries 
 				wget http://hannonlab.cshl.edu/fastx_toolkit/fastx_toolkit_0.0.13_binaries_Linux_2.6_amd64.tar.bz2
-				tar -xjf fastx_*
-				rm fastx_*
-				mv bin/ fastx
+				v
 			cd ..
 			break;;
 		n|N|no|NO|No)
