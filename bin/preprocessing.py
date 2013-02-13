@@ -1,11 +1,17 @@
-class PreProcessing
+import subprocess
 
-def __init__(self):
-	pass
+class PreProcessing:
 
-def __del__(self):
-	pass
+	
+	def __init__(self):
+		pass
 
-def qualityCheck(self):
-	print "starte FastQC in Preprocessing.py"
+	def __del__(self):
+		pass
+
+	def qualityCheck(self,sequenceFile):
+		if len(sequenceFile) > 1:
+			for i in sequenceFile:
+				p = subprocess.Popen([r"program/fastqc/fastqc",i])
+				p.wait()
 
