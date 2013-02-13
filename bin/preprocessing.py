@@ -11,7 +11,9 @@ class PreProcessing:
 
 	def qualityCheck(self,sequenceFile):
 		if len(sequenceFile) > 1:
-			for i in sequenceFile:
-				p = subprocess.Popen([r"program/fastqc/fastqc",i])
+			#for i in sequenceFile: 
+				p = subprocess.Popen([r"program/fastqc/fastqc","-o","result/qualityCheck","-t","2",
+									sequenceFile[0], sequenceFile[1]])
 				p.wait()
 
+#TODO make Better with multithreading
