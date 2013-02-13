@@ -1,4 +1,4 @@
-class helper:
+class Helper:
 	
 	def __init__(self,params):
 		self.params = params

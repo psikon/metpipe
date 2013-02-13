@@ -424,31 +424,24 @@ while true
 			cd program/db/
 				# download and decompress the database for MetaCV
 				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part00
-				fi
-				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part01
-				fi
-				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part02
-				fi
-				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part03
-				fi
-				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part04
-				fi
-				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part05
-				fi
-				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part06
-				fi
-				if [ ! -f program/db/db.part.00 ]; then
-				wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part07
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part00
+				elif [ ! -f program/db/db.part.00 ]; then
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part01
+				elif [ ! -f program/db/db.part.00 ]; then
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part02
+				elif [ ! -f program/db/db.part.00 ]; then
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part03
+				elif [ ! -f program/db/db.part.00 ]; then
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part04
+				elif [ ! -f program/db/db.part.00 ]; then
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part05
+				elif [ ! -f program/db/db.part.00 ]; then
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part06
+				elif [ ! -f program/db/db.part.00 ]; then
+					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part07
 				fi
 				cat db.part* | tar xvfzp
-				rm db.part*
+				#rm db.part*
 			cd ../..
 			break;;
 		n|N|no|NO|No)
