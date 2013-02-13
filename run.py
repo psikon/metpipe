@@ -1,34 +1,60 @@
 #!/usr/bin/env python
 
 from bin.misc import helper
-from bin.misc import switch
 import ConfigParser
+    
+def preProcessing(helperInstance):
+    pass
+   # if helperInstance.checkParameter('PreProcessing','program') == 'FastQC':
+   #     print 'starte metavelvet'
+   # elif helperInstance.checkParameter('Assembly','program') == 'abyss':
+   #         print 'starte abyss'
+   # elif helperInstance.checkParameter('Assembly','program') == 'metaidba':
+   #     print 'starte metaidba'
+   # elif helperInstance.checkParameter('Assembly','program') == 'stitch':
+   #     print "starte stitch"
+   # else:
+   #     print 'no assembly program recognized! Please check parameter file!'
 
-parameter = ConfigParser.ConfigParser()
-parameter.read("parameter.txt")
 
+def assembly(helperInstance):
 
-program = parameter.get("Assembly","program")
-print program
-
-for case in switch(program):
-    if case('abyss'):
-        print "starte abyss"
-        break
-    if case('metaidba'):
-        print "starte metaidba"
-        break
-    if case('metavelvet'):
-        print "starte metavelvet"
-        break
-    if case('stitch'):
+    if helperInstance.checkParameter('Assembly','program') == 'metavelvet':
+        print 'starte metavelvet'
+    elif helperInstance.checkParameter('Assembly','program') == 'abyss':
+            print 'starte abyss'
+    elif helperInstance.checkParameter('Assembly','program') == 'metaidba':
+        print 'starte metaidba'
+    elif helperInstance.checkParameter('Assembly','program') == 'stitch':
         print "starte stitch"
-        break
-    if case(): # default, could also just omit condition or 'if True'
-        print "something else!"
+    else:
+        print 'no assembly program recognized! Please check parameter file!'
 
+def annotate(helperInstance):
 
-
-
-
-
+    if helperInstance.checkParameter('Annotate','program') == 'blastn':
+        print 'starte blastn'
+    elif helperInstance.checkParameter('Annotate','program') == 'metacv':
+            print 'starte metacv'
+    else:
+        print 'no assembly program recognized! Please check parameter file!'
+        
+def classify(helperInstance):
+    
+    if helperInstance.checkParameter('Classify','program') == 'phylosift':
+        print 'starte phylosift'
+    elif helperInstance.checkParameter('Classify','program') == '':
+            print 'starte metacv'
+    else:
+        print 'no assembly program recognized! Please check parameter file!'
+        
+def main():
+    helperInstance = helper("parameter.txt")
+    
+    preProcessing(helperInstance)
+    assembly(helperInstance)
+    annotate(helperInstance)
+    classify(helperInstance)
+    
+    
+main()

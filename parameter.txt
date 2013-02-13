@@ -1,10 +1,19 @@
-[Preprocessing]
+[PreProcessing]
+quality check = yes
+trimming = yes
+quality = 20
+min_length = 150
 
 [Assembly]
 program = metavelvet
 k-mer = 85
 prefix = spice
+
 [Annotate]
-program = blast
-percent =
-outfmt	=  
+program = blastn
+db		= nt
+percent = 90
+outfmt	= 5
+
+[Classify]
+program = phylosift
