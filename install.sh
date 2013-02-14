@@ -425,19 +425,26 @@ while true
 				# download and decompress the database for MetaCV
 				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part00
-				elif [ ! -f program/db/db.part.00 ]; then
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part01
-				elif [ ! -f program/db/db.part.00 ]; then
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part02
-				elif [ ! -f program/db/db.part.00 ]; then
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part03
-				elif [ ! -f program/db/db.part.00 ]; then
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part04
-				elif [ ! -f program/db/db.part.00 ]; then
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part05
-				elif [ ! -f program/db/db.part.00 ]; then
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part06
-				elif [ ! -f program/db/db.part.00 ]; then
+				fi
+				if [ ! -f program/db/db.part.00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part07
 				fi
 				cat db.part* | tar xvfzp

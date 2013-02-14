@@ -1,8 +1,11 @@
 [PreProcessing]
 quality check = yes
 trimming = yes
+paired = yes
 quality = 20
 min_length = 150
+save single-end = yes
+phred Score = 33
 
 [Assembly]
 program = metavelvet
