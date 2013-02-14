@@ -29,7 +29,8 @@ class PreProcessing:
 		else:
 			retain=''
 		phred = '--phred'+self.helper.checkParameter("PreProcessing", "phred Score", paramsFile)
-		args = 'program/trim_galore/trim_galore -o result -q %s --length %s %s %s %s %s' % (quality,min_length,paired,retain,phred,' '.join(str(i) for i in (sequenceFile))))
+		args = self.helper.createArgs('program/trim_galore/trim_galore -o result -q %s --length %s %s %s %s %s' % (quality,min_length,paired,retain,phred,' '.join(str(i) for i in (sequenceFile))))
+		print args
 		p =subprocess.Popen(args)
 		p.wait()
 		
