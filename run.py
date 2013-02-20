@@ -2,6 +2,7 @@
 
 from bin.misc import Helper
 from bin.preprocessing import PreProcessing
+from bin.assembly import Assembly
 
 # set global variables
 helperInstance = Helper()
@@ -10,11 +11,13 @@ infile = helperInstance.parseCommandline().input
 threads = helperInstance.parseCommandline().threads
 skip = helperInstance.parseCommandline().skip
     
+
 def preProcessing(run):
     
     if run == True:
-        
+        # create an PreProcessing Object
         pre = PreProcessing()
+        
         if helperInstance.checkParameter('PreProcessing', 'quality check',"parameter.txt") == 'yes':
             pre.qualityCheck(infile,threads)  
         
@@ -27,8 +30,10 @@ def preProcessing(run):
 def assembly(run):
 
     if run ==True: 
+        assemble = Assembly()
         if helperInstance.checkParameter('Assembly', 'program',"parameter.txt") == 'metavelvet':
-            print 'starte metavelvet'
+           assemble.metavelvet(infile,threads,"parameter.txt")
+           
         elif helperInstance.checkParameter('Assembly', 'program',"parameter.txt") == 'abyss':
             print 'starte abyss'
         elif helperInstance.checkParameter('Assembly', 'program',"parameter.txt") == 'metaidba':
@@ -51,6 +56,7 @@ def annotate(run):
     else:
         print "skip Step:"+skip
 def classify(run):
+    
     if run ==True: 
         
         if helperInstance.checkParameter('Classify', 'program',"parameter.txt") == 'phylosift':
