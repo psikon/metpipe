@@ -18,13 +18,30 @@ All necassary programs will be downloaded and make runable automatically.
 
 ## Usage
 
+
 ## Working
 
+- [x] install script
 
 ## not Working
 
+- [ ] run script for pipeline
+- [ ] Preprocessing
+- [ ] Assembly
+- [ ] Concatination
+- [ ] Annotation
+- [ ] Classify
+- [ ] Visualization
 
 ## Tools in the Pipeline
+
+- Preprocessing: 
+FastQC
+Trim Galore!
+FastX Suite
+- Assembly:
+
+
 	
   
 ## Citations
