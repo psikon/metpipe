@@ -20,9 +20,14 @@ All necassary programs will be downloaded and make runable automatically.
 
 ## Working
 
+[x] install script
 
 ## not Working
 
+[] Preprocessing
+[] Assembly
+[] Concatiniation
+[] 
 
 ## Tools in the Pipeline
 	
