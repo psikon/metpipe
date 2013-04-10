@@ -34,10 +34,10 @@ class fileHandler:
         return self.__parameter
     
     def setType(self, typ):
-        self.type = typ
+        self.__typ = typ
         
-    def setStatus(self, status):
-        self.__status = status
+    def setStatus(self, string):
+        self.__status += string
         
     def setOrigin(self, origin):
         self.__origin = origin
