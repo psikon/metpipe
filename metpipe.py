@@ -12,6 +12,7 @@ Arguments
 Options:
 -h                show this help message and exit
 --version         show version and exit
+-o=<FILE>         change the output dir to specified location
 -q                print no status messsages to stdout.
 --skip            skip steps in the pipeline.
 --params=<FILE>   use alternate parameter file [default: parameter.conf].
@@ -31,12 +32,13 @@ from bin.programs import Programs
 # get commandline arguments
 cli = docopt(__doc__, help=True, version="metpipe 0.1 alpha", options_first=False)
 # init global variables
+output = "result/"#cli.get("-o")
 quiet = cli.get("-q")
 threads = cli.get('<THREADS>')
 skip = cli.get("--skip")
 config = parser(cli.get("--params"))
 workingStack = []
-program = Programs()
+program = Programs(output,quiet,threads)
 
 
 #if skip != "PreProcessing":

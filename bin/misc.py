@@ -22,7 +22,14 @@ class Misc:
 	def startProcess(self, program, params):
 		os.system(program + " " + params)
 		return os.getpid()
-		
+	
+	def createOutputDir(self,path):
+		try:
+			os.makedirs(path)
+		except OSError:
+			if not os.path.isdir(path):
+				raise
+               	
 	def skipStep(self, skip, category):
 		
 		if skip == category: 
