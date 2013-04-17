@@ -3,6 +3,7 @@
 # # First imports
 import os, sys
 from socket import errno
+from platform import system
 
 # # Setting up the paths
 SRC_DIR = "%s%ssrc" % (sys.path[0], os.sep)
@@ -17,22 +18,17 @@ PROGRAM_LIST = {'blastn','metacv','metavelvet','concat'}
 # # rest of imports
 import time
 import string
-import subprocess
 import datetime
 import argparse
 import multiprocessing
 import src.utils
+from src.programs import Programs
 
 sys.path.append(SRC_DIR)
 sys.path.append(PROGRAM_DIR)
 
 # Get the starting time
 starting_time = time.time()
-
-# import own Classes
-# from src.fileHandler import fileHandler
-# from src.parser import parser
-# from src.programs import Programs
 
 # # define cli
    
@@ -83,58 +79,14 @@ settings = src.utils.Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose
                               args.output, args.param, args.filter, args.quality, args.assembler, 
                               args.classify)
 
-print "CLI OPTIONS"
-print settings.input                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-print settings.verbose
-print settings.threads
-print settings.param
-print settings.skip
-print settings.output
-print settings.filter
-print settings.quality
-print settings.assembler
-print settings.kmer
-print settings.classify
-print "PROGRAM EXECUTABLES"
-print "PREPROCESSING"
-print settings.fastqc_nogroup
-print settings.fastqc_contaminants
-print settings.fastqc_kmers
-print settings.trim_quality
-print settings.trim_phred
-
-
-
-
-
-    
-# init 
-
-# get commandline arguments
-# cli = docopt(__doc__, help=True, version="metpipe 0.1 alpha", options_first=False)
-# init global variables
-# print cli.get("-o")
-# output = "result/"  # cli.get("-o")
-# quiet = cli.get("-q")
-# threads = cli.get('<THREADS>')
-# skip = cli.get("--skip")
-# config = parser(cli.get("--params"))
-# workingStack = []
-# program = Programs(output, quiet, threads)
-
-
-# if skip != "PreProcessing":
-# workingStack.append(fileHandler("RAW", "RAW", "RAW", program.fastqc, cli.get('<INPUT>'),
-#                                    "fastq", config.getAllfromSection("PreProcessing")))
-
-# while(workingStack): 
-#    actualElement = workingStack.pop()
-#    program.setfileHandler(actualElement)
-#    nextElement = actualElement.getDestination()()
-#    if nextElement != None:
-#        workingStack.append(nextElement)
-
-print "workingStack leer"
-
-
-
+programs = Programs()
+tasklist = []
+tasklist.append(src.utils.fileHandler(src.utils.attributes.raw_typ,src.utils.attributes.raw_status,
+                                      programs.fastqc,settings))
+while(tasklist): 
+    actualElement = tasklist.pop()
+    programs.setfileHandler(actualElement)
+    nextElement = actualElement.getNextStep()(settings)
+    if nextElement != None:
+        tasklist.append(nextElement)
+        
