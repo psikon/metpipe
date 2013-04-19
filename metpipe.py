@@ -21,7 +21,8 @@ import string
 import datetime
 import argparse
 import multiprocessing
-import src.utils
+from src.utils import *
+from src.settings import Settings
 from src.programs import Programs
 
 sys.path.append(SRC_DIR)
@@ -70,23 +71,23 @@ try:
 except OSError as exception:
     if exception.errno != errno.EEXIST:
         raise
+    
 ## check param File exists
 if not os.path.isfile(args.param):
     print ('param file %s is not readable'%(args.param))
     sys.exit()
 
-settings = src.utils.Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, args.input, 
-                              args.output, args.param, args.filter, args.quality, args.assembler, 
-                              args.classify)
+settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, args.input, 
+                    args.output, args.param, args.filter, args.quality, args.assembler, args.classify)
 
 programs = Programs()
 tasklist = []
-tasklist.append(src.utils.fileHandler(src.utils.attributes.raw_typ,src.utils.attributes.raw_status,
+tasklist.append(FileHandler(Attributes.raw_typ,Attributes.raw_status,
                                       programs.fastqc,settings))
 while(tasklist): 
     actualElement = tasklist.pop()
     programs.setfileHandler(actualElement)
-    nextElement = actualElement.getNextStep()(settings)
+    nextElement = actualElement.getNextStep()(programs, settings)
     if nextElement != None:
         tasklist.append(nextElement)
         
