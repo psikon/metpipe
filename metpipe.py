@@ -83,7 +83,7 @@ settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.ski
 programs = Programs()
 tasklist = []
 tasklist.append(FileHandler(Attributes.raw_typ,Attributes.raw_status,
-                                      programs.fastqc,settings))
+                                      programs.fastqc,settings,"RAW",Attributes.program_syntax[0]))
 while(tasklist): 
     actualElement = tasklist.pop()
     programs.setfileHandler(actualElement)

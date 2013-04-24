@@ -45,8 +45,11 @@ echo "Installation of the metPipe Programms.\n"
 # create needed directories
 if ! [ -d program ]; then
 	mkdir program/
-	mkdir program/db/
 fi 
+
+if ! [ -d program/db ]; then
+	mkdir program/db/
+fi
 
 
 
@@ -71,9 +74,10 @@ while true
 		y|Y|YES|yes|Yes) 
 			cd program/
 				# Download and uncompress FastQC
+http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.10.1.zip
 				wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.10.1.zip
 				unzip fastqc*
-				rm fastqc_v0.10.1.zip
+				rm fastqc_*.zip
 				mv FastQC* fastqc
 			cd ..
 			break;;
@@ -104,9 +108,12 @@ while true
 				# Download Trim Galore! 
 				mkdir trim_galore
 				cd trim_galore
-					wget http://www.bioinformatics.babraham.ac.uk/projects/trim_galore/trim_galore_v0.2.5.zip
+					wget http://www.bioinformatics.babraham.ac.uk/projects/trim_galore/trim_galore_v0.2.8.zip
 					unzip trim_galore*
-					rm trim_galore_v0.2.5.zip
+					if [ -d trim_galore_zip ]; then
+						mv trim_galore_zip/* ../trim_galore && rm -r trim_galore_zip
+					fi
+					rm trim_galore_v0.2.*.zip
 			cd ../..
 			break;;
 		n|N|no|NO|No)
@@ -213,6 +220,7 @@ while true
 			cd program/
 				# Download and unpack program
 				wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-*-x64-linux.tar.gz
+				chmod 775 ncbi-blast*
 				tar xzfv ncbi-blast*
 				rm ncbi-blast-2.2.28+-x64-linux.tar.gz
 				mv ncbi-blast-2.2.28+ blast
@@ -303,7 +311,7 @@ while true
 	case $CONFIRM in
 		y|Y|YES|yes|Yes) 
 			cd program
-				wget http://heanet.dl.sourceforge.net/project/metacv/metacv_2_3_0.tgz
+				wget http://sourceforge.net/projects/metacv/files/latest/metacv_2_3_0.tgz
 				tar xzfv metacv_*
 				rm metacv_2_3_0.tgz
 				mv metacv_* metacv
@@ -371,35 +379,34 @@ while true
 		esac
 	done
 
-while true
-	do
-		# checking for Phylosift installation
-		if [ -f program/phylosift/phylosift ]; then
-			echo "Phylosift installation found"
-			break
-		fi
-	
-		if [ "$quiet" = "y" ]; then	
-			CONFIRM="n"
-		else
-			echo -n "Phylosift installation not found. (optional for classify)\nDownload and install it? <y|n> :"
-			read CONFIRM
-		fi
-	case $CONFIRM in
-		y|Y|YES|yes|Yes) 
-			cd program/
-				wget http://edhar.genomecenter.ucdavis.edu/~koadman/phylosift/releases/phylosift_v1.0.0_01.tar.bz2
-				tar -xvf phylosift*
-				rm phylosift_v1.0.0_01.tar.bz2
-				mv phylosift* phylosift
-			cd ..
-			break;;
-		n|N|no|NO|No)
-			break;
-		;;
-		*) echo Please enter only y or n
-		esac
-	done
+#while true
+#	do
+#		# checking for Phylosift installation
+#		if [ -f program/phylosift/phylosift ]; then
+#			echo "Phylosift installation found"
+#			break
+#		fi
+#	
+#		if [ "$quiet" = "y" ]; then	
+#			CONFIRM="n"
+#		else
+#			echo -n "Phylosift installation not found. (optional for classify)\nDownload and install it? <y|n> :"
+#			read CONFIRM
+#		fi
+#	case $CONFIRM in
+#		y|Y|YES|yes|Yes) 
+#			cd program/
+#				wget http://edhar.genomecenter.ucdavis.edu/~koadman/phylosift/releases/phylosift_v1.0.0_01.tar.bz2
+#				tar -xvf phylosift*
+#				rm phylosift_v1.0.0_01.tar.bz2
+#				mv phylosift* phylosift
+#			cd ..
+#			break;;
+#		n|N|no|NO|No)
+#			break;
+#		;;
+#		*) echo Please enter only y or n
+#		esac
 
 ##### Misc Tools #####
 
@@ -439,7 +446,7 @@ if [ -f program/fastqc/fastqc ] && [ -f program/trim_galore/trim_galore ]; then
 	ln -s fastqc/fastqc program/quality && chmod 775 program/quality
 	ln -s trim_galore/trim_galore program/filter && chmod 775 program/filter
 fi
-
+echo "[Assembly programs]"
 if [ -f program/stitch/stitch/stitch.py ]; then
 	echo "Assembly - Concatenation OK!"
 	ln -s stitch/stitch/stitch.py program/concat && chmod 775 program/concat
@@ -452,6 +459,7 @@ if [ -f program/velvet/velveth ] && [ -f program/velvet/velvetg ] && [ -f progra
 	ln -s metavelvet/meta-velvetg program/metavelvet && chmod 775 program/metavelvet
 fi
 
+echo "[Annotation programs]"
 if [ -f program/blast/bin/blastn ] && [ -f program/db/nt.nal ]; then
 	echo "Annotate - Blastn OK!"
 	ln -s blast/bin/blastn program/blast && chmod 775 program/blast
