@@ -5,11 +5,11 @@ import sys
 def str2bool(string):
 		return string.lower() in ("yes","true","t","1")
 
-def bool2Str(object):
-		if str(object).lower in  ("yes","true","t","1","y"):
-			return "Yes"
+def bool2Str(string):
+		if str(string).lower in ("yes","t","1","y","True"):
+			return "yes"
 		else: 
-			return "No"
+			return "no"
 
 def createOutputDir(path):
 		try:

@@ -329,7 +329,7 @@ while true
 while true
 	do
 		# checking for MetaCV Database
-		if [ -f program/db/ ]; then
+		if [ -f program/db/cvk6_2059.cnt ]; then
 			echo "MetaCV database found"
 			break
 		fi
@@ -344,32 +344,32 @@ while true
 		y|Y|YES|yes|Yes) 
 			cd program/db/
 				# download and decompress the database for MetaCV
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part00 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part00
 				fi
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part01 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part01
 				fi
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part02 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part02
 				fi
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part03 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part03
 				fi
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part04 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part04
 				fi
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part05 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part05
 				fi
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part06 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part06
 				fi
-				if [ ! -f program/db/db.part.00 ]; then
+				if [ ! -f db.part07 ]; then
 					wget http://switch.dl.sourceforge.net/project/metacv/cvdb_2059/db.part07
 				fi
-				cat db.part* | tar xvfzp
-				#rm db.part*
+				cat db.part* | tar xvzp
+				rm db.part*
 			cd ../..
 			break;;
 		n|N|no|NO|No)
@@ -428,7 +428,9 @@ while true
 			cd program/
 				# Download and uncompress the binaries 
 				wget http://hannonlab.cshl.edu/fastx_toolkit/fastx_toolkit_0.0.13_binaries_Linux_2.6_amd64.tar.bz2
-				v
+				tar xvjf fastx*
+				rm fastx*.tar.bz2
+				mv bin* fastx
 			cd ..
 			break;;
 		n|N|no|NO|No)
@@ -439,35 +441,37 @@ while true
 	done
 
 
-echo "\n Checking Installations"
+echo "\n Checking Installations\n"
 echo "[Read preprocessing]"
 if [ -f program/fastqc/fastqc ] && [ -f program/trim_galore/trim_galore ]; then
 	echo "Preprocessing tools OK!"
-	ln -s fastqc/fastqc program/quality && chmod 775 program/quality
-	ln -s trim_galore/trim_galore program/filter && chmod 775 program/filter
+	ln -s -f fastqc/fastqc program/quality && chmod 775 program/quality
+	ln -s -f trim_galore/trim_galore program/filter && chmod 775 program/filter
+else 
+	echo "Preprcessing tool missing"
 fi
-echo "[Assembly programs]"
+echo "\n[Assembly programs]"
 if [ -f program/stitch/stitch/stitch.py ]; then
 	echo "Assembly - Concatenation OK!"
-	ln -s stitch/stitch/stitch.py program/concat && chmod 775 program/concat
+	ln -s -f stitch/stitch/stitch.py program/concat && chmod 775 program/concat
 fi	
 
 if [ -f program/velvet/velveth ] && [ -f program/velvet/velvetg ] && [ -f program/metavelvet/meta-velvetg ]; then
 	echo "Assembly - MetaVelvet OK!"
-	ln -s velvet/velveth program/velveth && chmod 775 program/velveth
-	ln -s velvet/velvetg program/velvetg && chmod 775 program/velvetg
-	ln -s metavelvet/meta-velvetg program/metavelvet && chmod 775 program/metavelvet
+	ln -s -f velvet/velveth program/velveth && chmod 775 program/velveth
+	ln -s -f velvet/velvetg program/velvetg && chmod 775 program/velvetg
+	ln -s -f metavelvet/meta-velvetg program/metavelvetg && chmod 775 program/metavelvetg
 fi
 
-echo "[Annotation programs]"
+echo "\n[Annotation programs]"
 if [ -f program/blast/bin/blastn ] && [ -f program/db/nt.nal ]; then
 	echo "Annotate - Blastn OK!"
-	ln -s blast/bin/blastn program/blast && chmod 775 program/blast
+	ln -s -f blast/bin/blastn program/blastn && chmod 775 program/blastn
 fi
 
-if  [ -f program/metacv/metacv ] && [ -f program/db/cvdb_2059/ 9; then
+if  [ -f program/metacv/metacv ] && [ -f program/db/cvdb_2059.cnt ]; then
 	echo "Annotate - MetaCV OK!"
-	ln -s metacv/metacv program/metacv && chmod 775 program/metacv
+	ln -s -f metacv/metacv program/metaCV && chmod 775 program/metaCV
 fi
 
 

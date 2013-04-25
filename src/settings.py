@@ -203,14 +203,14 @@ class Settings:
         Settings.blastn_html = conf.get('blastn', 'html')
         Settings.blastn_max_target_seqs = conf.get('blastn', 'max_target_seqs')
         # define program paths
-        Settings.FASTQC = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'quality')
-        Settings.TRIMGALORE = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'trimgalore')
-        Settings.VELVETH = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'velveth')
-        Settings.VELVETG = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'velvetg')
-        Settings.CONCAT = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'stitch')
-        Settings.METAVELVET = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'meta-velvetg')
-        Settings.BLASTN = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'blastn')
-        Settings.METACV = "%s%s%s%s%s" % (sys.path[0], os.sep, 'programs', os.sep, 'metacv')
+        Settings.FASTQC = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'quality')
+        Settings.TRIMGALORE = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'filter')
+        Settings.VELVETH = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velveth')
+        Settings.VELVETG = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
+        Settings.CONCAT = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'stitch')
+        Settings.METAVELVET = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'meta-velvetg')
+        Settings.BLASTN = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
+        Settings.METACV = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'metacv')
         
 class FastQC_Parameter:
     
@@ -232,9 +232,9 @@ class FastQC_Parameter:
         if self.fastqc_nogroup:
             args += self.arguments.get("nogroup")
         if self.fastqc_contaminants:
-            args += self.arguments.get("contaminants") + self.fastqc_contaminants
+            args += ' ' + self.arguments.get("contaminants") + self.fastqc_contaminants
         if self.fastqc_kmers:
-            args += self.arguments.get("kmers") + self.fastqc_kmers
+            args += ' ' + self.arguments.get("kmers") + self.fastqc_kmers
             
         return args
     
@@ -266,7 +266,7 @@ class TrimGalore_Parameter:
         self.trim_stringency = conf.get('TrimGalore', 'stringency')
         self.trim_error_rate = conf.get('TrimGalore', 'error_rate')
         self.trim_length = conf.get('TrimGalore', 'length')
-        self.trim_paired = conf.get('TrimGalore', 'paired')
+        self.trim_paired = conf.getboolean('TrimGalore', 'paired')
         self.trim_retain_unpaired = conf.get('TrimGalore', 'retain_unpaired')
         self.trim_length_1 = conf.get('TrimGalore', 'length_1')
         self.trim_length_2 = conf.get('TrimGalore', 'length_2')
@@ -279,7 +279,7 @@ class TrimGalore_Parameter:
         if self.trim_phred:
             args += " " + self.arguments.get("phred") + self.trim_phred
         if self.trim_adapter:
-            args += " " + self.arguments.get("adapter") +self.trim_adapter
+            args += " " + self.arguments.get("adapter") + self.trim_adapter
         if self.trim_adapter2:
             args += " " +  self.arguments.get("adapter2") + self.trim_adapter2
         if self.trim_stringency:
@@ -290,14 +290,16 @@ class TrimGalore_Parameter:
             args += " " +self.arguments.get("length") + self.trim_length
         if self.trim_paired:
             args += " " + self.arguments.get("paired")
-        if self.trim_retain_unpaired:
-            args += " " + self.arguments.get("unpaired")
-        if self.trim_length_1:
-            args += " " + self.arguments.get("length1") + self.trim_length_1
-        if self.trim_length_2:
-            args += " " + self.arguments.get("length2") + self.trim_length_2
-        if self.trim_trim1:
-            args += " " + self.arguments.get("trim1")    
+            if self.trim_retain_unpaired:
+                args += " " + self.arguments.get("unpaired")
+            if self.trim_length_1:
+                args += " " + self.arguments.get("length1") + self.trim_length_1
+            if self.trim_length_2:
+                args += " " + self.arguments.get("length2") + self.trim_length_2
+            if self.trim_trim1:
+                args += " " + self.arguments.get("trim1")  
+        else: 
+            args += ""   
         return args   
     
 class Concat_Parameter:
@@ -380,14 +382,14 @@ class Velvetg_Parameter:
     velvetg_shortMatePaired = False
     velvetg_conserveLong = False  
     arguments = {"cov_cutoff" : "-cov_cutoff ", "ins_length" : "-ins_length ",
-                     "read_trkg" : "-read_trkg", "min_contig_lgth" : "-min_contig_lgth ",
+                     "read_trkg" : "-read_trkg ", "min_contig_lgth" : "-min_contig_lgth ",
                      "exp_cov" : "-exp_cov ", "long_cov" : "-long_cov ", "long_cov_cutoff":"-long_cov_cutoff ",
                      "ins_length_long" : "-ins_length_long ", "ins_length_sd" : "-ins_length_sd ",
                      "scaffolding":"-scaffolding ","max_branch_length":"-max_branch_length ",
                      "max_divergence" : "-max_divergence ", "max_gap_count" : "-max_gap_count ",
                      "min_pair_count" : "-min_pair_count ", "max_coverage" : "-max_coverage ",
                      "coverage_mask" : "-coverage_mask ", "long_mult_cutoff" : "-long_mult_cutoff ", 
-                     "unused_reads" : "-unused_reads ", "aligments" : "-alignments ", 
+                     "unused_reads" : "-unused_reads ", "alignments" : "-alignments ", 
                      "exportFiltered" : "-exportFiltered ", "clean" : "-clean ", "very_clean" : "-very_clean ",
                      "paired_exp_fraction" : "-paired_exp_fraction ", "shortMatePaired" : "-shortMatePaired ",
                      "conserveLong" : "-conserveLong "}  
@@ -429,7 +431,7 @@ class Velvetg_Parameter:
         if self.velvetg_ins_length:
             args += ' ' + self.arguments.get("ins_length") + self.velvetg_ins_length
         if self.velvetg_read_trkg:
-            args += ' ' + self.arguments.get("read_trkg") + self.velvetg_read_trkg
+            args += ' ' + self.arguments.get("read_trkg") + bool2Str(self.velvetg_read_trkg)
         if self.velvetg_min_contig_lgth:
             args += ' ' + self.arguments.get("min_contig_lgth") + self.velvetg_min_contig_lgth
         if self.velvetg_long_cov_cutoff:
@@ -449,27 +451,28 @@ class Velvetg_Parameter:
         if self.velvetg_min_pair_count:
             args += ' ' + self.arguments.get("min_pair_count") + self.velvetg_min_pair_count
         if self.velvetg_max_coverage:
-            args += ' ' + self.arguments.get("max_coverage") + self.velvetg_max_coverage
+            args += ' ' + self.arguments.get("max_coverage") + bool2Str(self.velvetg_max_coverage)
         if self.velvetg_coverage_mask:
             args += ' ' + self.arguments.get("coverage_mask") + self.velvetg_coverage_mask
         if self.velvetg_long_mult_cutoff:
             args += ' ' + self.arguments.get("long_mult_cutoff") + self.velvetg_long_mult_cutoff
         if self.velvetg_unused_reads:
-            args += ' ' + self.arguments.get("unused_reads") +self.velvetg_unused_reads
+            args += ' ' + self.arguments.get("unused_reads") + bool2Str(self.velvetg_unused_reads)
         if self.velvetg_alignments:
-            args += ' ' + self.arguments.get("alignments") + self.velvetg_alignments
+            args += ' ' + self.arguments.get("alignments") + bool2Str(self.velvetg_alignments)
         if self.velvetg_exportFiltered:
-            args += ' ' + self.arguments.get("exportFiltered") + self.velvetg_exportFiltered
+            args += ' ' + self.arguments.get("exportFiltered") + bool2Str(self.velvetg_exportFiltered)
         if self.velvetg_clean:
-            args += ' ' + self.arguments.get("clean") + self.velvetg_clean
+            args += ' ' + self.arguments.get("clean") + bool2Str(self.velvetg_clean)
         if self.velvetg_very_clean:
-            args += ' ' + self.arguments.get("very_clean") + self.velvetg_very_clean
+            args += ' ' + self.arguments.get("very_clean") + bool2Str(self.velvetg_very_clean)
         if self.velvetg_paired_exp_fraction:
             args += ' ' + self.arguments.get("paired_exp_fraction") + self.velvetg_paired_exp_fraction
         if self.velvetg_shortMatePaired:
-            args += ' ' + self.arguments.get("shortMatePaired") + self.velvetg_shortMatePaired
+            args += ' ' + self.arguments.get("shortMatePaired") + bool2Str(self.velvetg_shortMatePaired)
         if self.velvetg_conserveLong:
-            args += ' ' + self.arguments.get("conserveLong") + self.velvetg_conserveLong
+            args += ' ' + self.arguments.get("conserveLong") + bool2Str(self.velvetg_conserveLong)
+        return args
         
             
             

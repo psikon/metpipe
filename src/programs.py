@@ -25,25 +25,32 @@ class Programs:
         
     def fastqc(self,program,settings):
     	createOutputDir(Settings.output+os.sep+self.fileObject.getOutputdir())
-        arguments = ("%s -t %s -o %s -q --extract %s")%(' '.join(sys.path[0] + os.sep + 
-														str(i)for i in Settings.input),Settings.threads,
+        arguments = (" -t %s -o %s -q --extract %s %s")%(Settings.threads,
 														Settings.output+os.sep+self.fileObject.getOutputdir(),
-														FastQC_Parameter().checkUsedArguments())
+														FastQC_Parameter().checkUsedArguments(),' '.join(sys.path[0] + os.sep + 
+														str(i)for i in Settings.input))
         print "FastQC: "+arguments
-        #p = subprocess.Popen(shlex.split(Settings.FASTQC + " " + arguments))
-        #p.wait()
+        print shlex.split(arguments)
+        print Settings.FASTQC
+        p = subprocess.Popen(shlex.split(Settings.FASTQC + " " + arguments))
+        p.wait()
         return FileHandler(Attributes.raw_typ, Attributes.raw_status, program.trimming, 
 						   settings,"trimmed",Attributes.program_syntax[0])
        
        	
     def trimming(self,program, settings):
         createOutputDir(Settings.output+os.sep+self.fileObject.getOutputdir())
-        arguments = ("%s %s")%(TrimGalore_Parameter().checkUsedArguments(),
-							' '.join(sys.path[0]+os.sep+str(i)for i in Settings.input))
+        arguments = ("%s %s")%(TrimGalore_Parameter().checkUsedArguments(),Settings.input[0])
+        #arguments = ("%s %s")%(TrimGalore_Parameter().checkUsedArguments(),
+		#					' '.join(sys.path[0]+os.sep+str(i)for i in Settings.input))
+		
         print "Trim: "+arguments
+        print shlex.split(arguments)
+        print Settings.TRIMGALORE
+        os.execv(Settings.TRIMGALORE, shlex.split(arguments))
         #p = subprocess.Popen(shlex.split(Settings.TRIMGALORE + " " + arguments))
         #p.wait()
-        Settings.input = [Settings.output + os.sep + self.fileObject.getOutputdir() + os.sep + "forward.fastq",
+        settings.input = [Settings.output + os.sep + self.fileObject.getOutputdir() + os.sep + "forward.fastq",
 						  Settings.output + os.sep + self.fileObject.getOutputdir() + os.sep + "reverse.fastq"]
         return FileHandler(Attributes.filter_typ,Attributes.filter_status,program.concat,settings,"concat",
 						Attributes.program_syntax[0])
@@ -54,6 +61,7 @@ class Programs:
     	print "Velveth: "+velveth_args
     	velvetg_args = "%s %s"%(Settings.output + os.sep + self.fileObject.getOutputdir(),
 								Velvetg_Parameter().checkUsedArguments())
+    	print "Velvetg: "+velvetg_args
         pass
     
     def concat(self,program,settings):
