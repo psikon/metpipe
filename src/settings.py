@@ -207,7 +207,7 @@ class Settings:
         Settings.TRIMGALORE = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'filter')
         Settings.VELVETH = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velveth')
         Settings.VELVETG = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
-        Settings.CONCAT = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'stitch')
+        Settings.CONCAT = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'concat')
         Settings.METAVELVET = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'meta-velvetg')
         Settings.BLASTN = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
         Settings.METACV = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'metacv')

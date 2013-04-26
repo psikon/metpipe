@@ -39,15 +39,17 @@ class Programs:
        	
     def trimming(self,program, settings):
         createOutputDir(Settings.output+os.sep+self.fileObject.getOutputdir())
-        arguments = ("%s -o %s %s")%(TrimGalore_Parameter().checkUsedArguments(),(sys.path[0]+os.sep+Settings.output+os.sep+self.fileObject.getOutputdir()),Settings.input[0])
-        #arguments = ("%s %s")%(TrimGalore_Parameter().checkUsedArguments(),
-		#					' '.join(sys.path[0]+os.sep+str(i)for i in Settings.input))
+        #arguments = ("%s -o %s %s")%(TrimGalore_Parameter().checkUsedArguments(),
+        #(sys.path[0]+os.sep+Settings.output+os.sep+self.fileObject.getOutputdir()),Settings.input[0])
+        arguments = ("%s -o %s %s")%(TrimGalore_Parameter().checkUsedArguments(),
+                                    (sys.path[0]+os.sep+Settings.output+os.sep+self.fileObject.getOutputdir()),
+                                    ' '.join(sys.path[0]+os.sep+str(i)for i in Settings.input))
 		
-        print "Trim: "+arguments
         print shlex.split(arguments)
-        print Settings.TRIMGALORE
-        p = subprocess.Popen(shlex.split(Settings.TRIMGALORE + " " + arguments))
+        p = subprocess.Popen(shlex.split(Settings.TRIMGALORE + " " + arguments),stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         p.wait()
+        output = p.stderr.read()
+        print output
         settings.input = [Settings.output + os.sep + self.fileObject.getOutputdir() + os.sep + "forward.fastq",
 						  Settings.output + os.sep + self.fileObject.getOutputdir() + os.sep + "reverse.fastq"]
         return FileHandler(Attributes.filter_typ,Attributes.filter_status,program.concat,settings,"concat",
@@ -65,17 +67,26 @@ class Programs:
     def concat(self,program,settings):
         createOutputDir(Settings.output+os.sep+self.fileObject.getOutputdir())
         if len(Settings.input) > 1:
-        	arguments = "-i %s -j %s -o %s -t %s %s " % (sys.path[0]+os.sep+Settings.input[0],
-												  		 sys.path[0]+os.sep+Settings.input[1],
+        	arguments = "-i %s -j %s -o %s -t %s %s " % (sys.path[0]+os.sep+str(Settings.input[0]),
+												  		 sys.path[0]+os.sep+str(Settings.input[1]),
 												  		 Settings.output+os.sep+self.fileObject.getOutputdir(), 
 												  		 Settings.threads,
 												  		 Concat_Parameter().checkUsedArguments())
         else:
-        	arguments = "-i %s -o %s -t %s %s " % (sys.path[0]+os.sep+Settings.input,
+        	arguments = "-i %s -o %s -t %s %s " % (sys.path[0]+os.sep+str(Settings.input),
 												  		 Settings.output+os.sep+self.fileObject.getOutputdir(), 
 												  		 Settings.threads,
 												  		 Concat_Parameter().checkUsedArguments())
-        p = subprocess.Popen(shlex.split(Settings.CONCAT+ " "+arguments))
+        print arguments
+        p = subprocess.Popen(shlex.split(Settings.CONCAT+ " "+arguments),stdout=subprocess.PIPE)
+        #subprocess.Popen(args, bufsize, executable, stdin, stdout, stderr, preexec_fn, close_fds, shell, cwd, env, 
+        #universal_newlines, startupinfo, creationflags)
+        p.wait()
+        f = open("alignments.txt","w")
+        print "Fange output ab"
+        output = p.stdout.read()
+        f.write(p.stdout.read())
+        
         return FileHandler(Attributes.filter_typ,Attributes.filter_status,program.assembly,settings,"assembly",
 						Attributes.program_syntax[0])
     
