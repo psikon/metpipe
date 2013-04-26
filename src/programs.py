@@ -3,7 +3,6 @@ import os
 import errno
 from src.settings import *
 from src.utils import *
-from docutils.io import FileOutput
 
 class Programs:
     
@@ -40,16 +39,15 @@ class Programs:
        	
     def trimming(self,program, settings):
         createOutputDir(Settings.output+os.sep+self.fileObject.getOutputdir())
-        arguments = ("%s %s")%(TrimGalore_Parameter().checkUsedArguments(),Settings.input[0])
+        arguments = ("%s -o %s %s")%(TrimGalore_Parameter().checkUsedArguments(),(sys.path[0]+os.sep+Settings.output+os.sep+self.fileObject.getOutputdir()),Settings.input[0])
         #arguments = ("%s %s")%(TrimGalore_Parameter().checkUsedArguments(),
 		#					' '.join(sys.path[0]+os.sep+str(i)for i in Settings.input))
 		
         print "Trim: "+arguments
         print shlex.split(arguments)
         print Settings.TRIMGALORE
-        os.execv(Settings.TRIMGALORE, shlex.split(arguments))
-        #p = subprocess.Popen(shlex.split(Settings.TRIMGALORE + " " + arguments))
-        #p.wait()
+        p = subprocess.Popen(shlex.split(Settings.TRIMGALORE + " " + arguments))
+        p.wait()
         settings.input = [Settings.output + os.sep + self.fileObject.getOutputdir() + os.sep + "forward.fastq",
 						  Settings.output + os.sep + self.fileObject.getOutputdir() + os.sep + "reverse.fastq"]
         return FileHandler(Attributes.filter_typ,Attributes.filter_status,program.concat,settings,"concat",
@@ -77,7 +75,7 @@ class Programs:
 												  		 Settings.output+os.sep+self.fileObject.getOutputdir(), 
 												  		 Settings.threads,
 												  		 Concat_Parameter().checkUsedArguments())
-        print "Stitch: "+arguments
+        p = subprocess.Popen(shlex.split(Settings.CONCAT+ " "+arguments))
         return FileHandler(Attributes.filter_typ,Attributes.filter_status,program.assembly,settings,"assembly",
 						Attributes.program_syntax[0])
     

@@ -7,7 +7,7 @@ from platform import system
 
 # # Setting up the paths
 SRC_DIR = "%s%ssrc" % (sys.path[0], os.sep)
-PROGRAM_DIR = "%s%sprograms" % (sys.path[0], os.sep)
+PROGRAM_DIR = "%s%sprogram" % (sys.path[0], os.sep)
 RESULT_DIR = "%s%sresult" % (sys.path[0], os.sep)
 PARAM_FILE = "%s%sparameter.conf" % (sys.path[0], os.sep)
 # # hardcode defaults
