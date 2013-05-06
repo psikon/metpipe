@@ -47,16 +47,30 @@ class Programs:
         return True
         
     def assembly(self, settings, outputdir):
-    	
+        
+        # parse all velveth specific arguments from parameter file
     	params = ParamFileArguments(Velveth_Parameter())
-    	velveth_args = "%s %s %s" % (Settings.output + os.sep + outputdir, Settings.kmer, params)
-    	print "Velveth: " + velveth_args
+        # create arguments string for velveth
+    	velveth_args = "%s %s %s -fmtAuto %s " % (Settings.output + os.sep + outputdir, Settings.kmer, params ,
+                                         ' '.join(sys.path[0] + os.sep + str(i)for i in Settings.input))
+        # open log file for piping
+        log = open(Settings.output + os.sep + outputdir + os.sep + "velveth.log.txt", "w")
+        # start velveth and wait for completion
+        p = subprocess.Popen(shlex.split(Settings.VELVETH + " " + velveth_args), stdout=log)
+        p.wait()
+        # parse alle velvetg specific aruments from parameter file
     	params = ParamFileArguments(Velvetg_Parameter())
-    	velvetg_args = "%s %s" % (Settings.output + os.sep + outputdir, params)
-    	print "Velvetg: " + velvetg_args
+    	velvetg_args = "%s %s" % (Settings.output + os.sep + outputdir, params)  
+        log = open(Settings.output + os.sep + outputdir + os.sep + "velvetg.log.txt", "w")
+        # # Argumente funktionieren im moment noch nicht 
+    	p = subprocess.Popen(shlex.split(Settings.VELVETG + " " + velvetg_args))
+        p.wait()
     	params = ParamFileArguments(MetaVelvet_Parameter())
-    	metavelvet_args = "%s" % (params)
-    	print "meta-velvetg: " + metavelvet_args
+        metavelvet_args = "%s %s" % (Settings.output + os.sep + outputdir, params)  
+        print shlex.split(metavelvet_args)
+        p = subprocess.Popen(shlex.split(Settings.METAVELVET + " " +Settings.output + os.sep + outputdir))
+    	#p = subprocess.Popen(shlex.split(Settings.METAVELVET + " " + metavelvet_args))
+        # print "meta-velvetg: " + metavelvet_args
 
     
     def concat(self, settings, outputdir):
@@ -79,8 +93,8 @@ class Programs:
     
     def blastn(self, settings, outputdir):
         params = ParamFileArguments(Blastn_Parameter())
-        print "Blastn: "+params
+        print "Blastn: " + params
     
-    def metaCV(self,settings,outputdir):
+    def metaCV(self, settings, outputdir):
         params = ParamFileArguments(MetaCV_Parameter())
-        print "MetaCV: "+params
+        print "MetaCV: " + params

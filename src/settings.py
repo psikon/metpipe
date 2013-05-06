@@ -32,13 +32,6 @@ class Settings:
     assembler = ""
     classify = ""
     
-    
-    # Annotate Options
-    
-   
-
-    
-
     def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, input=None, output=None,
                 param=None, filter=None, quality=None, assembler=None, classify=None):
         
@@ -66,7 +59,7 @@ class Settings:
         Settings.VELVETH = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velveth')
         Settings.VELVETG = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
         Settings.CONCAT = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'concat')
-        Settings.METAVELVET = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'meta-velvetg')
+        Settings.METAVELVET = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'metavelvetg')
         Settings.BLASTN = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
         Settings.METACV = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'metacv')
         
@@ -167,7 +160,7 @@ class Velvetg_Parameter:
     max_gap_count = 3
     min_pair_count = 5
     max_coverage = False
-    coverage_mask = 1
+    coverage_mask = ""
     long_mult_cutoff = 2
     unused_reads = False
     alignments = False
@@ -243,7 +236,7 @@ class MetaVelvet_Parameter:
     unused_reads_meta = False 
     alignments_meta = False
     exportFiltered_meta = False
-    paired_exp_fraction_meta = 0.1   
+    paired_exp_fraction_meta = ""   
     arguments = {"discard_chimera":"-discard_chimera ", "max_chimera_rate":"-max_chimera_rate ",
 				"repeat_cov_sd":"-repeat_cov_sd ", "min_split_length":"-min_split_length ",
 				"valid_connections":"-valid_connections ", "noise_connections":"-noise_connections ",
