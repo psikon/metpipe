@@ -26,11 +26,15 @@ class Settings:
     CONCAT = ""
     BLASTN = ""
     METACV = ""
+    CONVERTER = ""
     # Program Settings
     filter = ""
     quality = ""
     assembler = ""
     classify = ""
+    metacv_db = ""
+    blastdb_16S = ""
+    blastdb_nt = ""
     
     def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, input=None, output=None,
                 param=None, filter=None, quality=None, assembler=None, classify=None):
@@ -47,12 +51,7 @@ class Settings:
         Settings.filter = filter
         Settings.quality = quality 
         Settings.assembler = assembler.lower()
-        Settings.classify = classify.lower()
-        
-        
-        # Annotate Options
-        
-        
+        Settings.classify = classify.lower() 
         # define program paths
         Settings.FASTQC = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'quality')
         Settings.TRIMGALORE = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'filter')
@@ -61,8 +60,12 @@ class Settings:
         Settings.CONCAT = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'concat')
         Settings.METAVELVET = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'metavelvetg')
         Settings.BLASTN = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
-        Settings.METACV = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'metacv')
-        
+        Settings.METACV = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
+        Settings.CONVERTER = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'converter')
+        # define databases
+        Settings.blastdb_nt = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "nt")
+        Settings.blastdb_16S = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "16S")
+        Settings.metacv_db = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "cvk6_2059")
 class FastQC_Parameter:
     
     nogroup = False
@@ -276,7 +279,7 @@ class MetaCV_Parameter:
 	seq = ""
 	mode = ""
 	orf = ""
-	arguments = {"seq":"--seq ", "mode":"--mode ", "orf":"--orf "}
+	arguments = {"seq":"--seq=", "mode":"--mode=", "orf":"--orf="}
 	
 	def __init__(self):
 		conf = ConfigParser.ConfigParser()
@@ -289,7 +292,6 @@ class MetaCV_Parameter:
 class Blastn_Parameter:
 	
 	import_search_strategy = ""
-	task_name = "metpipe-blastn "
 	db = ""
 	dbsize = ""
 	gilist = ""
@@ -329,7 +331,7 @@ class Blastn_Parameter:
 	off_diagonal_range = ""
 	use_index = False
 	index_name = ""
-	lcase_maskingm = False
+	lcase_masking = False
 	query_loc = ""
 	strand = ""
 	parse_deflines = False
@@ -339,13 +341,30 @@ class Blastn_Parameter:
 	num_alignments = ""
 	html = False
 	max_target_seqs = ""
-	arguments = {}
+	arguments = {"import_search_strategy" : "-import_search_strategy ", "db" : "-db ",
+                 "dbsize" : "-dbsize ", "gilist" : "-gilist ", "seqidlist" : "-seqidlist ",
+                  "negative_gilist" : "-negative_gilist ","entrez_query" : "-entrez_query ",
+                  "db_soft_mask" : "-db_soft_mask ", "db_hard_mask" : "-db_hard_mask ", "subject" : "-subject ",
+                  "subject_loc" : "-subject_loc ", "evalue" : "-evalue ", "word_size" : "-word_size ", 
+                  "gapopen" :  "-gapopen ", "gapextend" : "-gapextend ", "perc_identity" : "-perc_identity ",
+                  "xdrop_ungap" : "-xdrop_ungap ", "xdrop_gap" : "-xdrop_gap ", "xdrop_gap_final" : "-xdrop_gap_final ",
+                  "searchsp" : "-searchsp ", "max_hsps_per_subject" : "-max_hsps_per_subject ", 
+                  "penalty" : "-penalty ", "reward" : "-reward ", "no_greedy" : "-no_greedy ", 
+                  "min_raw_gapped_score" : "-min_raw_gapped_score ", "template_type" : "-template_type ",
+                  "template_length" : "-template_length ", "dust" : "-dust ", "filtering_db" : "-filtering_db ",
+                  "window_masker_taxid" : "-window_masker_taxid ", "window_masker_db" :  "-window_masker_db ",
+                  "soft_masking" : "-soft_masking ", "ungapped" : "-ungapped ", "culling_limit" : "-culling_limit ",
+                  "best_hit_overhang" : "-best_hit_overhang ", "best_hit_score_edge" : "-best_hit_score_edge ",
+                  "window_size" : "-window_size ", "off_diagonal_range" : "-off_diagonal_range ",
+                  "use_index" : "-use_index ", "index_name" : "-index_name ", "lcase_masking" : "-lcase_masking ",
+                  "query_loc" : "-query_loc ", "strand" : "-strand ", "parse_deflines" : "-parse_deflines ",
+                  "outfmt" : "-outfmt ", "show_gis" : "-show_gis ", "num_descriptions" : "-num_descriptions ",
+                  "num_alignments" : "-num_alignments ", "html" : "-html ", "max_target_seqs" : "-max_target_seqs " }
 	
 	def __init__(self):
 		conf = ConfigParser.ConfigParser()
 		conf.read(Settings.param)
 		self.import_search_strategy = conf.get('blastn', 'import_search_strategy')
-		self.task_name = conf.get('blastn', 'task_name')
 		self.db = conf.get('blastn', 'db')
 		self.dbsize = conf.get('blastn', 'dbsize')
 		self.gilist = conf.get('blastn', 'gilist')

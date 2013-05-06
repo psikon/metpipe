@@ -30,9 +30,11 @@ def consoleOutput(step, arguments):
 		sys.stdout.write("Arguments: " + arguments + "\n")
 		sys.stdout.flush()
 
-def moveFiles(src, dst):
-	listofFiles = [f for f in os.listdir(src) if f.endswith('.fastq')]
+def moveFiles(src, dst, fileExtension):
+	listofFiles = [f for f in os.listdir(src) if f.endswith(fileExtension)]
 	for f in listofFiles:
+		if os.path.exists(dst + f):
+			os.remove(dst + f)
 		shutil.move(src + f, dst)
 
 def ParamFileArguments(instance):
@@ -57,16 +59,6 @@ class Utils:
 	def checkInstallation(self, path):
 		return os._exists(path)
 
-	
-	
-               	
-	def skipStep(self, skip, category):
-		
-		if skip == category: 
-			return False
-		else:
-			return True
-	
 class Task:
 	
 	def __init__(self, parameter, task, outputDir):

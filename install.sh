@@ -471,9 +471,13 @@ fi
 
 if  [ -f program/metacv/metacv ] && [ -f program/db/cvdb_2059.cnt ]; then
 	echo "Annotate - MetaCV OK!"
-	ln -s -f metacv/metacv program/metaCV && chmod 775 program/metaCV
+	ln -s -f metacv/metacv program/bacterial && chmod 775 program/bacterial
 fi
 
+if [ -f program/fastx/fastq_to_fastq ]; then
+	echo "Helper Tools OK!"
+	ln -s -f fastx/fastq_to_fasta program/converter && chmod 775 program/converter
+fi
 
 
 	

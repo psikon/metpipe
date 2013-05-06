@@ -105,11 +105,7 @@ if (not settings.skip.lower() =="annotation"):
         queue.append(Task(settings,Programs().blastn,"blastn"))
 # summary
         
-print "\n###################"
-print "#     metpipe     #"
-print "###################\n"
-
-while(queue): 
+while(queue):
     actualElement = queue.popleft()
     actualElement.getTask()(actualElement.getParameter(), actualElement.getOutputDir())
         
