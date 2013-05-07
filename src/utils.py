@@ -1,7 +1,7 @@
 import os
 import sys
 import shutil
-import types
+import zipfile
 
 def str2bool(string):
 		return string.lower() in ("yes", "true", "t", "1")
@@ -50,15 +50,30 @@ def ParamFileArguments(instance):
 			else: 
 				args += " " + instance.arguments.get(str(name)) + getattr(instance, name)
 	return args
-		
-class Utils:
-	
-	def __inti__(self):
-		pass
-			
-	def checkInstallation(self, path):
-		return os._exists(path)
 
+def autotrim(outputdir):
+	
+	# get filenames of the quality reports
+	fastqc = [f for f in os.listdir(outputdir) if f.endswith(".zip")]
+	# unpack only the quality report 
+	for file in fastqc:
+		with zipfile.ZipFile(outputdir+file) as zip_file:
+			for member in zip_file.namelist():
+				filename = os.path.basename(member)
+				if not filename:
+					continue
+				if filename.endswith("data.txt"):
+					source = zip_file.open(member)
+					with source, outputdir+filename:
+						shutil.copyfileobj(source, outputdir+filename)
+					
+				
+							
+						
+	
+	sys.exit()
+	# --paired -q --phred33 --length 
+			
 class Task:
 	
 	def __init__(self, parameter, task, outputDir):

@@ -2,7 +2,7 @@ import subprocess
 import os
 from src.settings import *
 import shlex
-from src.utils import createOutputDir
+from src.utils import createOutputDir, ParamFileArguments
 
 class Programs:
     
@@ -16,91 +16,81 @@ class Programs:
     def fastqc(self, settings, outputdir):
     	
     	createOutputDir(Settings.output + os.sep + outputdir)
-    	# get all specified arguments from the parameter file
-    	params = ParamFileArguments(FastQC_Parameter())
-    	# create the argument string for usage
-        arguments = (" -t %s -o %s -q --extract %s %s") % (Settings.threads,
-														Settings.output + os.sep + outputdir,
-														params, ' '.join(sys.path[0] + os.sep + 
-														str(i)for i in Settings.input))
         # update cli
-        consoleOutput("FastQC", params)
+        consoleOutput("FastQC", ParamFileArguments(FastQC_Parameter()))
         # start FastQC and wait until task complete
-        p = subprocess.Popen(shlex.split(Settings.FASTQC + " " + arguments))
+        p = subprocess.Popen(shlex.split("%s -t %s -o %s -q --noextract %s %s" % (Settings.FASTQC, Settings.threads, Settings.output + os.sep + outputdir,
+                                                                                ParamFileArguments(FastQC_Parameter()),
+                                                                                 ' '.join(sys.path[0] + os.sep + str(i)for i in Settings.input))))
         p.wait()
+        autotrim(Settings.output+os.sep+outputdir+os.sep)
         return True
        
     def trimming(self, settings, outputdir):
+        
         createOutputDir(Settings.output + os.sep + outputdir)
-        params = ParamFileArguments(TrimGalore_Parameter())
-        # create the arguments string for TrimGalore
-        arguments = ("%s -o %s %s") % (params, (sys.path[0] + os.sep + Settings.output + os.sep + outputdir),
-                                    ' '.join(sys.path[0] + os.sep + str(i)for i in Settings.input))
         # update cli
-        consoleOutput("Quality Trimming", params)
+        consoleOutput("Quality Trimming", ParamFileArguments(TrimGalore_Parameter()))
         # start TrimGalore and wait until task complete
-        p = subprocess.Popen(shlex.split(Settings.TRIMGALORE + " " + arguments), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(shlex.split("%s %s -o %s %s" % (Settings.TRIMGALORE, ParamFileArguments(TrimGalore_Parameter())
+                                                              , (sys.path[0] + os.sep + Settings.output + os.sep + outputdir),
+                                                              ' '.join(sys.path[0] + os.sep + str(i)for i in Settings.input)))
+                             , stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         p.wait()
         # search for the processed input files and update input files in settings object
         new = [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)]
         Settings.input = [Settings.output + os.sep + outputdir + os.sep + new[1],
 						Settings.output + os.sep + outputdir + os.sep + new[0]]
         return True
-        
+    
     def assembly(self, settings, outputdir):
         createOutputDir(Settings.output + os.sep + outputdir + os.sep)
-        # parse all velveth specific arguments from parameter file
-    	params = ParamFileArguments(Velveth_Parameter())
-        # create arguments string for velveth
-    	velveth_args = "%s %s %s -fmtAuto %s " % (Settings.output + os.sep + outputdir, Settings.kmer, params ,
-                                         ' '.join(sys.path[0] + os.sep + str(i)for i in Settings.input))
-        consoleOutput("Create Hashtables", params)
+        consoleOutput("Create Hashtables", ParamFileArguments(Velveth_Parameter()))
         # open log file for piping
         log = open(Settings.output + os.sep + outputdir + os.sep + "velveth.log.txt", "w")
         # start velveth and wait for completion
-        p = subprocess.Popen(shlex.split(Settings.VELVETH + " " + velveth_args), stdout=log)
+        p = subprocess.Popen(shlex.split("%s %s %s %s -fmtAuto %s " % (Settings.VELVETH,Settings.output + os.sep + outputdir, 
+                                                                       Settings.kmer, ParamFileArguments(Velveth_Parameter()) ,
+                                                                       ' '.join(sys.path[0] + os.sep + str(i)for i in Settings.input))), 
+                             stdout=log)
         p.wait()
-        # parse alle velvetg specific aruments from parameter file
-    	params = ParamFileArguments(Velvetg_Parameter())
-    	velvetg_args = "%s %s" % (Settings.output + os.sep + outputdir, params)
-        consoleOutput("First Assembly Step", params)
+
+        consoleOutput("First Assembly Step", ParamFileArguments(Velvetg_Parameter()))
         log = open(Settings.output + os.sep + outputdir + os.sep + "velvetg.log.txt", "w")
         # # Argumente funktionieren im moment noch nicht 
-        p = subprocess.Popen(shlex.split(Settings.VELVETG + " " + velvetg_args), stdout=log)
+        p = subprocess.Popen(shlex.split("%s %s %s" % (Settings.VELVETG,Settings.output + os.sep + outputdir, 
+                                                       ParamFileArguments(Velvetg_Parameter()))), stdout=log)
         p.wait()
-    	params = ParamFileArguments(MetaVelvet_Parameter())
         log = open(Settings.output + os.sep + outputdir + os.sep + "meta-velvetg.log.txt", "w")
-        metavelvet_args = "%s %s" % (Settings.output + os.sep + outputdir, params)  
-        consoleOutput("Metagenomic Assembly", params)
+        consoleOutput("Metagenomic Assembly", ParamFileArguments(MetaVelvet_Parameter()))
         p = subprocess.Popen(shlex.split(Settings.METAVELVET + " " + Settings.output + os.sep + outputdir), stdout=log)
-    	# p = subprocess.Popen(shlex.split(Settings.METAVELVET + " " + metavelvet_args))
+    	#p = subprocess.Popen(shlex.split("%s %s %s" % (Settings.METAVELVET,Settings.output + os.sep + outputdir, 
+        #                                               ParamFileArguments(MetaVelvet_Parameter()))),stderr=log)
         p.wait()
         Settings.input = Settings.output + os.sep + outputdir + os.sep + "meta-velvetg.contigs.fa"
         return True
     
     def concat(self, settings, outputdir):
         createOutputDir(Settings.output + os.sep + outputdir)
-        # get all specified parameter from parameter file 
-        params = ParamFileArguments(Concat_Parameter())
-        # create argument string
+        aln = open(Settings.output + os.sep + outputdir + os.sep + "alignments.txt", "w")
+        #print all created alignments in extra file
+        consoleOutput("Concat", ParamFileArguments(Concat_Parameter()))
         if len(Settings.input) > 1:
             # for paired end files
-        	arguments = "-i %s -j %s -o %s -t %s %s " % (sys.path[0] + os.sep + str(Settings.input[0]),
-												  		 sys.path[0] + os.sep + str(Settings.input[1]),
-												  		 Settings.output + os.sep + outputdir, Settings.threads,
-												  		 params)
+            p = subprocess.Popen(shlex.split("%s -i %s -j %s -o %s -t %s %s " % (Settings.CONCAT,sys.path[0] + os.sep + str(Settings.input[0]),
+                                                                                 sys.path[0] + os.sep + str(Settings.input[1]),
+                                                                                 Settings.output + os.sep + outputdir, Settings.threads,
+                                                                                 ParamFileArguments(Concat_Parameter()))), 
+                                 stdout=aln, stderr=subprocess.STDOUT)
         else:
             # for single end files
-        	arguments = "-i %s -o %s -t %s %s " % (sys.path[0] + os.sep + str(Settings.input),
-												  		 Settings.output + os.sep + outputdir, Settings.threads,
-												  		 params)
-        consoleOutput("Concat", params)
-        # print all created alignments in extra file
-        aln = open(Settings.output + os.sep + outputdir + os.sep + "alignments.txt", "w")
-        p = subprocess.Popen(shlex.split(Settings.CONCAT + " " + arguments), stdout=aln, stderr=subprocess.STDOUT)
+            p = subprocess.Popen(shlex.split("%s -i %s -j %s -o %s -t %s %s " % (Settings.CONCAT,sys.path[0] + os.sep + str(Settings.input),
+                                                                                 Settings.output + os.sep + outputdir, Settings.threads,
+                                                                                 ParamFileArguments(Concat_Parameter()))),
+                                 stdout=aln, stderr=subprocess.STDOUT)
         p.wait()
         # move file from the first level to the specified output folder
-        moveFiles(Settings.output + os.sep , Settings.output + os.sep + outputdir + os.sep,".fastq")
+        moveFiles(Settings.output + os.sep , Settings.output + os.sep + outputdir + os.sep, ".fastq")
         # update the input parameter
         Settings.input = Settings.output + os.sep + outputdir + os.sep + "concat-contigs.fastq"
     
@@ -110,18 +100,16 @@ class Programs:
         if Settings.input.endswith(".fq") or Settings.input.endswith(".fastq"):
             consoleOutput("Converting from fastq to fasta", "")
             # convert fastq files to fasta
-            converter_args = "-n -Q33 -i %s -o %s" % (Settings.input,Settings.output + os.sep + outputdir + os.sep + "contigs.fasta")
-            p = subprocess.Popen(shlex.split(Settings.CONVERTER + " " + converter_args))
+            p = subprocess.Popen(shlex.split("%s -n -Q33 -i %s -o %s" % (Settings.CONVERTER,Settings.input, 
+                                                                         Settings.output + os.sep + outputdir + os.sep + "contigs.fasta")))
             p.wait()
             Settings.input = Settings.output + os.sep + outputdir + os.sep + "contigs.fasta"
         # get all specified blastn parameter
-        params = ParamFileArguments(Blastn_Parameter())
-        consoleOutput("Classify with Blastn", params)
-        #create argument string
-        arguments = "-db %s -query %s -out %s -num_threads %s %s " % (Settings.blastdb_nt, Settings.input,
+        consoleOutput("Classify with Blastn", ParamFileArguments(Blastn_Parameter()))
+        # create argument string
+        p = subprocess.Popen(shlex.split("%s -db %s -query %s -out %s -num_threads %s %s " % (Settings.BLASTN,Settings.blastdb_nt, Settings.input,
                                                                       Settings.output + os.sep + outputdir + os.sep + "blastn.tab",
-                                                                      Settings.threads, params)  
-        p = subprocess.Popen(shlex.split(Settings.BLASTN + " " + arguments))
+                                                                      Settings.threads, ParamFileArguments(Blastn_Parameter()))))
         p.wait()
         
     def metaCV(self, settings, outputdir):
