@@ -1,8 +1,8 @@
 import subprocess
-import os
-from src.settings import *
 import shlex
-from src.utils import createOutputDir, ParamFileArguments
+import sys, os
+from src.utils import consoleOutput,createOutputDir,ParamFileArguments,moveFiles
+from src.settings import Settings,FastQC_Parameter,TrimGalore_Parameter,Concat_Parameter,Velveth_Parameter,Velvetg_Parameter,MetaVelvet_Parameter,Blastn_Parameter,MetaCV_Parameter
 
 class Programs:
     
@@ -13,17 +13,16 @@ class Programs:
         pass
        
     # do an quality analysis of the input files with FastQC   
-    def fastqc(self, settings, outputdir):
+    def fastqc(self,settings,outputdir):
     	
     	createOutputDir(Settings.output + os.sep + outputdir)
         # update cli
         consoleOutput("FastQC", ParamFileArguments(FastQC_Parameter()))
         # start FastQC and wait until task complete
-        p = subprocess.Popen(shlex.split("%s -t %s -o %s -q --noextract %s %s" % (Settings.FASTQC, Settings.threads, Settings.output + os.sep + outputdir,
+        p = subprocess.Popen(shlex.split("%s -t %s -o %s -q --extract %s %s" % (Settings.FASTQC, Settings.threads, Settings.output + os.sep + outputdir,
                                                                                 ParamFileArguments(FastQC_Parameter()),
                                                                                  ' '.join(sys.path[0] + os.sep + str(i)for i in Settings.input))))
-        p.wait()
-        autotrim(Settings.output+os.sep+outputdir+os.sep)
+        p.wait()            
         return True
        
     def trimming(self, settings, outputdir):
@@ -71,6 +70,7 @@ class Programs:
         return True
     
     def concat(self, settings, outputdir):
+        
         createOutputDir(Settings.output + os.sep + outputdir)
         aln = open(Settings.output + os.sep + outputdir + os.sep + "alignments.txt", "w")
         #print all created alignments in extra file
@@ -111,11 +111,11 @@ class Programs:
                                                                       Settings.output + os.sep + outputdir + os.sep + "blastn.tab",
                                                                       Settings.threads, ParamFileArguments(Blastn_Parameter()))))
         p.wait()
+        return True
         
     def metaCV(self, settings, outputdir):
         createOutputDir(Settings.output + os.sep + outputdir)
         params = ParamFileArguments(MetaCV_Parameter())
-        consoleOutput("Annotation ", params)
         arguments = "classify %s %s %s %s" % (Settings.metacv_db, Settings.input, "metpipe", params)
         consoleOutput("MetaCV", params)
         log = open(Settings.output + os.sep + outputdir + os.sep + "metacv.log", "w")
@@ -138,7 +138,7 @@ class Programs:
         p = subprocess.Popen(shlex.split(Settings.METACV + " " + arguments), stderr=log)
         p.wait()
         moveFiles(sys.path[0] + os.sep, Settings.output + os.sep + outputdir + os.sep, ".res2sum")
-        
+        return True
         
         
         

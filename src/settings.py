@@ -1,9 +1,6 @@
 import ConfigParser
 import sys
 import os
-from src.utils import *
-from twisted.python.rebuild import __getattr__
-import types
 
 class Settings:
     
@@ -16,6 +13,7 @@ class Settings:
     input = ""
     output = ""
     param = ""
+    quality_report = ""
     # EXECUTABLES 
     program_dir = ""
     FASTQC = ""
@@ -28,16 +26,16 @@ class Settings:
     METACV = ""
     CONVERTER = ""
     # Program Settings
-    filter = ""
-    quality = ""
+    trim = True
+    quality = True
     assembler = ""
-    classify = ""
+    classify = "both"
     metacv_db = ""
     blastdb_16S = ""
     blastdb_nt = ""
     
     def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, input=None, output=None,
-                param=None, filter=None, quality=None, assembler=None, classify=None):
+                param=None, trim=None, quality=None, assembler=None, classify=None):
         
         conf = ConfigParser.ConfigParser()
         conf.read(param)
@@ -48,7 +46,7 @@ class Settings:
         Settings.input = input
         Settings.output = output
         Settings.param = param
-        Settings.filter = filter
+        Settings.trim = trim
         Settings.quality = quality 
         Settings.assembler = assembler.lower()
         Settings.classify = classify.lower() 
@@ -66,6 +64,7 @@ class Settings:
         Settings.blastdb_nt = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "nt")
         Settings.blastdb_16S = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "16S")
         Settings.metacv_db = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "cvk6_2059")
+
 class FastQC_Parameter:
     
     nogroup = False
@@ -76,7 +75,7 @@ class FastQC_Parameter:
     def __init__(self):
         conf = ConfigParser.ConfigParser()
         conf.read(Settings.param)
-        self.nogroup = str2bool(conf.get('FastQC', 'nogroup'))
+        self.nogroup = conf.getboolean('FastQC', 'nogroup')
         self.kmers = conf.get('FastQC', 'kmers')
         self.contaminants = conf.get('FastQC', 'contaminants')
     
@@ -109,10 +108,10 @@ class TrimGalore_Parameter:
         self.error_rate = conf.get('TrimGalore', 'error_rate')
         self.length = conf.get('TrimGalore', 'length')
         self.paired = conf.getboolean('TrimGalore', 'paired')
-        self.retain_unpaired = conf.get('TrimGalore', 'retain_unpaired')
+        self.retain_unpaired = conf.getboolean('TrimGalore', 'retain_unpaired')
         self.length_1 = conf.get('TrimGalore', 'length_1')
         self.length_2 = conf.get('TrimGalore', 'length_2')
-        self.trim = conf.get('TrimGalore', 'trim1')
+        self.trim = conf.getboolean('TrimGalore', 'trim1')
     
 class Concat_Parameter:
      
@@ -123,7 +122,7 @@ class Concat_Parameter:
     def __init__(self):
         conf = ConfigParser.ConfigParser()
         conf.read(Settings.param)
-        self.pretty_out = conf.get('concat', 'pretty_output')
+        self.pretty_out = conf.getboolean('concat', 'pretty_output')
         self.score = conf.get('concat', 'score')
 
 class Velveth_Parameter:
@@ -142,10 +141,10 @@ class Velveth_Parameter:
         conf.read(Settings.param)
         self.file_layout = conf.get('MetaVelvet', 'file_layout')
         self.read_type = conf.get('MetaVelvet', 'read_type')
-        self.strand_specific = conf.get('MetaVelvet', 'strand_specific')
-        self.reuse_Sequences = conf.get('MetaVelvet', 'reuse_Sequences')
-        self.noHash = conf.get('MetaVelvet', 'noHash')
-        self.create_binary = conf.get('MetaVelvet', 'create_binary')
+        self.strand_specific = conf.getboolean('MetaVelvet', 'strand_specific')
+        self.reuse_Sequences = conf.getboolean('MetaVelvet', 'reuse_Sequences')
+        self.noHash = conf.getboolean('MetaVelvet', 'noHash')
+        self.create_binary = conf.getboolean('MetaVelvet', 'create_binary')
 
 class Velvetg_Parameter:
     
@@ -192,13 +191,13 @@ class Velvetg_Parameter:
         conf.read(Settings.param)
         self.cov_cutoff = conf.get('MetaVelvet', 'cov_cutoff')
         self.ins_length = conf.get('MetaVelvet', 'ins_length')
-        self.read_trkg = conf.get('MetaVelvet', 'read_trkg')
+        self.read_trkg = conf.getboolean('MetaVelvet', 'read_trkg')
         self.min_contig_lgth = conf.get('MetaVelvet', 'min_contig_lgth')
         self.exp_cov = conf.get('MetaVelvet', 'exp_cov')
         self.long_cov_cutoff = conf.get('MetaVelvet', 'long_cov_cutoff')
         self.ins_length_long = conf.get('MetaVelvet', 'ins_length_long')
         self.ins_length_sd = conf.get('MetaVelvet', 'ins_length_sd')
-        self.scaffolding = conf.get('MetaVelvet', 'scaffolding')
+        self.scaffolding = conf.getboolean('MetaVelvet', 'scaffolding')
         self.max_branch_length = conf.get('MetaVelvet', 'max_branch_length')
         self.max_divergence = conf.get('MetaVelvet', 'max_divergence')
         self.max_gap_count = conf.get('MetaVelvet', 'max_gap_count')
@@ -206,14 +205,14 @@ class Velvetg_Parameter:
         self.max_coverage = conf.get('MetaVelvet', 'max_coverage')
         self.coverage_mask = conf.get('MetaVelvet', 'coverage_mask')
         self.long_mult_cutoff = conf.get('MetaVelvet', 'long_mult_cutoff')
-        self.unused_reads = conf.get('MetaVelvet', 'unused_reads')
-        self.alignments = conf.get('MetaVelvet', 'alignments')
-        self.exportFiltered = conf.get('MetaVelvet', 'exportFiltered')
-        self.clean = conf.get('MetaVelvet', 'clean')
-        self.very_clean = conf.get('MetaVelvet', 'very_clean')
+        self.unused_reads = conf.getboolean('MetaVelvet', 'unused_reads')
+        self.alignments = conf.getboolean('MetaVelvet', 'alignments')
+        self.exportFiltered = conf.getboolean('MetaVelvet', 'exportFiltered')
+        self.clean = conf.getboolean('MetaVelvet', 'clean')
+        self.very_clean = conf.getboolean('MetaVelvet', 'very_clean')
         self.paired_exp_fraction = conf.get('MetaVelvet', 'paired_exp_fraction')
-        self.shortMatePaired = conf.get('MetaVelvet', 'shortMatePaired')
-        self.conserveLong = conf.get('MetaVelvet', 'conserveLong') 
+        self.shortMatePaired = conf.getboolean('MetaVelvet', 'shortMatePaired')
+        self.conserveLong = conf.getboolean('MetaVelvet', 'conserveLong') 
         
        
     
@@ -260,9 +259,9 @@ class MetaVelvet_Parameter:
         self.min_split_length = conf.get('MetaVelvet', 'min_split_length')
         self.valid_connections = conf.get('MetaVelvet', 'valid_connections')
         self.noise_connections = conf.get('MetaVelvet', 'noise_connections')
-        self.use_connections = conf.get('MetaVelvet', 'use_connections')
-        self.report_split_detail = conf.get('MetaVelvet', 'report_split_detail')
-        self.report_subgraph = conf.get('MetaVelvet', 'report_subgraph')
+        self.use_connections = conf.getboolean('MetaVelvet', 'use_connections')
+        self.report_split_detail = conf.getboolean('MetaVelvet', 'report_split_detail')
+        self.report_subgraph = conf.getboolean('MetaVelvet', 'report_subgraph')
         self.exp_covs_meta = conf.get('MetaVelvet', 'exp_covs_meta')
         self.min_peak_cov = conf.get('MetaVelvet', 'min_peak_cov')
         self.max_peak_cov = conf.get('MetaVelvet', 'max_peak_cov')
@@ -270,9 +269,9 @@ class MetaVelvet_Parameter:
         self.histo_sn_ratio = conf.get('MetaVelvet', 'histo_sn_ratio')
         self.amos_file = conf.get('MetaVelvet', 'amos_file')
         self.coverage_mask = conf.get('MetaVelvet', 'coverage_mask')
-        self.unused_reads_meta = conf.get('MetaVelvet', 'unused_reads_meta')
-        self.alignments_meta = conf.get('MetaVelvet', 'alignments_meta')
-        self.exportFiltered_meta = conf.get('MetaVelvet', 'exportFiltered_meta')
+        self.unused_reads_meta = conf.getboolean('MetaVelvet', 'unused_reads_meta')
+        self.alignments_meta = conf.getboolean('MetaVelvet', 'alignments_meta')
+        self.exportFiltered_meta = conf.getboolean('MetaVelvet', 'exportFiltered_meta')
         self.paired_exp_fraction_meta = conf.get('MetaVelvet', 'paired_exp_fraction_meta')   
 
 class MetaCV_Parameter:
@@ -343,13 +342,13 @@ class Blastn_Parameter:
 	max_target_seqs = ""
 	arguments = {"import_search_strategy" : "-import_search_strategy ", "db" : "-db ",
                  "dbsize" : "-dbsize ", "gilist" : "-gilist ", "seqidlist" : "-seqidlist ",
-                  "negative_gilist" : "-negative_gilist ","entrez_query" : "-entrez_query ",
+                  "negative_gilist" : "-negative_gilist ", "entrez_query" : "-entrez_query ",
                   "db_soft_mask" : "-db_soft_mask ", "db_hard_mask" : "-db_hard_mask ", "subject" : "-subject ",
-                  "subject_loc" : "-subject_loc ", "evalue" : "-evalue ", "word_size" : "-word_size ", 
+                  "subject_loc" : "-subject_loc ", "evalue" : "-evalue ", "word_size" : "-word_size ",
                   "gapopen" :  "-gapopen ", "gapextend" : "-gapextend ", "perc_identity" : "-perc_identity ",
                   "xdrop_ungap" : "-xdrop_ungap ", "xdrop_gap" : "-xdrop_gap ", "xdrop_gap_final" : "-xdrop_gap_final ",
-                  "searchsp" : "-searchsp ", "max_hsps_per_subject" : "-max_hsps_per_subject ", 
-                  "penalty" : "-penalty ", "reward" : "-reward ", "no_greedy" : "-no_greedy ", 
+                  "searchsp" : "-searchsp ", "max_hsps_per_subject" : "-max_hsps_per_subject ",
+                  "penalty" : "-penalty ", "reward" : "-reward ", "no_greedy" : "-no_greedy ",
                   "min_raw_gapped_score" : "-min_raw_gapped_score ", "template_type" : "-template_type ",
                   "template_length" : "-template_length ", "dust" : "-dust ", "filtering_db" : "-filtering_db ",
                   "window_masker_taxid" : "-window_masker_taxid ", "window_masker_db" :  "-window_masker_db ",
@@ -387,7 +386,7 @@ class Blastn_Parameter:
 		self.max_hsps_per_subject = conf.get('blastn', 'max_hsps_per_subject')
 		self.penalty = conf.get('blastn', 'penalty')
 		self.reward = conf.get('blastn', 'reward')
-		self.no_greedy = conf.get('blastn', 'no_greedy')
+		self.no_greedy = conf.getboolean('blastn', 'no_greedy')
 		self.min_raw_gapped_score = conf.get('blastn', 'min_raw_gapped_score')
 		self.template_type = conf.get('blastn', 'template_type')
 		self.template_length = conf.get('blastn', 'template_length')
@@ -396,35 +395,21 @@ class Blastn_Parameter:
 		self.window_masker_taxid = conf.get('blastn', 'window_masker_taxid')
 		self.window_masker_db = conf.get('blastn', 'window_masker_db')
 		self.soft_masking = conf.get('blastn', 'soft_masking')
-		self.ungapped = conf.get('blastn', 'ungapped')
+		self.ungapped = conf.getboolean('blastn', 'ungapped')
 		self.culling_limit = conf.get('blastn', 'culling_limit')
 		self.best_hit_overhang = conf.get('blastn', 'best_hit_overhang')
 		self.best_hit_score_edge = conf.get('blastn', 'best_hit_score_edge')
 		self.window_size = conf.get('blastn', 'window_size')
 		self.off_diagonal_range = conf.get('blastn', 'off_diagonal_range')
-		self.use_index = conf.get('blastn', 'use_index')
+		self.use_index = conf.getboolean('blastn', 'use_index')
 		self.index_name = conf.get('blastn', 'index_name')
-		self.lcase_maskingm = conf.get('blastn', 'lcase_maskingm')
+		self.lcase_maskingm = conf.getboolean('blastn', 'lcase_maskingm')
 		self.query_loc = conf.get('blastn', 'query_loc')
 		self.strand = conf.get('blastn', 'strand')
-		self.parse_deflines = conf.get('blastn', 'parse_deflines')
+		self.parse_deflines = conf.getboolean('blastn', 'parse_deflines')
 		self.outfmt = conf.get('blastn', 'outfmt')
-		self.show_gis = conf.get('blastn', 'show_gis')
+		self.show_gis = conf.getboolean('blastn', 'show_gis')
 		self.num_descriptions = conf.get('blastn', 'num_descriptions')
 		self.num_alignments = conf.get('blastn', 'num_alignments')
-		self.html = conf.get('blastn', 'html')
+		self.html = conf.getboolean('blastn', 'html')
 		self.max_target_seqs = conf.get('blastn', 'max_target_seqs')
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
