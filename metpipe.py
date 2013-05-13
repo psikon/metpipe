@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-# # First imports
+# First imports
 import os, sys
 from socket import errno
 from collections import deque
 
-# # Setting up the paths
+# Setting up the paths
 SRC_DIR = "%s%ssrc" % (sys.path[0], os.sep)
 PROGRAM_DIR = "%s%sprogram" % (sys.path[0], os.sep)
 RESULT_DIR = "%s%sresult" % (sys.path[0], os.sep)
@@ -88,5 +88,9 @@ consoleSummary(settings)
 
 while(queue):
     actualElement = queue.popleft()
-    actualElement.getTask()(actualElement.getParameter(), actualElement.getOutputDir())
+    if actualElement.getTask()(actualElement.getOutputDir()):
+        continue
+    else: 
+        print "error"
+        sys.exit()
         

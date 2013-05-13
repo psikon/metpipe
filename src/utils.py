@@ -131,6 +131,12 @@ def ParamFileArguments(instance):
 			else: 
 				args += ' ' + instance.arguments.get(str(name)) + getattr(instance, name)
 	return args
+
+def testInputFormat(file):
+	if file.endswith(".fq") or file.endswith(".fastq"):
+		return True
+	else:
+		return False
 			
 class Task:
 	

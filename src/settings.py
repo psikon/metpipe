@@ -13,7 +13,9 @@ class Settings:
     input = ""
     output = ""
     param = ""
-    quality_report = ""
+    quality_report = []
+    metaCV_output = []
+    blast_output = ""
     # EXECUTABLES 
     program_dir = ""
     FASTQC = ""
@@ -64,7 +66,7 @@ class Settings:
         Settings.blastdb_nt = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "nt")
         Settings.blastdb_16S = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "16S")
         Settings.metacv_db = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "cvk6_2059")
-
+        
 class FastQC_Parameter:
     
     nogroup = False
