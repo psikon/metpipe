@@ -3,6 +3,7 @@ import shlex
 import sys, os
 from src.utils import consoleOutput, createOutputDir, ParamFileArguments, moveFiles, testInputFormat
 from src.settings import Settings, FastQC_Parameter, TrimGalore_Parameter, Concat_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter, Blastn_Parameter, MetaCV_Parameter
+import shutil
 
 class Programs:
     
@@ -110,14 +111,17 @@ class Programs:
     def convertToFasta(self,outputdir):
         
         # if no assembly was done and the reads are paired-end in 2 files --> create one file from it
+        
+        consoleOutput("Converting from fastq to fasta", Settings.input)
         if len(Settings.input) > 1:
-            consoleOutput(step, arguments)
-            input = open()
+            input = open("concat-reads.fastq","wb")
+            shutil.copyfileobj(open(Settings.input[0],'rb'),input)
+            shutil.copyfileobj(open(Settings.input[1],'rb'),input)
+            Settings.input = input
+            input.close()
             
             
             
-            # update information of cmd
-            consoleOutput("Converting from fastq to fasta", Settings.input)
             # convert fastq files to fasta
             p = subprocess.Popen(shlex.split("%s -n -Q33 -i %s -o %s" % (Settings.CONVERTER, Settings.input,
                                                                      Settings.output + os.sep + outputdir + os.sep + "contigs.fasta")))
