@@ -53,29 +53,13 @@ optional arguments:
 
 ```
 
-## Working
+All step specific settings can be found in the parameter.conf file in the root dir of this program.
+ 
+### not working
 
-- [x] install script
-
-## not Working
-
-- [ ] run script for pipeline
-- [ ] Preprocessing
-- [ ] Assembly
-- [ ] Concatination
-- [ ] Annotation
-- [ ] Classify
-- [ ] Visualization
-
-## Tools in the Pipeline
-
-- Preprocessing: 
-FastQC
-Trim Galore!
-FastX Suite
-- Assembly:
-
-
-	
-  
+- change parameter for metavelvet
+- no verbose mode at the moment
+- no log functions
+- analysis of the results under development
+ 
 ## Citations
