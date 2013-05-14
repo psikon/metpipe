@@ -62,19 +62,19 @@ All step specific settings can be found in the parameter.conf file in the root d
 
 ### Parts of this pipeline
 
-	- Fastqc	  (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
-	- TrimGalore! (http://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)
-	- MetaVelvet  (http://metavelvet.dna.bio.keio.ac.jp/)
-		Namiki T*, Hachiya T*, Tanaka H, Sakakibara Y. (2012) 
-		MetaVelvet : An extension of Velvet assembler to de novo 
-		metagenome assembly from short sequence reads, 
-		Nucleic Acids Res.
-	- stitch 	  (https://github.com/audy/stitch)
-	- Blastn	  (http://www.ncbi.nlm.nih.gov/books/NBK1763/
-		Altschul, S.F., Gish, W., Miller, W., Myers, E.W. & Lipman, D.J. 
-		(1990) "Basic local alignment search tool." 
-		J. Mol. Biol. 215:403-410. PubMed
-	- MetaCV	  (http://metacv.sourceforge.net/)
+- Fastqc (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- TrimGalore! (http://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)
+- MetaVelvet (http://metavelvet.dna.bio.keio.ac.jp/)
+	Namiki T*, Hachiya T*, Tanaka H, Sakakibara Y. (2012) 
+	MetaVelvet : An extension of Velvet assembler to de novo 
+	metagenome assembly from short sequence reads, 
+	Nucleic Acids Res.
+- stitch (https://github.com/audy/stitch)
+- Blastn (http://www.ncbi.nlm.nih.gov/books/NBK1763/
+	Altschul, S.F., Gish, W., Miller, W., Myers, E.W. & Lipman, D.J. 
+	(1990) "Basic local alignment search tool." 
+	J. Mol. Biol. 215:403-410. PubMed
+- MetaCV (http://metacv.sourceforge.net/)
 		
 	 
 ### Bugs/under Development
