@@ -1,17 +1,22 @@
 # metPipe
 
+
+Philipp Sehnert
+philipp.sehnert@gmail.com
+
 This software package bundles a number of standard software for the analysis of metagenomic datasets 
 under one surface. The pipeline is developed for the processing of the new Illumina MiSeq technology 
 with its long read lengths of up to 250 bp, but is also capable to process the older Illumina HiSeq 
 reads.
 
-## Requirements
+### Requirements
 
   - Python >= 2.6
   - R >= 2.15
   - Java Runtime Environment (z.B. open-jre)
+  - Linux (Mac OS X possible, but not tested) 
 
-## Installation
+### Installation
 
 The pipeline provide an automatic installer script in the main folder. To install all necassary components 
 for the pipeline just start this skript in a unix shell by the following command.
@@ -22,7 +27,7 @@ sh install.sh
 Folow the instructions on the screen and all necassary programs will be downloaded and make runable 
 automatically.
 
-## Usage:
+### Usage:
 
 ```python
 python metpipe.py [-h] [--version] [-v] [-t THREADS] [-p PARAM]
@@ -54,12 +59,24 @@ optional arguments:
 ```
 
 All step specific settings can be found in the parameter.conf file in the root dir of this program.
- 
-### not working
+
+### Parts of this pipeline
+
+	- Fastqc	  (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+	- TrimGalore!
+	- MetaVelvet (http://metavelvet.dna.bio.keio.ac.jp/)
+		Namiki T*, Hachiya T*, Tanaka H, Sakakibara Y. (2012) 
+		MetaVelvet : An extension of Velvet assembler to de novo 
+		metagenome assembly from short sequence reads, 
+		Nucleic Acids Res.
+	- stitch (https://github.com/audy/stitch)
+	- Blastn
+	- MetaCV
+	 
+### Bugs/under Development
 
 - change parameter for metavelvet
 - no verbose mode at the moment
 - no log functions
 - analysis of the results under development
- 
-## Citations
+
