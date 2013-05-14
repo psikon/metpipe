@@ -1,7 +1,7 @@
 # metPipe
 
 
-Philipp Sehnert
+Philipp Sehnert\n
 philipp.sehnert@gmail.com
 
 This software package bundles a number of standard software for the analysis of metagenomic datasets 
@@ -64,7 +64,7 @@ All step specific settings can be found in the parameter.conf file in the root d
 
 - Fastqc (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 - TrimGalore! (http://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)
-- MetaVelvet (http://metavelvet.dna.bio.keio.ac.jp/)
+- MetaVelvet (http://metavelvet.dna.bio.keio.ac.jp/) \n
 	Namiki T*, Hachiya T*, Tanaka H, Sakakibara Y. (2012) 
 	MetaVelvet : An extension of Velvet assembler to de novo 
 	metagenome assembly from short sequence reads, 
