@@ -3,13 +3,17 @@ import shutil
 from collections import deque
 from src.settings import TrimGalore_Parameter,Blastn_Parameter
 
+# simple function to create a dir
 def createOutputDir(path):
+		
 		try:
 			os.makedirs(path)
 		except OSError:
+			# if dir exists and is dir go ahead
 			if not os.path.isdir(path):
 				raise
-			
+
+# function to fill the working queue with tasks based on the cli commands
 def createTasks(settings_instance, program_instance):
 	queue = deque()
 	
@@ -41,6 +45,7 @@ def createTasks(settings_instance, program_instance):
 			queue.append(Task(settings_instance, program_instance.blastn, 'blastn'))
 	return queue
 
+# before start the first run - print all important settings on the cmd
 def consoleSummary(settings):
 	sys.stdout.write('\nmetpipe - Overview\n\n')
 	if settings.quality:
@@ -102,15 +107,20 @@ def consoleSummary(settings):
 			if blastn.perc_identity:
 				sys.stdout.write(' - perc id  : ' + blastn.perc_identity + '\n')	
 			
+	# only continue when keyboard command comes
 	return raw_input('\nContinue?\n')
 
-	
-	
+# simple console output
 def consoleOutput(step, arguments):
 		sys.stdout.write('Step:      ' + step + '\n')
 		sys.stdout.write('Arguments: ' + arguments + '\n')
 		sys.stdout.flush()
 
+# console output for verbose setting
+def consoleVerboseOutput():
+	pass
+
+# copy files into another dir
 def moveFiles(src, dst, fileExtension):
 	listofFiles = [f for f in os.listdir(src) if f.endswith(fileExtension)]
 	for f in listofFiles:
@@ -118,26 +128,35 @@ def moveFiles(src, dst, fileExtension):
 			os.remove(dst + f)
 		shutil.move(src + f, dst)
 
+# important function to get all used arguments from a settings object and convert it to an argument string
 def ParamFileArguments(instance):
 
 	args = ''
+	# get all used vars of the instance
 	var = vars(instance)
 	for name in var:
+		# if var is boolean and true only print the name of the var in dict
 		if getattr(instance, name):
 			if str(getattr(instance, name)).lower() in 'true':
 				args += ' ' + instance.arguments.get(str(name))
+			# if var is boolean and false discard it
 			elif str(getattr(instance, name)).lower() in 'false':
 				pass
+			# else var has a value - print var from dict + value
 			else: 
 				args += ' ' + instance.arguments.get(str(name)) + getattr(instance, name)
 	return args
 
-def testInputFormat(file):
-	if file.endswith(".fq") or file.endswith(".fastq"):
+# test the input file for etxension of fastq files
+
+def testForFQ(testfile):
+	if  testfile.endswith(".fq") or testfile.endswith(".fastq"):
+		print "here"
 		return True
 	else:
 		return False
 			
+# class for manage the attributes of the tasks in the workingQueue
 class Task:
 	
 	def __init__(self, parameter, task, outputDir):

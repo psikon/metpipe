@@ -2,15 +2,16 @@ import ConfigParser
 import sys
 import os
 
+# class for general settings of the pipeline and variables needed from every program
 class Settings:
-    
+
     # general settings
     kmer = 85
     threads = 8
     verbose = False
     skip = ""
     # File settings
-    input = ""
+    input = []
     output = ""
     param = ""
     quality_report = []
@@ -38,9 +39,7 @@ class Settings:
     
     def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, input=None, output=None,
                 param=None, trim=None, quality=None, assembler=None, classify=None):
-        
-        conf = ConfigParser.ConfigParser()
-        conf.read(param)
+
         Settings.kmer = kmer
         Settings.threads = threads
         Settings.verbose = verbose
@@ -66,12 +65,14 @@ class Settings:
         Settings.blastdb_nt = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "nt")
         Settings.blastdb_16S = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "16S")
         Settings.metacv_db = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "cvk6_2059")
-        
+  
+# Parameters for FastQC 
 class FastQC_Parameter:
-    
+
     nogroup = False
     contaminants = "" 
     kmers = ""
+    # dict with the arguments string
     arguments = {"nogroup" : "--nogroup ", "contaminants": "-c ", "kmers": "-k "}
     
     def __init__(self):
@@ -80,9 +81,10 @@ class FastQC_Parameter:
         self.nogroup = conf.getboolean('FastQC', 'nogroup')
         self.kmers = conf.get('FastQC', 'kmers')
         self.contaminants = conf.get('FastQC', 'contaminants')
-    
+
+# Parameter for TrimGalore!
 class TrimGalore_Parameter:
-    
+
     quality = 20 
     phred = ""
     adapter = ""
@@ -95,6 +97,7 @@ class TrimGalore_Parameter:
     length_1 = ""
     length_2 = ""
     trim = False
+    # dict with the arguments string
     arguments = {"quality":"-q ", "phred":"--phred", "adapter":"-a ", "adapter2":"-a2 ", "stringency":"-s ",
                  "error_rate":"-e ", "length":"--length ", "paired":"--paired", "retain_unpaired":"--retain_unpaired",
                  "length1":"-r1 ", "length2":"-r2 ", "trim":"-t "}
@@ -114,11 +117,13 @@ class TrimGalore_Parameter:
         self.length_1 = conf.get('TrimGalore', 'length_1')
         self.length_2 = conf.get('TrimGalore', 'length_2')
         self.trim = conf.getboolean('TrimGalore', 'trim1')
-    
+
+# Parameter for concatenation of the reads
 class Concat_Parameter:
-     
+
     pretty_out = False
     score = 20
+    # dict with the arguments string
     arguments = {"pretty_out" : "-p", "score" : "-s "}
        
     def __init__(self):
@@ -127,14 +132,16 @@ class Concat_Parameter:
         self.pretty_out = conf.getboolean('concat', 'pretty_output')
         self.score = conf.get('concat', 'score')
 
+# Parameter for velveth
 class Velveth_Parameter:
-    
+
     file_layout = ""
     read_type = ""
     strand_specific = False
     reuse_Sequences = False
     noHash = False
     create_binary = False
+    # dict with the arguments string
     arguments = {"file_layout" : "-", "read_type" : "-", "strand_specific":"-strand_specific",
 				"reuse_Sequences":"-reuse_Sequences", "noHash":"-noHash", "create_binary":"-createBinary"}
     
@@ -148,8 +155,9 @@ class Velveth_Parameter:
         self.noHash = conf.getboolean('MetaVelvet', 'noHash')
         self.create_binary = conf.getboolean('MetaVelvet', 'create_binary')
 
+# Parameter for velvetg
 class Velvetg_Parameter:
-    
+
     cov_cutoff = ""
     ins_length = ""
     read_trkg = False
@@ -173,7 +181,8 @@ class Velvetg_Parameter:
     very_clean = False
     paired_exp_fraction = 0.1
     shortMatePaired = False
-    conserveLong = False  
+    conserveLong = False
+    # dict with the arguments string
     arguments = {"cov_cutoff" : "-cov_cutoff ", "ins_length" : "-ins_length ",
                      "read_trkg" : "-read_trkg ", "min_contig_lgth" : "-min_contig_lgth ",
                      "exp_cov" : "-exp_cov ", "long_cov" : "-long_cov ", "long_cov_cutoff":"-long_cov_cutoff ",
@@ -216,11 +225,9 @@ class Velvetg_Parameter:
         self.shortMatePaired = conf.getboolean('MetaVelvet', 'shortMatePaired')
         self.conserveLong = conf.getboolean('MetaVelvet', 'conserveLong') 
         
-       
-    
-       
+# Parameter for meta-velvetg 
 class MetaVelvet_Parameter:
-    
+
     discard_chimera = False
     max_chimera_rate = 0.0 
     repeat_cov_sd = 0.1 
@@ -240,7 +247,8 @@ class MetaVelvet_Parameter:
     unused_reads_meta = False 
     alignments_meta = False
     exportFiltered_meta = False
-    paired_exp_fraction_meta = ""   
+    paired_exp_fraction_meta = ""
+    # dict with the arguments string 
     arguments = {"discard_chimera":"-discard_chimera ", "max_chimera_rate":"-max_chimera_rate ",
 				"repeat_cov_sd":"-repeat_cov_sd ", "min_split_length":"-min_split_length ",
 				"valid_connections":"-valid_connections ", "noise_connections":"-noise_connections ",
@@ -276,73 +284,76 @@ class MetaVelvet_Parameter:
         self.exportFiltered_meta = conf.getboolean('MetaVelvet', 'exportFiltered_meta')
         self.paired_exp_fraction_meta = conf.get('MetaVelvet', 'paired_exp_fraction_meta')   
 
+# Parameter for metacv
 class MetaCV_Parameter:
-	seq = ""
-	mode = ""
-	orf = ""
-	arguments = {"seq":"--seq=", "mode":"--mode=", "orf":"--orf="}
-	
-	def __init__(self):
-		conf = ConfigParser.ConfigParser()
-		conf.read(Settings.param)   
-		self.seq = conf.get('MetaCV', 'seq')
-		self.mode = conf.get('MetaCV', 'mode')
-		self.orf = conf.get('MetaCV', 'orf')        
+
+    seq = ""
+    mode = ""
+    orf = ""
+    # dict with the arguments string
+    arguments = {"seq":"--seq=", "mode":"--mode=", "orf":"--orf="}
+
+    def __init__(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(Settings.param)   
+        self.seq = conf.get('MetaCV', 'seq')
+        self.mode = conf.get('MetaCV', 'mode')
+        self.orf = conf.get('MetaCV', 'orf')        
             
-            
+# Parameter for blastn        
 class Blastn_Parameter:
-	
-	import_search_strategy = ""
-	db = ""
-	dbsize = ""
-	gilist = ""
-	seqidlist = ""
-	negative_gilist = ""
-	entrez_query = ""
-	db_soft_mask = ""
-	db_hard_mask = ""
-	subject = ""
-	subject_loc = ""
-	evalue = ""
-	word_size = ""
-	gapopen = ""
-	gapextend = ""
-	perc_identity = 100.0
-	xdrop_ungap = ""
-	xdrop_gap = ""
-	xdrop_gap_final = ""
-	searchsp = ""
-	max_hsps_per_subject = ""
-	penalty = ""
-	reward = ""
-	no_greedy = False
-	min_raw_gapped_score = ""
-	template_type = ""
-	template_length = ""
-	dust = ""
-	filtering_db = ""
-	window_masker_taxid = ""
-	window_masker_db = ""
-	soft_masking = ""
-	ungapped = False
-	culling_limit = ""
-	best_hit_overhang = ""
-	best_hit_score_edge = ""
-	window_size = ""
-	off_diagonal_range = ""
-	use_index = False
-	index_name = ""
-	lcase_masking = False
-	query_loc = ""
-	strand = ""
-	parse_deflines = False
-	outfmt = 5
-	show_gis = False
-	num_descriptions = ""
-	num_alignments = ""
-	html = False
-	max_target_seqs = ""
-	arguments = {"import_search_strategy" : "-import_search_strategy ", "db" : "-db ",
+
+    import_search_strategy = ""
+    db = ""
+    dbsize = ""
+    gilist = ""
+    seqidlist = ""
+    negative_gilist = ""
+    entrez_query = ""
+    db_soft_mask = ""
+    db_hard_mask = ""
+    subject = ""
+    subject_loc = ""
+    evalue = ""
+    word_size = ""
+    gapopen = ""
+    gapextend = ""
+    perc_identity = 100.0
+    xdrop_ungap = ""
+    xdrop_gap = ""
+    xdrop_gap_final = ""
+    searchsp = ""
+    max_hsps_per_subject = ""
+    penalty = ""
+    reward = ""
+    no_greedy = False
+    min_raw_gapped_score = ""
+    template_type = ""
+    template_length = ""
+    dust = ""
+    filtering_db = ""
+    window_masker_taxid = ""
+    window_masker_db = ""
+    soft_masking = ""
+    ungapped = False
+    culling_limit = ""
+    best_hit_overhang = ""
+    best_hit_score_edge = ""
+    window_size = ""
+    off_diagonal_range = ""
+    use_index = False
+    index_name = ""
+    lcase_masking = False
+    query_loc = ""
+    strand = ""
+    parse_deflines = False
+    outfmt = 5
+    show_gis = False
+    num_descriptions = ""
+    num_alignments = ""
+    html = False
+    max_target_seqs = ""
+    arguments = {"import_search_strategy" : "-import_search_strategy ", "db" : "-db ",
                  "dbsize" : "-dbsize ", "gilist" : "-gilist ", "seqidlist" : "-seqidlist ",
                   "negative_gilist" : "-negative_gilist ", "entrez_query" : "-entrez_query ",
                   "db_soft_mask" : "-db_soft_mask ", "db_hard_mask" : "-db_hard_mask ", "subject" : "-subject ",
@@ -361,57 +372,57 @@ class Blastn_Parameter:
                   "query_loc" : "-query_loc ", "strand" : "-strand ", "parse_deflines" : "-parse_deflines ",
                   "outfmt" : "-outfmt ", "show_gis" : "-show_gis ", "num_descriptions" : "-num_descriptions ",
                   "num_alignments" : "-num_alignments ", "html" : "-html ", "max_target_seqs" : "-max_target_seqs " }
-	
-	def __init__(self):
-		conf = ConfigParser.ConfigParser()
-		conf.read(Settings.param)
-		self.import_search_strategy = conf.get('blastn', 'import_search_strategy')
-		self.db = conf.get('blastn', 'db')
-		self.dbsize = conf.get('blastn', 'dbsize')
-		self.gilist = conf.get('blastn', 'gilist')
-		self.seqidlist = conf.get('blastn', 'seqidlist')
-		self.negative_gilist = conf.get('blastn', 'negative_gilist')
-		self.entrez_query = conf.get('blastn', 'entrez_query')
-		self.db_soft_mask = conf.get('blastn', 'db_soft_mask')
-		self.db_hard_mask = conf.get('blastn', 'db_hard_mask')
-		self.subject = conf.get('blastn', 'subject')
-		self.subject_loc = conf.get('blastn', 'subject_loc')
-		self.evalue = conf.get('blastn', 'evalue')
-		self.word_size = conf.get('blastn', 'word_size')
-		self.gapopen = conf.get('blastn', 'gapopen')
-		self.gapextend = conf.get('blastn', 'gapextend')
-		self.perc_identity = conf.get('blastn', 'perc_identity')
-		self.xdrop_ungap = conf.get('blastn', 'xdrop_ungap')
-		self.xdrop_gap = conf.get('blastn', 'xdrop_gap')
-		self.xdrop_gap_final = conf.get('blastn', 'xdrop_gap_final')
-		self.searchsp = conf.get('blastn', 'searchsp')
-		self.max_hsps_per_subject = conf.get('blastn', 'max_hsps_per_subject')
-		self.penalty = conf.get('blastn', 'penalty')
-		self.reward = conf.get('blastn', 'reward')
-		self.no_greedy = conf.getboolean('blastn', 'no_greedy')
-		self.min_raw_gapped_score = conf.get('blastn', 'min_raw_gapped_score')
-		self.template_type = conf.get('blastn', 'template_type')
-		self.template_length = conf.get('blastn', 'template_length')
-		self.dust = conf.get('blastn', 'dust')
-		self.filtering_db = conf.get('blastn', 'filtering_db')
-		self.window_masker_taxid = conf.get('blastn', 'window_masker_taxid')
-		self.window_masker_db = conf.get('blastn', 'window_masker_db')
-		self.soft_masking = conf.get('blastn', 'soft_masking')
-		self.ungapped = conf.getboolean('blastn', 'ungapped')
-		self.culling_limit = conf.get('blastn', 'culling_limit')
-		self.best_hit_overhang = conf.get('blastn', 'best_hit_overhang')
-		self.best_hit_score_edge = conf.get('blastn', 'best_hit_score_edge')
-		self.window_size = conf.get('blastn', 'window_size')
-		self.off_diagonal_range = conf.get('blastn', 'off_diagonal_range')
-		self.use_index = conf.getboolean('blastn', 'use_index')
-		self.index_name = conf.get('blastn', 'index_name')
-		self.lcase_maskingm = conf.getboolean('blastn', 'lcase_maskingm')
-		self.query_loc = conf.get('blastn', 'query_loc')
-		self.strand = conf.get('blastn', 'strand')
-		self.parse_deflines = conf.getboolean('blastn', 'parse_deflines')
-		self.outfmt = conf.get('blastn', 'outfmt')
-		self.show_gis = conf.getboolean('blastn', 'show_gis')
-		self.num_descriptions = conf.get('blastn', 'num_descriptions')
-		self.num_alignments = conf.get('blastn', 'num_alignments')
-		self.html = conf.getboolean('blastn', 'html')
-		self.max_target_seqs = conf.get('blastn', 'max_target_seqs')
+
+    def __init__(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(Settings.param)
+        self.import_search_strategy = conf.get('blastn', 'import_search_strategy')
+        self.db = conf.get('blastn', 'db')
+        self.dbsize = conf.get('blastn', 'dbsize')
+        self.gilist = conf.get('blastn', 'gilist')
+        self.seqidlist = conf.get('blastn', 'seqidlist')
+        self.negative_gilist = conf.get('blastn', 'negative_gilist')
+        self.entrez_query = conf.get('blastn', 'entrez_query')
+        self.db_soft_mask = conf.get('blastn', 'db_soft_mask')
+        self.db_hard_mask = conf.get('blastn', 'db_hard_mask')
+        self.subject = conf.get('blastn', 'subject')
+        self.subject_loc = conf.get('blastn', 'subject_loc')
+        self.evalue = conf.get('blastn', 'evalue')
+        self.word_size = conf.get('blastn', 'word_size')
+        self.gapopen = conf.get('blastn', 'gapopen')
+        self.gapextend = conf.get('blastn', 'gapextend')
+        self.perc_identity = conf.get('blastn', 'perc_identity')
+        self.xdrop_ungap = conf.get('blastn', 'xdrop_ungap')
+        self.xdrop_gap = conf.get('blastn', 'xdrop_gap')
+        self.xdrop_gap_final = conf.get('blastn', 'xdrop_gap_final')
+        self.searchsp = conf.get('blastn', 'searchsp')
+        self.max_hsps_per_subject = conf.get('blastn', 'max_hsps_per_subject')
+        self.penalty = conf.get('blastn', 'penalty')
+        self.reward = conf.get('blastn', 'reward')
+        self.no_greedy = conf.getboolean('blastn', 'no_greedy')
+        self.min_raw_gapped_score = conf.get('blastn', 'min_raw_gapped_score')
+        self.template_type = conf.get('blastn', 'template_type')
+        self.template_length = conf.get('blastn', 'template_length')
+        self.dust = conf.get('blastn', 'dust')
+        self.filtering_db = conf.get('blastn', 'filtering_db')
+        self.window_masker_taxid = conf.get('blastn', 'window_masker_taxid')
+        self.window_masker_db = conf.get('blastn', 'window_masker_db')
+        self.soft_masking = conf.get('blastn', 'soft_masking')
+        self.ungapped = conf.getboolean('blastn', 'ungapped')
+        self.culling_limit = conf.get('blastn', 'culling_limit')
+        self.best_hit_overhang = conf.get('blastn', 'best_hit_overhang')
+        self.best_hit_score_edge = conf.get('blastn', 'best_hit_score_edge')
+        self.window_size = conf.get('blastn', 'window_size')
+        self.off_diagonal_range = conf.get('blastn', 'off_diagonal_range')
+        self.use_index = conf.getboolean('blastn', 'use_index')
+        self.index_name = conf.get('blastn', 'index_name')
+        self.lcase_maskingm = conf.getboolean('blastn', 'lcase_maskingm')
+        self.query_loc = conf.get('blastn', 'query_loc')
+        self.strand = conf.get('blastn', 'strand')
+        self.parse_deflines = conf.getboolean('blastn', 'parse_deflines')
+        self.outfmt = conf.get('blastn', 'outfmt')
+        self.show_gis = conf.getboolean('blastn', 'show_gis')
+        self.num_descriptions = conf.get('blastn', 'num_descriptions')
+        self.num_alignments = conf.get('blastn', 'num_alignments')
+        self.html = conf.getboolean('blastn', 'html')
+        self.max_target_seqs = conf.get('blastn', 'max_target_seqs')
