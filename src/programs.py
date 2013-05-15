@@ -3,8 +3,9 @@ import subprocess
 import shlex
 import sys, os
 import shutil
+import time
 # own imports
-from src.utils import consoleOutput, createOutputDir, ParamFileArguments, moveFiles, testForFQ
+from src.utils import  getDHMS, createOutputDir, ParamFileArguments, moveFiles, testForFQ
 from src.settings import Settings, FastQC_Parameter, TrimGalore_Parameter, Concat_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter, Blastn_Parameter, MetaCV_Parameter
 
 
@@ -21,7 +22,8 @@ class Programs:
     
         createOutputDir(Settings.output + os.sep + outputdir)
         # update information on cmd
-        consoleOutput('FastQC', ParamFileArguments(FastQC_Parameter()))
+        sys.stdout.write('\nStep:       Quality analysis with FastQC \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(FastQC_Parameter()) + '\n\n')
         # start FastQC and wait until task complete
         p = subprocess.Popen(shlex.split('%s -t %s -o %s -q --extract %s %s' % (Settings.FASTQC, Settings.threads, Settings.output + os.sep + outputdir,
                                                                                 ParamFileArguments(FastQC_Parameter()),
@@ -32,20 +34,35 @@ class Programs:
             for files in f:
                 if files.endswith('_data.txt'):
                     Settings.quality_report.append(os.path.join(r, files))
-                    
+        # print out the processing time of this step
+        sys.stdout.write('processed in: ' + getDHMS(time.time()-Settings.actual_time)  + '\n')
+        Settings.actual_time = time.time()
+         
         return True
        
     def trimming(self, outputdir):
         
         createOutputDir(Settings.output + os.sep + outputdir)
         # update information on cmd
-        consoleOutput('Quality Trimming', ParamFileArguments(TrimGalore_Parameter()))
+        sys.stdout.write('\nStep:       Quality trimming and filtering \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(TrimGalore_Parameter()) + '\n\n')
         
         # start TrimGalore and wait until task complete
-        p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, ParamFileArguments(TrimGalore_Parameter())
-                                                              , (Settings.output + os.sep + outputdir),
-                                                              ' '.join(str(i)for i in Settings.input)))
-                             , stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        trimlog = open(Settings.logdir + 'trim.log.txt', 'w')
+        if Settings.verbose:
+            
+            p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, ParamFileArguments(TrimGalore_Parameter())
+                                                                 , (Settings.output + os.sep + outputdir),
+                                                                 ' '.join(str(i)for i in Settings.input))),
+                                 stderr=subprocess.PIPE)
+            for line in p.stderr:
+                sys.stdout.write(line)
+                trimlog.write(line)
+        else:   
+            p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, ParamFileArguments(TrimGalore_Parameter())
+                                                                 , (Settings.output + os.sep + outputdir),
+                                                                 ' '.join(str(i)for i in Settings.input)))
+                                 , stdout=subprocess.PIPE, stderr=trimlog)
         p.wait()
         
         # search for the processed input files and update input files in settings object
@@ -56,41 +73,81 @@ class Programs:
         else:
             Settings.input = [Settings.output + os.sep + outputdir + os.sep + [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)][0]]
         
+        # print out the processing time of this step
+        sys.stdout.write('processed in: ' + getDHMS(time.time()-Settings.actual_time)  + '\n')
+        Settings.actual_time = time.time()
+        
         return True
     
     def assembly(self, outputdir):
         
         createOutputDir(Settings.output + os.sep + outputdir + os.sep)
         # update information on cmd
-        consoleOutput('Create Hashtables with velveth', ParamFileArguments(Velveth_Parameter()))
-        
+        sys.stdout.write('\nStep:       Creating Hastables \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(Velveth_Parameter()) + '\n\n')
         # start velveth and wait for completion
-        p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, Settings.output + os.sep + outputdir,
-                                                                       Settings.kmer, ParamFileArguments(Velveth_Parameter()) ,
-                                                                       ' '.join(str(i)for i in Settings.input))),
-                             stdout=open(Settings.output + os.sep + outputdir + os.sep + 'velveth.log.txt', 'w'))
+        velvethlog = open(Settings.logdir + 'velveth.log.txt', 'w')
+        if Settings.verbose:
+            p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, Settings.output + os.sep + outputdir,
+                                                                           Settings.kmer, ParamFileArguments(Velveth_Parameter()) ,
+                                                                           ' '.join(str(i)for i in Settings.input))),
+                                 stdout=subprocess.PIPE) 
+            for line in p.stdout:
+                sys.stdout.write(line)
+                velvethlog.write(line)
+        else:
+            p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, Settings.output + os.sep + outputdir,
+                                                                           Settings.kmer, ParamFileArguments(Velveth_Parameter()) ,
+                                                                           ' '.join(str(i)for i in Settings.input))),
+                                 stdout=velvethlog)
         p.wait()
         
         # update information on cmd
-        consoleOutput('First Assembly Step', ParamFileArguments(Velvetg_Parameter()))
+        sys.stdout.write('\nStep:       Create Graph for Assembly \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(Velvetg_Parameter()) + '\n\n')
 
         # start velvetg to create the graph for the metagenomic assembly
-        p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, Settings.output + os.sep + outputdir,
-                                                       ParamFileArguments(Velvetg_Parameter()))),
-                             stdout=open(Settings.output + os.sep + outputdir + os.sep + 'velvetg.log.txt', 'w'))
+        velvetglog = open(Settings.logdir + 'velvetg.log.txt', 'w')
+        if Settings.verbose:
+            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, Settings.output + os.sep + outputdir,
+                                                           ParamFileArguments(Velvetg_Parameter()))),
+                                 stdout=subprocess.PIPE)
+            for line in p.stdout:
+                sys.stdout.write(line)
+                velvetglog.write(line)
+        else:
+            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, Settings.output + os.sep + outputdir,
+                                                           ParamFileArguments(Velvetg_Parameter()))),
+                                 stdout=velvetglog)
         p.wait()
         
         # update information on cmd
-        consoleOutput('Metagenomic Assembly', ParamFileArguments(MetaVelvet_Parameter()))
-        p = subprocess.Popen(shlex.split(Settings.METAVELVET + ' ' + Settings.output + os.sep + outputdir),
-                             stdout=open(Settings.output + os.sep + outputdir + os.sep + 'meta-velvetg.log.txt', 'w'))
-        # p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET,Settings.output + os.sep + outputdir, 
-        #                                               ParamFileArguments(MetaVelvet_Parameter()))),
-        #                     stderr=open(Settings.output + os.sep + outputdir + os.sep + 'meta-velvetg.log.txt', 'w'))
+        sys.stdout.write('Step:       Search for metagenomic Contigs \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(MetaVelvet_Parameter()) + '\n')
+        metavelvetlog = open(Settings.logdir + 'meta-velvetg.log.txt', 'w')
+        if Settings.verbose:
+            p = subprocess.Popen(shlex.split(Settings.METAVELVET + ' ' + Settings.output + os.sep + outputdir),
+                                 stdout=subprocess.PIPE)
+#            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET,Settings.output + os.sep + outputdir, 
+#                                                          ParamFileArguments(MetaVelvet_Parameter()))),
+#                                 stdout=subprocess.PIPE)
+            for line in p.stdout:
+                sys.stdout.write(line)
+                metavelvetlog.write(line)
+        else:
+            p = subprocess.Popen(shlex.split(Settings.METAVELVET + ' ' + Settings.output + os.sep + outputdir),
+                                 stdout=metavelvetlog)
+            # p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET,Settings.output + os.sep + outputdir, 
+            #                                               ParamFileArguments(MetaVelvet_Parameter()))),
+            #                     stdout=metavelvetlog)
         p.wait()
         
         # update Settings.input for further processing
-        Settings.input = Settings.output + os.sep + outputdir + os.sep + 'meta-velvetg.contigs.fa'
+        Settings.input = [Settings.output + os.sep + outputdir + os.sep + 'meta-velvetg.contigs.fa']
+        
+        # print out the processing time of this step
+        sys.stdout.write('processed in: ' + getDHMS(time.time()-Settings.actual_time)  + '\n')
+        Settings.actual_time = time.time()
         
         return True
     
@@ -98,46 +155,72 @@ class Programs:
         
         createOutputDir(Settings.output + os.sep + outputdir)
         # update information on cmd
-        consoleOutput('Concat', ParamFileArguments(Concat_Parameter()))
-        
+        sys.stdout.write('Step:       Concatenate the reads \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(Concat_Parameter()) + '\n')
         if len(Settings.input) > 1:
             # for paired end files
-            p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, str(Settings.input[0]),
-                                                                                 str(Settings.input[1]),
-                                                                                 Settings.output + os.sep + outputdir, Settings.threads,
-                                                                                 ParamFileArguments(Concat_Parameter()))),
-                                 stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
-                                 stderr=open(Settings.output + os.sep + outputdir + os.sep + 'concat.log.txt', 'w'))
+            concatlog = open(Settings.logdir + 'concat.log.txt', 'w')
+            if Settings.verbose:
+                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, str(Settings.input[0]),
+                                                                                     str(Settings.input[1]),
+                                                                                     Settings.output + os.sep + outputdir, Settings.threads,
+                                                                                     ParamFileArguments(Concat_Parameter()))),
+                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
+                                     stderr=subprocess.PIPE)
+                for line in p.stderr:
+                    sys.stdout.write(line)
+                    concatlog.write(line)
+            else:
+                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, str(Settings.input[0]),
+                                                                                     str(Settings.input[1]),
+                                                                                     Settings.output + os.sep + outputdir, Settings.threads,
+                                                                                     ParamFileArguments(Concat_Parameter()))),
+                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
+                                     stderr=concatlog)
         else:
             # for single end files
-            p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, str(Settings.input),
-                                                                                 Settings.output + os.sep + outputdir, Settings.threads,
-                                                                                 ParamFileArguments(Concat_Parameter()))),
-                                 stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
-                                 stderr=open(Settings.output + os.sep + outputdir + os.sep + 'concat.log.txt', 'w'))
+            if Settings.verbose:
+                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, str(Settings.input),
+                                                                                     Settings.output + os.sep + outputdir, Settings.threads,
+                                                                                     ParamFileArguments(Concat_Parameter()))),
+                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt'),
+                                     stderr=subprocess.PIPE)
+                for line in p.stderr:
+                    sys.stdout.write(line)
+                    concatlog.write(line)
+            else:
+                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, str(Settings.input),
+                                                                                     Settings.output + os.sep + outputdir, Settings.threads,
+                                                                                     ParamFileArguments(Concat_Parameter()))),
+                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
+                                     stderr=concatlog)
         p.wait()
         
         # move files from the first level to the specified output folder
         moveFiles(Settings.output + os.sep , Settings.output + os.sep + outputdir + os.sep, '.fastq')
         # update the Setings.input var for further processing
-        Settings.input = Settings.output + os.sep + outputdir + os.sep + 'concat-contigs.fastq'
+        Settings.input = [Settings.output + os.sep + outputdir + os.sep + 'concat-contigs.fastq']
+        
+        # print out the processing time of this step
+        sys.stdout.write('processed in: ' + getDHMS(time.time()-Settings.actual_time)  + '\n')
+        Settings.actual_time = time.time()
         
         return True
     
     def convertToFasta(self, outputdir):
         
-        consoleOutput('Converting from fastq to fasta', '')
+        sys.stdout.write('Step:       Converting Fastq to Fasta \n')
         
         # if the assembly step was skipped --> merge the two paired-end files
-        if len(Settings.input) == 2:
+        if len(Settings.input) > 1:
             merge = open(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq', 'wb')
             shutil.copyfileobj(open(Settings.input[0], 'rb'), merge)
             shutil.copyfileobj(open(Settings.input[1], 'rb'), merge)
             merge.close()
-            Settings.input = Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq'    
+            Settings.input = [Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq']   
         
         # convert fastq files to fasta
-        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (Settings.CONVERTER, Settings.input,
+        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (Settings.CONVERTER, Settings.input[0],
                                                                      Settings.output + os.sep + outputdir + os.sep + 'contigs.fasta')))
         p.wait()
         
@@ -145,23 +228,23 @@ class Programs:
         if os.path.exists(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq'):
             os.remove(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq')
         # update the Settings.input var
-        Settings.input = Settings.output + os.sep + outputdir + os.sep + 'contigs.fasta'
+        Settings.input = [Settings.output + os.sep + outputdir + os.sep + 'contigs.fasta']
         
     def blastn(self, outputdir):
         
         createOutputDir(Settings.output + os.sep + outputdir)
         
         # check the input files for filetype - fastq Files need conversion into fasta for blastn
-        if len(Settings.input) == 2: 
+        if len(Settings.input) > 1: 
             if testForFQ(' '.join(str(i)for i in Settings.input)):
                 self.convertToFasta(outputdir)
         else: 
-            if testForFQ(Settings.input):
+            if testForFQ(Settings.input[0]):
                 self.convertToFasta(outputdir)
             
         # update information of cmd
-        consoleOutput('Classify with Blastn', ParamFileArguments(Blastn_Parameter()))
-        
+        sys.stdout.write('Step:       Classify with Blastn \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(Blastn_Parameter()) + '\n')
         # create outputfile name
         if Blastn_Parameter().outfmt == 5:
             outfile = 'blastn.xml' 
@@ -169,14 +252,17 @@ class Programs:
             outfile = 'blastn.tab'
             
         # start blastn and wait until completion
-        p = subprocess.Popen(shlex.split('%s -db %s -query %s -out %s -num_threads %s %s ' % (Settings.BLASTN, Settings.blastdb_nt, Settings.input,
+        p = subprocess.Popen(shlex.split('%s -db %s -query %s -out %s -num_threads %s %s ' % (Settings.BLASTN, Settings.blastdb_nt, Settings.input[0],
                                                                       Settings.output + os.sep + outputdir + os.sep + outfile,
                                                                       Settings.threads, ParamFileArguments(Blastn_Parameter()))))
         p.wait()
         
         # save path to the blastn results
         Settings.blast_output = Settings.output + os.sep + outputdir + os.sep + outfile
-        #self.summary()
+        
+        # print out the processing time of this step
+        sys.stdout.write('processed in: ' + getDHMS(time.time()-Settings.actual_time)  + '\n')
+        Settings.actual_time = time.time()
         
         return True
         
@@ -184,13 +270,23 @@ class Programs:
         
         createOutputDir(Settings.output + os.sep + outputdir)
         # update the information of cmd
-        consoleOutput('MetaCV', ParamFileArguments(MetaCV_Parameter()))
-        
+        sys.stdout.write('Step:       Classify with MetaCV \n')
+        sys.stdout.write('Arguments: ' + ParamFileArguments(MetaCV_Parameter()) + '\n')
         # start metaCV and wait until completion ATTENTION: need 32GB RAM
-        p = subprocess.Popen(shlex.split('%s classify %s %s %s %s' % (Settings.METACV, Settings.metacv_db,
-                                                                      Settings.input, 'metpipe',
-                                                                      ParamFileArguments(MetaCV_Parameter()))),
-                             stderr=open(Settings.output + os.sep + outputdir + os.sep + 'metacv.log', 'w'))
+        metacvlog=open(Settings.logdir + 'metacv.log', 'w')
+        if Settings.verbose:
+            p = subprocess.Popen(shlex.split('%s classify %s %s %s %s' % (Settings.METACV, Settings.metacv_db,
+                                                                          ' '.join(str(i)for i in Settings.input), 'metpipe',
+                                                                          ParamFileArguments(MetaCV_Parameter()))),
+                                 stdout=subprocess.PIPE)
+            for line in p.stdout:
+                    sys.stdout.write(line)
+                    metacvlog.write(line)
+        else:
+            p = subprocess.Popen(shlex.split('%s classify %s %s %s %s' % (Settings.METACV, Settings.metacv_db,
+                                                                          ' '.join(str(i)for i in Settings.input), 'metpipe',
+                                                                          ParamFileArguments(MetaCV_Parameter()))),
+                                 stdout=metacvlog)
         p.wait()
         
         # move all necessary files into metacv output folder
@@ -202,11 +298,21 @@ class Programs:
                                                                     str([f for f in os.listdir(Settings.output + os.sep + outputdir) if f.endswith('.res')][0]))))
         
         # update the information of cmd
-        consoleOutput('Create Summary of annotation', '')
-        
+        sys.stdout.write('Step:       Create summary of MetaCV results \n')
         # create an summary of the metacv run
-        p = subprocess.Popen(shlex.split('%s res2table %s %s %s --threads=%s' % (Settings.METACV, Settings.metacv_db, Settings.metaCV_output, 'metpipe.res2table', Settings.threads)),
-                             stderr=open(Settings.output + os.sep + outputdir + os.sep + 'metacv.log', 'w'))
+        if Settings.verbose:
+            p = subprocess.Popen(shlex.split('%s res2table %s %s %s --threads=%s' % (Settings.METACV, 
+                                                                                     Settings.metacv_db, 
+                                                                                     Settings.metaCV_output[0], 
+                                                                                     'metpipe.res2table', 
+                                                                                     Settings.threads)))
+        else:
+            p = subprocess.Popen(shlex.split('%s res2table %s %s %s --threads=%s' % (Settings.METACV, 
+                                                                                     Settings.metacv_db, 
+                                                                                     Settings.metaCV_output[0], 
+                                                                                     'metpipe.res2table', 
+                                                                                     Settings.threads)),
+                                 stderr=open(Settings.logdir + 'metacv.log', 'w'))
         p.wait()
         
         # move the summary to the output folder
@@ -218,8 +324,13 @@ class Programs:
                                                                     str([f for f in os.listdir(Settings.output + os.sep + outputdir) if f.endswith('.fun_hist') or f.endswith('.tax_hist')][0]))))
         
         # create a list of all found taxa in the metacv result
-        p = subprocess.Popen(shlex.split('%s res2sum %s %s %s' % (Settings.METACV, Settings.metacv_db, Settings.metaCV_output, 'metpipe.res2sum')),
-                             stderr=open(Settings.output + os.sep + outputdir + os.sep + 'metacv.log', 'w'))
+        if Settings.verbose:
+            p = subprocess.Popen(shlex.split('%s res2sum %s %s %s' % (Settings.METACV, Settings.metacv_db, 
+                                                                      Settings.metaCV_output[0], 'metpipe.res2sum')))
+        else:
+            p = subprocess.Popen(shlex.split('%s res2sum %s %s %s' % (Settings.METACV, Settings.metacv_db, 
+                                                                      Settings.metaCV_output[0], 'metpipe.res2sum')),
+                                stderr=open(Settings.logdir + 'metacv.log', 'w'))
         p.wait()
         
         # move the list to the output folder
@@ -227,16 +338,11 @@ class Programs:
         Settings.metaCV_output.append(os.path.normpath(os.path.join(sys.path[0] + os.sep, Settings.output + os.sep + outputdir + os.sep,
                                                                     str([f for f in os.listdir(Settings.output + os.sep + outputdir) if f.endswith('.res2sum')][0]))))
         
+        # print out the processing time of this step
+        sys.stdout.write('processed in: ' + getDHMS(time.time()-Settings.actual_time)  + '\n')
+        Settings.actual_time = time.time()
+        
         return True
-        
-    def summary(self):
-        f = open('summary.txt', 'w')
-        f.write(Settings.blast_output + '\n')
-        for element in Settings.metaCV_output:
-            f.write(element + '\n')
-        f.write(Settings.quality_report)
-
-        
         
         
         

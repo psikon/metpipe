@@ -4,12 +4,12 @@
 import os, sys
 
 # Setting up the paths
-SRC_DIR = "%s%ssrc" % (sys.path[0], os.sep)
-PROGRAM_DIR = "%s%sprogram" % (sys.path[0], os.sep)
-RESULT_DIR = "%s%sresult" % (sys.path[0], os.sep)
+SRC_DIR = '%s%ssrc' % (sys.path[0], os.sep)
+PROGRAM_DIR = '%s%sprogram' % (sys.path[0], os.sep)
+RESULT_DIR = '%s%sresult' % (sys.path[0], os.sep)
 
 # hardcode defaults
-PARAM_FILE = "%s%sparameter.conf" % (sys.path[0], os.sep)
+PARAM_FILE = '%s%sparameter.conf' % (sys.path[0], os.sep)
 DEFAULT_KMER = 85
 STEPS = {'preprocessing', 'annotate', 'assembly'}
 PROGRAM_LIST = {'blastn', 'metacv', 'metavelvet', 'concat'}
@@ -21,7 +21,7 @@ import multiprocessing
 from socket import errno
 from collections import deque
 # import own functions and classes 
-from src.utils import consoleSummary, createTasks
+from src.utils import consoleSummary, createTasks, getDHMS
 from src.settings import Settings
 from src.programs import Programs
 
@@ -29,7 +29,7 @@ from src.programs import Programs
 starting_time = time.time()
 
 # define cli
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(add_help=True)
     parser.add_argument('input', nargs='+', action='store', help='single or paired input files in <fastq> format')
     parser.add_argument('--version', action='version', version='%(prog)s 0.1')
@@ -61,12 +61,19 @@ args = parser.parse_args()
 # check if input exists
 for fname in args.input:
     if not os.path.isfile(fname):
-        print ("File:  %s not exists" % (fname))
+        print ('File:  %s not exists' % (fname))
         sys.exit()
         
 # check if output dir exists and create it if not
 try:
     os.makedirs(args.output)
+except OSError as exception:
+    if exception.errno != errno.EEXIST:
+        raise
+
+# create the log folder
+try:
+    os.makedirs(args.output + os.sep + 'log')
 except OSError as exception:
     if exception.errno != errno.EEXIST:
         raise
@@ -77,12 +84,12 @@ if not os.path.isfile(args.param):
     sys.exit()
 
 # create the global settings object
-settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, args.input,
-                    args.output, args.param, args.trim, args.quality, args.assembler, args.classify)
+settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time, args.input,
+                    args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, args.assembler, args.classify)
 
 # fill the pipeline with tasks
 queue = deque([])
-queue = createTasks(settings,Programs())
+queue = createTasks(settings, Programs())
 # print the summary of the settings
 consoleSummary(settings)
 
@@ -92,6 +99,8 @@ while(queue):
     if actualElement.getTask()(actualElement.getOutputDir()):
         continue
     else: 
-        print "error"
+        print 'error'
         sys.exit()
-        
+
+sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
+sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')

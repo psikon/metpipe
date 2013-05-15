@@ -48,6 +48,10 @@ def createTasks(settings_instance, program_instance):
 # before start the first run - print all important settings on the cmd
 def consoleSummary(settings):
 	sys.stdout.write('\nmetpipe - Overview\n\n')
+	if settings.verbose:
+		sys.stdout.write('Verbose Output: ' + 'yes' + '\n')
+	else:
+		sys.stdout.write('Verbose Output: ' + 'no' + '\n')
 	if settings.quality:
 		sys.stdout.write('Quality Report: ' + 'yes' + '\n')
 	else:
@@ -110,15 +114,12 @@ def consoleSummary(settings):
 	# only continue when keyboard command comes
 	return raw_input('\nContinue?\n')
 
-# simple console output
-def consoleOutput(step, arguments):
-		sys.stdout.write('Step:      ' + step + '\n')
-		sys.stdout.write('Arguments: ' + arguments + '\n')
-		sys.stdout.flush()
-
-# console output for verbose setting
-def consoleVerboseOutput():
-	pass
+def getDHMS(seconds):
+	
+	minutes, seconds = divmod(seconds, 60)
+	hours, minutes = divmod(minutes, 60)
+	days, hours = divmod(hours, 24)
+	return "%d days, %d hours, %d minutes, %d seconds" % (days, hours, minutes, seconds)
 
 # copy files into another dir
 def moveFiles(src, dst, fileExtension):

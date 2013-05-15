@@ -10,9 +10,12 @@ class Settings:
     threads = 8
     verbose = False
     skip = ""
+    starting_time = ""
+    actual_time = ""
     # File settings
     input = []
     output = ""
+    logdir = ""
     param = ""
     quality_report = []
     metaCV_output = []
@@ -37,15 +40,18 @@ class Settings:
     blastdb_16S = ""
     blastdb_nt = ""
     
-    def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, input=None, output=None,
-                param=None, trim=None, quality=None, assembler=None, classify=None):
+    def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, starting_time=None, input=None,
+                 output=None, logdir=None, param=None, trim=None, quality=None, assembler=None, classify=None):
 
         Settings.kmer = kmer
         Settings.threads = threads
         Settings.verbose = verbose
         Settings.skip = skip.lower()
+        Settings.starting_time = starting_time
+        Settings.actual_time = starting_time
         Settings.input = input
         Settings.output = output
+        Settings.logdir = logdir
         Settings.param = param
         Settings.trim = trim
         Settings.quality = quality 
