@@ -116,7 +116,10 @@ def consoleSummary(settings):
 		sys.stdout.write('Summary       : no \n')
 		
 	# only continue when keyboard command comes
-	return raw_input('\nContinue?\n')
+	if settings.automatic:
+		return True
+	else:
+		return raw_input('\nContinue?\n')
 
 def getDHMS(seconds):
 	

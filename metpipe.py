@@ -55,6 +55,8 @@ if __name__ == '__main__':
                         help='create quality report (default=True)')
     parser.add_argument('--nosummary', dest='summary', action='store_false',default=True,
                         help='analyse the results of the pipeline (default=True)')
+    parser.add_argument('--auto',dest='auto',action='store_true',default=False,
+                        help='skip all commands for automatic processing')
 # create the cli interface
 args = parser.parse_args()
 
@@ -88,7 +90,7 @@ if not os.path.isfile(args.param):
 # create the global settings object
 settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time, args.input,
                     args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, 
-                    args.assembler, args.classify, args.summary)
+                    args.assembler, args.classify, args.summary,args.auto)
 
 # fill the pipeline with tasks
 queue = deque([])

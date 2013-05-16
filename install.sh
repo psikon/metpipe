@@ -440,6 +440,32 @@ while true
 		esac
 	done
 
+while true
+	do
+		if [ -f program/db/taxon.db ] && [ -f program/db/geneid.db ] ; then
+			echo "NCBI Taxonomy database for R/ncbi found "
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "NCBI Taxonomy database for R/ncbi not found. (required for analysis)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				
+				R -q -e "require(ncbi);createTaxonDB('db/')"
+			cd ..
+			break;;
+		n|N|no|NO|No)
+		break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
 
 echo "\n Checking Installations\n"
 echo "[Read preprocessing]"
@@ -450,10 +476,13 @@ if [ -f program/fastqc/fastqc ] && [ -f program/trim_galore/trim_galore ]; then
 else 
 	echo "Preprcessing tool missing"
 fi
+
 echo "\n[Assembly programs]"
 if [ -f program/stitch/stitch/stitch.py ]; then
 	echo "Assembly - Concatenation OK!"
 	ln -s -f stitch/stitch/stitch.py program/concat && chmod 775 program/concat
+else 
+	echo "Concatenation not installed"
 fi	
 
 if [ -f program/velvet/velveth ] && [ -f program/velvet/velvetg ] && [ -f program/metavelvet/meta-velvetg ]; then
@@ -461,19 +490,29 @@ if [ -f program/velvet/velveth ] && [ -f program/velvet/velvetg ] && [ -f progra
 	ln -s -f velvet/velveth program/velveth && chmod 775 program/velveth
 	ln -s -f velvet/velvetg program/velvetg && chmod 775 program/velvetg
 	ln -s -f metavelvet/meta-velvetg program/metavelvetg && chmod 775 program/metavelvetg
+else
+	echo "MetaVelvet not installed"
 fi
 
 echo "\n[Annotation programs]"
 if [ -f program/blast/bin/blastn ] && [ -f program/db/nt.nal ]; then
 	echo "Annotate - Blastn OK!"
 	ln -s -f blast/bin/blastn program/blastn && chmod 775 program/blastn
+else
+	echo "Blastn not installed"
 fi
 
 if  [ -f program/metacv/metacv ] && [ -f program/db/cvdb_2059.cnt ]; then
 	echo "Annotate - MetaCV OK!"
 	ln -s -f metacv/metacv program/bacterial && chmod 775 program/bacterial
+else
+	echo "MetaCV not installed"
 fi
 
+if [ -f program/db/taxon.db ]  && [ -f program/db/geneid.db ]; then
+	echo "Analysis - NCBI Taxonomy Database OK!"
+	ln -s -f db/taxon.db program/taxondb && chmod 775 program taxondb
+fi
 if [ -f program/fastx/fastq_to_fastq ]; then
 	echo "Helper Tools OK!"
 	ln -s -f fastx/fastq_to_fasta program/converter && chmod 775 program/converter
