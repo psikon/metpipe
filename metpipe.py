@@ -106,11 +106,7 @@ while(queue):
         print '\nPIPELINE NOT COMPLETE'
         sys.exit()
 
-print Settings.input
-print Settings.output
-print Settings.metaCV_output
-print Settings.blast_output
-print Settings.quality_report
+
 
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')

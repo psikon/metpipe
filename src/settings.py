@@ -9,40 +9,40 @@ class Settings:
     kmer = 85
     threads = 8
     verbose = False
-    skip = ""
-    starting_time = ""
-    actual_time = ""
+    skip = ''
+    starting_time = ''
+    actual_time = ''
     # File settings
     input = []
-    output = ""
-    logdir = ""
-    param = ""
+    output = ''
+    logdir = ''
+    param = ''
     quality_report = []
     metaCV_output = []
-    blast_output = ""
+    blast_output = ''
     # EXECUTABLES 
-    program_dir = ""
-    FASTQC = ""
-    TRIMGALORE = ""
-    VELVETH = ""
-    VELVETG = ""
-    METAVELVET = ""
-    CONCAT = ""
-    BLASTN = ""
-    METACV = ""
-    CONVERTER = ""
+    program_dir = ''
+    FASTQC = ''
+    TRIMGALORE = ''
+    VELVETH = ''
+    VELVETG = ''
+    METAVELVET = ''
+    CONCAT = ''
+    BLASTN = ''
+    METACV = ''
+    CONVERTER = ''
     # Program Settings
     trim = True
     quality = True
-    assembler = ""
-    classify = "both"
+    assembler = ''
+    classify = 'both'
     summary = True
-    metacv_db = ""
-    blastdb_16S = ""
-    blastdb_nt = ""
+    metacv_db = ''
+    blastdb_16S = ''
+    blastdb_nt = ''
     
     def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, starting_time=None, 
-                 input=None,output=None, logdir=None, param=None, trim=None, quality=None, assembler=None, 
+                 infile=None,output=None, logdir=None, param=None, trim=None, quality=None, assembler=None, 
                  classify=None, summary=None):
 
         Settings.kmer = kmer
@@ -51,7 +51,7 @@ class Settings:
         Settings.skip = skip.lower()
         Settings.starting_time = starting_time
         Settings.actual_time = starting_time
-        Settings.input = input
+        Settings.input = infile
         Settings.output = output
         Settings.logdir = logdir
         Settings.param = param
@@ -61,28 +61,28 @@ class Settings:
         Settings.classify = classify.lower() 
         Settings.summary = summary
         # define program paths
-        Settings.FASTQC = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'quality')
-        Settings.TRIMGALORE = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'filter')
-        Settings.VELVETH = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velveth')
-        Settings.VELVETG = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
-        Settings.CONCAT = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'concat')
-        Settings.METAVELVET = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'metavelvetg')
-        Settings.BLASTN = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
-        Settings.METACV = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
-        Settings.CONVERTER = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'converter')
+        Settings.FASTQC = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'quality')
+        Settings.TRIMGALORE = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'filter')
+        Settings.VELVETH = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'velveth')
+        Settings.VELVETG = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
+        Settings.CONCAT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'concat')
+        Settings.METAVELVET = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'metavelvetg')
+        Settings.BLASTN = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
+        Settings.METACV = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
+        Settings.CONVERTER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'converter')
         # define databases
-        Settings.blastdb_nt = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "nt")
-        Settings.blastdb_16S = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "16S")
-        Settings.metacv_db = "%s%s%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep , "db", os.sep, "cvk6_2059")
+        Settings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'nt')
+        Settings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, '16S')
+        Settings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'cvk6_2059')
   
 # Parameters for FastQC 
 class FastQC_Parameter:
 
     nogroup = False
-    contaminants = "" 
-    kmers = ""
+    contaminants = '' 
+    kmers = ''
     # dict with the arguments string
-    arguments = {"nogroup" : "--nogroup ", "contaminants": "-c ", "kmers": "-k "}
+    arguments = {'nogroup' : '--nogroup ', 'contaminants': '-c ', 'kmers': '-k '}
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
@@ -95,21 +95,21 @@ class FastQC_Parameter:
 class TrimGalore_Parameter:
 
     quality = 20 
-    phred = ""
-    adapter = ""
-    adapter2 = ""
-    stringency = ""
+    phred = ''
+    adapter = ''
+    adapter2 = ''
+    stringency = ''
     error_rate = 0.1
     length = 150
     paired = False
     retain_unpaired = False
-    length_1 = ""
-    length_2 = ""
+    length_1 = ''
+    length_2 = ''
     trim = False
     # dict with the arguments string
-    arguments = {"quality":"-q ", "phred":"--phred", "adapter":"-a ", "adapter2":"-a2 ", "stringency":"-s ",
-                 "error_rate":"-e ", "length":"--length ", "paired":"--paired", "retain_unpaired":"--retain_unpaired",
-                 "length1":"-r1 ", "length2":"-r2 ", "trim":"-t "}
+    arguments = {'quality':'-q ', 'phred':'--phred', 'adapter':'-a ', 'adapter2':'-a2 ', 'stringency':'-s ',
+                 'error_rate':'-e ', 'length':'--length ', 'paired':'--paired', 'retain_unpaired':'--retain_unpaired',
+                 'length1':'-r1 ', 'length2':'-r2 ', 'trim':'-t '}
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
@@ -133,7 +133,7 @@ class Concat_Parameter:
     pretty_out = False
     score = 20
     # dict with the arguments string
-    arguments = {"pretty_out" : "-p", "score" : "-s "}
+    arguments = {'pretty_out' : '-p', 'score' : '-s '}
        
     def __init__(self):
         conf = ConfigParser.ConfigParser()
@@ -144,15 +144,15 @@ class Concat_Parameter:
 # Parameter for velveth
 class Velveth_Parameter:
 
-    file_layout = ""
-    read_type = ""
+    file_layout = ''
+    read_type = ''
     strand_specific = False
     reuse_Sequences = False
     noHash = False
     create_binary = False
     # dict with the arguments string
-    arguments = {"file_layout" : "-", "read_type" : "-", "strand_specific":"-strand_specific",
-				"reuse_Sequences":"-reuse_Sequences", "noHash":"-noHash", "create_binary":"-createBinary"}
+    arguments = {'file_layout' : '-', 'read_type' : '-', 'strand_specific':'-strand_specific',
+				'reuse_Sequences':'-reuse_Sequences', 'noHash':'-noHash', 'create_binary':'-createBinary'}
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
@@ -167,43 +167,40 @@ class Velveth_Parameter:
 # Parameter for velvetg
 class Velvetg_Parameter:
 
-    cov_cutoff = ""
-    ins_length = ""
+    cov_cutoff = ''
+    ins_length = ''
     read_trkg = False
     min_contig_lgth = 250
-    exp_cov = "auto"
-    long_cov_cutoff = ""
-    ins_length_long = ""
-    ins_length_sd = ""
+    exp_cov = 'auto'
+    long_cov_cutoff = ''
+    ins_length_long = ''
+    ins_length_sd = ''
     scaffolding = True
     max_branch_length = 100
     max_divergence = 0.2
     max_gap_count = 3
     min_pair_count = 5
     max_coverage = False
-    coverage_mask = ""
+    coverage_mask = ''
     long_mult_cutoff = 2
     unused_reads = False
     alignments = False
     exportFiltered = False 
-    clean = False 
-    very_clean = False
     paired_exp_fraction = 0.1
     shortMatePaired = False
     conserveLong = False
     # dict with the arguments string
-    arguments = {"cov_cutoff" : "-cov_cutoff ", "ins_length" : "-ins_length ",
-                     "read_trkg" : "-read_trkg ", "min_contig_lgth" : "-min_contig_lgth ",
-                     "exp_cov" : "-exp_cov ", "long_cov" : "-long_cov ", "long_cov_cutoff":"-long_cov_cutoff ",
-                     "ins_length_long" : "-ins_length_long ", "ins_length_sd" : "-ins_length_sd ",
-                     "scaffolding":"-scaffolding ", "max_branch_length":"-max_branch_length ",
-                     "max_divergence" : "-max_divergence ", "max_gap_count" : "-max_gap_count ",
-                     "min_pair_count" : "-min_pair_count ", "max_coverage" : "-max_coverage ",
-                     "coverage_mask" : "-coverage_mask ", "long_mult_cutoff" : "-long_mult_cutoff ",
-                     "unused_reads" : "-unused_reads ", "alignments" : "-alignments ",
-                     "exportFiltered" : "-exportFiltered ", "clean" : "-clean ", "very_clean" : "-very_clean ",
-                     "paired_exp_fraction" : "-paired_exp_fraction ", "shortMatePaired" : "-shortMatePaired ",
-                     "conserveLong" : "-conserveLong "}  
+    arguments = {'cov_cutoff' : '-cov_cutoff ', 'ins_length' : '-ins_length ',
+                     'read_trkg' : '-read_trkg ', 'min_contig_lgth' : '-min_contig_lgth ',
+                     'exp_cov' : '-exp_cov ', 'long_cov' : '-long_cov ', 'long_cov_cutoff':'-long_cov_cutoff ',
+                     'ins_length_long' : '-ins_length_long ', 'ins_length_sd' : '-ins_length_sd ',
+                     'scaffolding':'-scaffolding ', 'max_branch_length':'-max_branch_length ',
+                     'max_divergence' : '-max_divergence ', 'max_gap_count' : '-max_gap_count ',
+                     'min_pair_count' : '-min_pair_count ', 'max_coverage' : '-max_coverage ',
+                     'coverage_mask' : '-coverage_mask ', 'long_mult_cutoff' : '-long_mult_cutoff ',
+                     'unused_reads' : '-unused_reads ', 'alignments' : '-alignments ',
+                     'exportFiltered' : '-exportFiltered ','paired_exp_fraction' : '-paired_exp_fraction ', 
+                     'shortMatePaired' : '-shortMatePaired ','conserveLong' : '-conserveLong '}  
     
     def __init__(self):
         
@@ -228,8 +225,6 @@ class Velvetg_Parameter:
         self.unused_reads = conf.getboolean('MetaVelvet', 'unused_reads')
         self.alignments = conf.getboolean('MetaVelvet', 'alignments')
         self.exportFiltered = conf.getboolean('MetaVelvet', 'exportFiltered')
-        self.clean = conf.getboolean('MetaVelvet', 'clean')
-        self.very_clean = conf.getboolean('MetaVelvet', 'very_clean')
         self.paired_exp_fraction = conf.get('MetaVelvet', 'paired_exp_fraction')
         self.shortMatePaired = conf.getboolean('MetaVelvet', 'shortMatePaired')
         self.conserveLong = conf.getboolean('MetaVelvet', 'conserveLong') 
@@ -238,36 +233,36 @@ class Velvetg_Parameter:
 class MetaVelvet_Parameter:
 
     discard_chimera = False
-    max_chimera_rate = 0.0 
-    repeat_cov_sd = 0.1 
-    min_split_length = 0
-    valid_connections = 1 
-    noise_connections = 0 
+    max_chimera_rate = '' 
+    repeat_cov_sd ='' 
+    min_split_length = ''
+    valid_connections = '' 
+    noise_connections = '' 
     use_connections = True 
     report_split_detail = False
     report_subgraph = False 
-    exp_covs_meta = "auto"  
-    min_peak_cov = 0 
-    max_peak_cov = 500        
-    histo_bin_width = 1  
-    histo_sn_ratio = 10
+    exp_covs_meta = ''  
+    min_peak_cov = '' 
+    max_peak_cov = ''      
+    histo_bin_width = ''  
+    histo_sn_ratio = ''
     amos_file = False
-    coverage_mask = 1
+    coverage_mask = ''
     unused_reads_meta = False 
     alignments_meta = False
     exportFiltered_meta = False
-    paired_exp_fraction_meta = ""
+    paired_exp_fraction_meta = ''
     # dict with the arguments string 
-    arguments = {"discard_chimera":"-discard_chimera ", "max_chimera_rate":"-max_chimera_rate ",
-				"repeat_cov_sd":"-repeat_cov_sd ", "min_split_length":"-min_split_length ",
-				"valid_connections":"-valid_connections ", "noise_connections":"-noise_connections ",
-				"use_connections":"-use_connections ", "report_split_detail":"-report_split_detail ",
-				"report_subgraph":"-report_subgraph " , "exp_covs_meta":"-exp_covs ",
-				"min_peak_cov":"-min_peak_cov ", "max_peak_cov":"-max_peak_cov ",
-				"histo_bin_width":"-histo_bin_width ", "histo_sn_ratio":"-histo_sn_ratio ", "amos_file":"-amos_file",
-				"coverage_mask":"-coverage_mask ", "unused_reads_meta":"-unused_reads ",
-				"alignments_meta":"-alignments", "exportFiltered_meta":"-exportFiltered ",
-				"paired_exp_fraction_meta": "-paired_exp_fraction "}  
+    arguments = {'discard_chimera':'-discard_chimera ', 'max_chimera_rate':'-max_chimera_rate ',
+				'repeat_cov_sd':'-repeat_cov_sd ', 'min_split_length':'-min_split_length ',
+				'valid_connections':'-valid_connections ', 'noise_connections':'-noise_connections ',
+				'use_connections':'-use_connections', 'report_split_detail':'-report_split_detail',
+				'report_subgraph':'-report_subgraph' , 'exp_covs_meta':'-exp_cov ',
+				'min_peak_cov':'-min_peak_cov ', 'max_peak_cov':'-max_peak_cov ',
+				'histo_bin_width':'-histo_bin_width ', 'histo_sn_ratio':'-histo_sn_ratio ', 'amos_file':'-amos_file',
+				'coverage_mask':'-coverage_mask ', 'unused_reads_meta':'-unused_reads',
+				'alignments_meta':'-alignments', 'exportFiltered_meta':'-exportFiltered',
+				'paired_exp_fraction_meta': '-paired_exp_fraction '}  
      
     def __init__(self):
         conf = ConfigParser.ConfigParser()
@@ -296,11 +291,11 @@ class MetaVelvet_Parameter:
 # Parameter for metacv
 class MetaCV_Parameter:
 
-    seq = ""
-    mode = ""
-    orf = ""
+    seq = ''
+    mode = ''
+    orf = ''
     # dict with the arguments string
-    arguments = {"seq":"--seq=", "mode":"--mode=", "orf":"--orf="}
+    arguments = {'seq':'--seq=', 'mode':'--mode=', 'orf':'--orf='}
 
     def __init__(self):
         conf = ConfigParser.ConfigParser()
@@ -312,75 +307,75 @@ class MetaCV_Parameter:
 # Parameter for blastn        
 class Blastn_Parameter:
 
-    import_search_strategy = ""
-    db = ""
-    dbsize = ""
-    gilist = ""
-    seqidlist = ""
-    negative_gilist = ""
-    entrez_query = ""
-    db_soft_mask = ""
-    db_hard_mask = ""
-    subject = ""
-    subject_loc = ""
-    evalue = ""
-    word_size = ""
-    gapopen = ""
-    gapextend = ""
+    import_search_strategy = ''
+    db = ''
+    dbsize = ''
+    gilist = ''
+    seqidlist = ''
+    negative_gilist = ''
+    entrez_query = ''
+    db_soft_mask = ''
+    db_hard_mask = ''
+    subject = ''
+    subject_loc = ''
+    evalue = ''
+    word_size = ''
+    gapopen = ''
+    gapextend = ''
     perc_identity = 100.0
-    xdrop_ungap = ""
-    xdrop_gap = ""
-    xdrop_gap_final = ""
-    searchsp = ""
-    max_hsps_per_subject = ""
-    penalty = ""
-    reward = ""
+    xdrop_ungap = ''
+    xdrop_gap = ''
+    xdrop_gap_final = ''
+    searchsp = ''
+    max_hsps_per_subject = ''
+    penalty = ''
+    reward = ''
     no_greedy = False
-    min_raw_gapped_score = ""
-    template_type = ""
-    template_length = ""
-    dust = ""
-    filtering_db = ""
-    window_masker_taxid = ""
-    window_masker_db = ""
-    soft_masking = ""
+    min_raw_gapped_score = ''
+    template_type = ''
+    template_length = ''
+    dust = ''
+    filtering_db = ''
+    window_masker_taxid = ''
+    window_masker_db = ''
+    soft_masking = ''
     ungapped = False
-    culling_limit = ""
-    best_hit_overhang = ""
-    best_hit_score_edge = ""
-    window_size = ""
-    off_diagonal_range = ""
+    culling_limit = ''
+    best_hit_overhang = ''
+    best_hit_score_edge = ''
+    window_size = ''
+    off_diagonal_range = ''
     use_index = False
-    index_name = ""
+    index_name = ''
     lcase_masking = False
-    query_loc = ""
-    strand = ""
+    query_loc = ''
+    strand = ''
     parse_deflines = False
     outfmt = 5
     show_gis = False
-    num_descriptions = ""
-    num_alignments = ""
+    num_descriptions = ''
+    num_alignments = ''
     html = False
-    max_target_seqs = ""
-    arguments = {"import_search_strategy" : "-import_search_strategy ", "db" : "-db ",
-                 "dbsize" : "-dbsize ", "gilist" : "-gilist ", "seqidlist" : "-seqidlist ",
-                  "negative_gilist" : "-negative_gilist ", "entrez_query" : "-entrez_query ",
-                  "db_soft_mask" : "-db_soft_mask ", "db_hard_mask" : "-db_hard_mask ", "subject" : "-subject ",
-                  "subject_loc" : "-subject_loc ", "evalue" : "-evalue ", "word_size" : "-word_size ",
-                  "gapopen" :  "-gapopen ", "gapextend" : "-gapextend ", "perc_identity" : "-perc_identity ",
-                  "xdrop_ungap" : "-xdrop_ungap ", "xdrop_gap" : "-xdrop_gap ", "xdrop_gap_final" : "-xdrop_gap_final ",
-                  "searchsp" : "-searchsp ", "max_hsps_per_subject" : "-max_hsps_per_subject ",
-                  "penalty" : "-penalty ", "reward" : "-reward ", "no_greedy" : "-no_greedy ",
-                  "min_raw_gapped_score" : "-min_raw_gapped_score ", "template_type" : "-template_type ",
-                  "template_length" : "-template_length ", "dust" : "-dust ", "filtering_db" : "-filtering_db ",
-                  "window_masker_taxid" : "-window_masker_taxid ", "window_masker_db" :  "-window_masker_db ",
-                  "soft_masking" : "-soft_masking ", "ungapped" : "-ungapped ", "culling_limit" : "-culling_limit ",
-                  "best_hit_overhang" : "-best_hit_overhang ", "best_hit_score_edge" : "-best_hit_score_edge ",
-                  "window_size" : "-window_size ", "off_diagonal_range" : "-off_diagonal_range ",
-                  "use_index" : "-use_index ", "index_name" : "-index_name ", "lcase_masking" : "-lcase_masking ",
-                  "query_loc" : "-query_loc ", "strand" : "-strand ", "parse_deflines" : "-parse_deflines ",
-                  "outfmt" : "-outfmt ", "show_gis" : "-show_gis ", "num_descriptions" : "-num_descriptions ",
-                  "num_alignments" : "-num_alignments ", "html" : "-html ", "max_target_seqs" : "-max_target_seqs " }
+    max_target_seqs = ''
+    arguments = {'import_search_strategy' : '-import_search_strategy ', 'db' : '-db ',
+                 'dbsize' : '-dbsize ', 'gilist' : '-gilist ', 'seqidlist' : '-seqidlist ',
+                  'negative_gilist' : '-negative_gilist ', 'entrez_query' : '-entrez_query ',
+                  'db_soft_mask' : '-db_soft_mask ', 'db_hard_mask' : '-db_hard_mask ', 'subject' : '-subject ',
+                  'subject_loc' : '-subject_loc ', 'evalue' : '-evalue ', 'word_size' : '-word_size ',
+                  'gapopen' :  '-gapopen ', 'gapextend' : '-gapextend ', 'perc_identity' : '-perc_identity ',
+                  'xdrop_ungap' : '-xdrop_ungap ', 'xdrop_gap' : '-xdrop_gap ', 'xdrop_gap_final' : '-xdrop_gap_final ',
+                  'searchsp' : '-searchsp ', 'max_hsps_per_subject' : '-max_hsps_per_subject ',
+                  'penalty' : '-penalty ', 'reward' : '-reward ', 'no_greedy' : '-no_greedy ',
+                  'min_raw_gapped_score' : '-min_raw_gapped_score ', 'template_type' : '-template_type ',
+                  'template_length' : '-template_length ', 'dust' : '-dust ', 'filtering_db' : '-filtering_db ',
+                  'window_masker_taxid' : '-window_masker_taxid ', 'window_masker_db' :  '-window_masker_db ',
+                  'soft_masking' : '-soft_masking ', 'ungapped' : '-ungapped ', 'culling_limit' : '-culling_limit ',
+                  'best_hit_overhang' : '-best_hit_overhang ', 'best_hit_score_edge' : '-best_hit_score_edge ',
+                  'window_size' : '-window_size ', 'off_diagonal_range' : '-off_diagonal_range ',
+                  'use_index' : '-use_index ', 'index_name' : '-index_name ', 'lcase_masking' : '-lcase_masking ',
+                  'query_loc' : '-query_loc ', 'strand' : '-strand ', 'parse_deflines' : '-parse_deflines ',
+                  'outfmt' : '-outfmt ', 'show_gis' : '-show_gis ', 'num_descriptions' : '-num_descriptions ',
+                  'num_alignments' : '-num_alignments ', 'html' : '-html ', 'max_target_seqs' : '-max_target_seqs ' }
 
     def __init__(self):
         conf = ConfigParser.ConfigParser()

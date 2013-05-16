@@ -110,7 +110,11 @@ def consoleSummary(settings):
 				sys.stdout.write(' - evalue   : ' + blastn.evalue + '\n')
 			if blastn.perc_identity:
 				sys.stdout.write(' - perc id  : ' + blastn.perc_identity + '\n')	
-			
+	if settings.summary:
+		sys.stdout.write('Summary       : yes \n')
+	else:
+		sys.stdout.write('Summary       : no \n')
+		
 	# only continue when keyboard command comes
 	return raw_input('\nContinue?\n')
 
@@ -147,6 +151,7 @@ def ParamFileArguments(instance):
 			# else var has a value - print var from dict + value
 			else: 
 				args += ' ' + instance.arguments.get(str(name)) + getattr(instance, name)
+	
 	return args
 
 # test the input file for etxension of fastq files
@@ -183,5 +188,5 @@ class Task:
 	def getOutputDir(self):
 		return self.outputDir
 	
-	def setOutputDir(self, dir):
-		self.outputDir = dir
+	def setOutputDir(self, outputDir):
+		self.outputDir = outputDir

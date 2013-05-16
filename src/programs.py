@@ -93,7 +93,7 @@ class Programs:
             p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, Settings.output + os.sep + outputdir,
                                                                            Settings.kmer, ParamFileArguments(Velveth_Parameter()) ,
                                                                            ' '.join(str(i)for i in Settings.input))),
-                                 stdout=subprocess.PIPE) 
+                                 stdout=subprocess.PIPE,stderr=open(Settings.logdir + 'velveth.err.txt','w')) 
             for line in p.stdout:
                 sys.stdout.write(line)
                 velvethlog.write(line)
@@ -101,7 +101,7 @@ class Programs:
             p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, Settings.output + os.sep + outputdir,
                                                                            Settings.kmer, ParamFileArguments(Velveth_Parameter()) ,
                                                                            ' '.join(str(i)for i in Settings.input))),
-                                 stdout=velvethlog)
+                                 stdout=velvethlog,stderr=open(Settings.logdir + 'velveth.err.txt','w'))
         p.wait()
         
         # update information on cmd
@@ -113,14 +113,14 @@ class Programs:
         if Settings.verbose:
             p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, Settings.output + os.sep + outputdir,
                                                            ParamFileArguments(Velvetg_Parameter()))),
-                                 stdout=subprocess.PIPE)
+                                 stdout=subprocess.PIPE,stderr=open(Settings.logdir + 'velvetg.err.txt','w'))
             for line in p.stdout:
                 sys.stdout.write(line)
                 velvetglog.write(line)
         else:
             p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, Settings.output + os.sep + outputdir,
                                                            ParamFileArguments(Velvetg_Parameter()))),
-                                 stdout=velvetglog)
+                                 stdout=velvetglog,stderr=open(Settings.logdir + 'velvetg.err.txt','w'))
         p.wait()
         
         # update information on cmd
@@ -128,20 +128,16 @@ class Programs:
         sys.stdout.write('Arguments: ' + ParamFileArguments(MetaVelvet_Parameter()) + '\n')
         metavelvetlog = open(Settings.logdir + 'meta-velvetg.log.txt', 'w')
         if Settings.verbose:
-            p = subprocess.Popen(shlex.split(Settings.METAVELVET + ' ' + Settings.output + os.sep + outputdir),
-                                 stdout=subprocess.PIPE)
-#            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET,Settings.output + os.sep + outputdir, 
-#                                                          ParamFileArguments(MetaVelvet_Parameter()))),
-#                                 stdout=subprocess.PIPE)
+            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET,Settings.output + os.sep + outputdir, 
+                                                          ParamFileArguments(MetaVelvet_Parameter()))),
+                                 stdout=subprocess.PIPE,stderr=open(Settings.logdir + 'meta-velvetg.err.txt','w'))
             for line in p.stdout:
                 sys.stdout.write(line)
                 metavelvetlog.write(line)
         else:
-            p = subprocess.Popen(shlex.split(Settings.METAVELVET + ' ' + Settings.output + os.sep + outputdir),
-                                 stdout=metavelvetlog)
-            # p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET,Settings.output + os.sep + outputdir, 
-            #                                               ParamFileArguments(MetaVelvet_Parameter()))),
-            #                     stdout=metavelvetlog)
+            p = subprocess.Popen(shlex.split('%s %s%s' % (Settings.METAVELVET,Settings.output + os.sep + outputdir+os.sep, 
+                                                           ParamFileArguments(MetaVelvet_Parameter()))),
+                                 stdout=metavelvetlog,stderr=open(Settings.logdir + 'meta-velvetg.err.txt','w'))
         p.wait()
         
         # update Settings.input for further processing
