@@ -36,12 +36,14 @@ class Settings:
     quality = True
     assembler = ""
     classify = "both"
+    summary = True
     metacv_db = ""
     blastdb_16S = ""
     blastdb_nt = ""
     
-    def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, starting_time=None, input=None,
-                 output=None, logdir=None, param=None, trim=None, quality=None, assembler=None, classify=None):
+    def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, starting_time=None, 
+                 input=None,output=None, logdir=None, param=None, trim=None, quality=None, assembler=None, 
+                 classify=None, summary=None):
 
         Settings.kmer = kmer
         Settings.threads = threads
@@ -57,6 +59,7 @@ class Settings:
         Settings.quality = quality 
         Settings.assembler = assembler.lower()
         Settings.classify = classify.lower() 
+        Settings.summary = summary
         # define program paths
         Settings.FASTQC = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'quality')
         Settings.TRIMGALORE = "%s%s%s%s%s" % (sys.path[0], os.sep, 'program', os.sep, 'filter')

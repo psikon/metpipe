@@ -124,9 +124,10 @@ def getDHMS(seconds):
 # copy files into another dir
 def moveFiles(src, dst, fileExtension):
 	listofFiles = [f for f in os.listdir(src) if f.endswith(fileExtension)]
+	print 
 	for f in listofFiles:
-		if os.path.exists(dst + f):
-			os.remove(dst + f)
+		if os.path.exists(dst + os.sep + f):
+			os.remove(dst + os.sep + f)
 		shutil.move(src + f, dst)
 
 # important function to get all used arguments from a settings object and convert it to an argument string
@@ -152,7 +153,6 @@ def ParamFileArguments(instance):
 
 def testForFQ(testfile):
 	if  testfile.endswith(".fq") or testfile.endswith(".fastq"):
-		print "here"
 		return True
 	else:
 		return False
@@ -176,7 +176,7 @@ class Task:
 		
 	def getTask(self):
 		return self.task
-	
+		
 	def setTask(self, task):
 		self.task = task
 		

@@ -53,6 +53,8 @@ if __name__ == '__main__':
                         help='trimm and filter input reads? (default=True)')
     parser.add_argument('--noquality', dest='quality', action='store_false', default=True,
                         help='create quality report (default=True)')
+    parser.add_argument('--nosummary', dest='summary', action='store_false',default=True,
+                        help='analyse the results of the pipeline (default=True)')
 # create the cli interface
 args = parser.parse_args()
 
@@ -85,7 +87,8 @@ if not os.path.isfile(args.param):
 
 # create the global settings object
 settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time, args.input,
-                    args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, args.assembler, args.classify)
+                    args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, 
+                    args.assembler, args.classify, args.summary)
 
 # fill the pipeline with tasks
 queue = deque([])
@@ -99,8 +102,15 @@ while(queue):
     if actualElement.getTask()(actualElement.getOutputDir()):
         continue
     else: 
-        print 'error'
+        sys.stderr.write('ERROR!!! \nPlease check the log files for further information')
+        print '\nPIPELINE NOT COMPLETE'
         sys.exit()
+
+print Settings.input
+print Settings.output
+print Settings.metaCV_output
+print Settings.blast_output
+print Settings.quality_report
 
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')
