@@ -12,9 +12,14 @@ reads.
 ### Requirements
 
   - Python >= 2.6
-  - R >= 2.15
+  - R >= 2.15 
+  - (for R >= 3.0 useDevel() - Parameter for Bioconductor - biocLite muss be assigned
+    see: http://www.bioconductor.org/developers/useDevel/)
+  - libboost-dev
+  - libboost-regex-dev
   - Java Runtime Environment (z.B. open-jre)
   - Linux (Mac OS X possible, but not tested) 
+  
 
 ### Installation
 
