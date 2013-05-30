@@ -82,7 +82,7 @@ except OSError as exception:
     if exception.errno != errno.EEXIST:
         raise
     
-# check if param File exists
+# check if param File existsObjekt orientiert entwickelt 
 if not os.path.isfile(args.param):
     print ('param file %s is not readable' % (args.param))
     sys.exit()

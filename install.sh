@@ -18,16 +18,13 @@ while getopts hscq opt
 [Annotate]
 - Blastn (nt|16SMicrobial)
 - MetaCV
-[Classifier]
-- MetaCV
 "
 exit 0;;
-			-h) echo "
+			h) echo "
 This is the install script of the pipeline. All relevant programms will be checked and installed if not existing.
 
 Requirments: boost
              python 2.6+
-             perl
               
 USAGE: $0 [-h]
 
