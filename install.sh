@@ -71,7 +71,6 @@ while true
 		y|Y|YES|yes|Yes) 
 			cd program/
 				# Download and uncompress FastQC
-http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.10.1.zip
 				wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.10.1.zip
 				unzip fastqc*
 				rm fastqc_*.zip
@@ -436,6 +435,26 @@ while true
 		*) echo Please enter only y or n
 		esac
 	done
+
+while true
+	do
+	echo -n "\nSetup the R environment for analysis of the results\n\n"
+		cd program/
+		echo "install standard R packages:\n"
+		#R -q -e "install.packages(c('stringr','XML','IRanges','devtools','RSQLite','ape','RCurl','plyr','Rcpp'),repos='http://cran.us.r-project.org')"
+		echo "install R packages from Bioconductor project:\n"
+		#R -q -e "source('http://bioconductor.org/biocLite.R') ;biocLite(c('BioGenerics','XVector','GenomicRanges','Biostrings'))"
+		echo "install R packages from Github and provided packages"
+		#R -q -e "require(devtools); install_github('assertthat','hadley')"
+		#R CMD INSTALL ../pkg/rmisc_0.2-2.tar.gz
+		# blastr
+		# ncbi
+		# rentrez
+		# biofiles
+		cd ..
+		break
+	done
+
 
 while true
 	do
