@@ -93,9 +93,14 @@ def consoleSummary(settings):
 				sys.stdout.write(' - perc id  : ' + blastn.perc_identity + '\n')	
 		elif settings.classify.lower() == 'metacv':
 			sys.stdout.write('Classify      : ' + settings.classify + '\n')
+			if settings.use_contigs == True:
+				sys.stdout.write(' - input: contigs \n')
+			else:
+				sys.stdout.write(' - input: RAW \n')
 		else: 
 			sys.stdout.write('Classify      : ' + settings.classify + '\n')
 			blastn = Blastn_Parameter()
+			sys.stdout.write('Blastn Parameter: \n')
 			if blastn.db == '':
 				sys.stdout.write(' - blastn db: nt \n')
 			else:
@@ -110,6 +115,12 @@ def consoleSummary(settings):
 				sys.stdout.write(' - evalue   : ' + blastn.evalue + '\n')
 			if blastn.perc_identity:
 				sys.stdout.write(' - perc id  : ' + blastn.perc_identity + '\n')	
+			sys.stdout.write('MetaCV Parameter:\n ')
+			if settings.use_contigs == True:
+				sys.stdout.write(' - input: contigs \n')
+			else:
+				sys.stdout.write(' - input: RAW \n')
+				
 	if settings.summary:
 		sys.stdout.write('Summary       : yes \n')
 	else:

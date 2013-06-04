@@ -15,6 +15,8 @@ class Settings:
     automatic = False
     # File settings
     input = []
+    contigs = []
+    blast_input = []
     output = ''
     logdir = ''
     param = ''
@@ -35,6 +37,7 @@ class Settings:
     # Program Settings
     trim = True
     quality = True
+    use_contigs = False
     assembler = ''
     classify = 'both'
     summary = True
@@ -43,8 +46,8 @@ class Settings:
     blastdb_nt = ''
     
     def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, starting_time=None, 
-                 infile=None,output=None, logdir=None, param=None, trim=None, quality=None, assembler=None, 
-                 classify=None, summary=None,automatic=None):
+                 infile=None, output=None, logdir=None, param=None, trim=None, quality=None, 
+                 use_contigs=None,assembler=None, classify=None, summary=None,automatic=None):
 
         Settings.kmer = kmer
         Settings.threads = threads
@@ -53,11 +56,14 @@ class Settings:
         Settings.starting_time = starting_time
         Settings.actual_time = starting_time
         Settings.input = infile
+        Settings.contigs = []
+        Settings.blast_input = []
         Settings.output = output
         Settings.logdir = logdir
         Settings.param = param
         Settings.trim = trim
         Settings.quality = quality 
+        Settings.use_contigs = use_contigs
         Settings.assembler = assembler.lower()
         Settings.classify = classify.lower() 
         Settings.summary = summary

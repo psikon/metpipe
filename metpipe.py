@@ -48,7 +48,9 @@ if __name__ == '__main__':
     parser.add_argument('-k', dest='kmer', type=int, default=DEFAULT_KMER,
                         help='k-mer size to be used (default=' + str(DEFAULT_KMER) + ')')
     parser.add_argument('-c', dest='classify', choices=['metacv', 'blastn', 'both'], default='both',
-                        help='classifier to use for annotation (default= both)')                                      
+                        help='classifier to use for annotation (default= both)')     
+    parser.add_argument('--use_contigs', dest='use_contigs', action='store_true', default='False',
+                        help='should MetaCV use assembled Reads or RAW Reads (default=RAW')                                    
     parser.add_argument('--notrimming', dest='trim', action='store_false', default=True,
                         help='trimm and filter input reads? (default=True)')
     parser.add_argument('--noquality', dest='quality', action='store_false', default=True,
@@ -86,17 +88,17 @@ except OSError as exception:
 if not os.path.isfile(args.param):
     print ('param file %s is not readable' % (args.param))
     sys.exit()
-
 # create the global settings object
 settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time, args.input,
                     args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, 
-                    args.assembler, args.classify, args.summary,args.auto)
+                    args.use_contigs, args.assembler, args.classify, args.summary,args.auto)
 
 # fill the pipeline with tasks
 queue = deque([])
 queue = createTasks(settings, Programs())
 # print the summary of the settings
 consoleSummary(settings)
+
 
 # working queue - run until queue is empty or an error occured
 while(queue):
