@@ -24,20 +24,23 @@ class Programs:
         # update information on cmd
         logging('\nStep:       Quality analysis with FastQC \n')
         logging('Arguments: ' + ParamFileArguments(FastQC_Parameter()) + '\n\n')
-        
-        # start FastQC and wait until task complete
-        p = subprocess.Popen(shlex.split('%s -t %s -o %s -q --extract %s %s' % (Settings.FASTQC, 
-                                                                                Settings.threads, 
-                                                                                Settings.output + os.sep + outputdir,
-                                                                                ParamFileArguments(FastQC_Parameter()),
-                                                                                ' '.join(str(i)for i in Settings.input))))
-        p.wait()
+        if (Settings.input[0].endswith(".fastq")):
+            # start FastQC and wait until task complete
+            p = subprocess.Popen(shlex.split('%s -t %s -o %s -q --extract %s %s' % (Settings.FASTQC, 
+                                                                                    Settings.threads, 
+                                                                                    Settings.output + os.sep + outputdir,
+                                                                                    ParamFileArguments(FastQC_Parameter()),
+                                                                                    ' '.join(str(i)for i in Settings.input))))
+            p.wait()
 
-        # update the Settings.quality_report var for log purposes
-        for r, d, f in os.walk(Settings.output + os.sep + outputdir + os.sep):
-            for files in f:
-                if files.endswith('_data.txt'):
-                    Settings.quality_report.append(os.path.join(r, files))
+            # update the Settings.quality_report var for log purposes
+            for r, d, f in os.walk(Settings.output + os.sep + outputdir + os.sep):
+                for files in f:
+                    if files.endswith('_data.txt'):
+                        Settings.quality_report.append(os.path.join(r, files))
+        else:
+            logging("! ERROR: %s not a fastq file! \n"%(' '.join(str(i)for i in Settings.input)))
+                        
         logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
         Settings.actual_time = time.time()
         
