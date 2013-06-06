@@ -1,7 +1,9 @@
 import os, sys
 import shutil
 from collections import deque
-from src.settings import TrimGalore_Parameter,Blastn_Parameter
+from datetime import date
+from src.settings import TrimGalore_Parameter, Blastn_Parameter, Settings
+
 
 # simple function to create a dir
 def createOutputDir(path):
@@ -47,84 +49,84 @@ def createTasks(settings_instance, program_instance):
 
 # before start the first run - print all important settings on the cmd
 def consoleSummary(settings):
-	sys.stdout.write('\nmetpipe - Overview\n\n')
+	logging('\nmetpipe - run on %s\n\n'%(date.today()))
 	if settings.verbose:
-		sys.stdout.write('Verbose Output: ' + 'yes' + '\n')
+		logging('Verbose Output: ' + 'yes' + '\n')
 	else:
-		sys.stdout.write('Verbose Output: ' + 'no' + '\n')
+		logging('Verbose Output: ' + 'no' + '\n')
 	if settings.quality:
-		sys.stdout.write('Quality Report: ' + 'yes' + '\n')
+		logging('Quality Report: ' + 'yes' + '\n')
 	else:
-		sys.stdout.write('Quality Report: ' + 'no' + '\n')
+		logging('Quality Report: ' + 'no' + '\n')
 	if settings.trim:
-		sys.stdout.write('Read Trimming : ' + 'yes' + '\n')
+		logging('Read Trimming : ' + 'yes' + '\n')
 		trim = TrimGalore_Parameter()
-		sys.stdout.write(' - trim down to : ' + trim.length + 'bp' + '\n')
-		sys.stdout.write(' - min quality  : ' + trim.quality + '\n')
-		sys.stdout.write(' - paired reads : ' + str(trim.paired) + '\n')
+		logging(' - trim down to : ' + trim.length + 'bp' + '\n')
+		logging(' - min quality  : ' + trim.quality + '\n')
+		logging(' - paired reads : ' + str(trim.paired) + '\n')
 	else:
-		sys.stdout.write('Read Trimming : ' + 'no' + '\n')
+		logging('Read Trimming : ' + 'no' + '\n')
 	if  settings.skip.lower() == 'assembly':
-		sys.stdout.write('Assembly      : skipped \n')
+		logging('Assembly      : skipped \n')
 	else:
 		if settings.assembler == 'concat':
-			sys.stdout.write('Assembly      : ' + settings.assembler + '\n')
+			logging('Assembly      : ' + settings.assembler + '\n')
 		else:
-			sys.stdout.write('Assembly      : ' + settings.assembler + '\n')	
+			logging('Assembly      : ' + settings.assembler + '\n')	
 	if  settings.skip.lower() == 'annotation':
-		sys.stdout.write('Classify      : skipped \n')
+		logging('Classify      : skipped \n')
 	else:
 		if settings.classify.lower() == 'blastn':
-			sys.stdout.write('Classify      : ' + settings.classify + '\n')
+			logging('Classify      : ' + settings.classify + '\n')
 			blastn = Blastn_Parameter()
 			if blastn.db == '':
-				sys.stdout.write(' - blastn db: nt \n')
+				logging(' - blastn db: nt \n')
 			else:
-				sys.stdout.write(' - blastn db: ' + blastn.db + '\n')
+				logging(' - blastn db: ' + blastn.db + '\n')
 			if blastn.outfmt == 6:
-				sys.stdout.write(' - outfmt   : table \n')
+				logging(' - outfmt   : table \n')
 			elif blastn.outfmt == 5:
-				sys.stdout.write(' - outfmt   : xml \n')
+				logging(' - outfmt   : xml \n')
 			else:
-				sys.stdout.write(' - outfmt   : ' + blastn.outfmt + '\n') 
+				logging(' - outfmt   : ' + blastn.outfmt + '\n') 
 			if blastn.evalue:
-				sys.stdout.write(' - evalue   : ' + blastn.evalue + '\n')
+				logging(' - evalue   : ' + blastn.evalue + '\n')
 			if blastn.perc_identity:
-				sys.stdout.write(' - perc id  : ' + blastn.perc_identity + '\n')	
+				logging(' - perc id  : ' + blastn.perc_identity + '\n')	
 		elif settings.classify.lower() == 'metacv':
-			sys.stdout.write('Classify      : ' + settings.classify + '\n')
+			logging('Classify      : ' + settings.classify + '\n')
 			if settings.use_contigs == True:
-				sys.stdout.write(' - input: contigs \n')
+				logging(' - input: contigs \n')
 			else:
-				sys.stdout.write(' - input: RAW \n')
+				logging(' - input: RAW \n')
 		else: 
-			sys.stdout.write('Classify      : ' + settings.classify + '\n')
+			logging('Classify      : ' + settings.classify + '\n')
 			blastn = Blastn_Parameter()
-			sys.stdout.write('Blastn Parameter: \n')
+			logging('Blastn Parameter: \n')
 			if blastn.db == '':
-				sys.stdout.write(' - blastn db: nt \n')
+				logging(' - blastn db: nt \n')
 			else:
-				sys.stdout.write(' - blastn db: ' + blastn.db + '\n')
+				logging(' - blastn db: ' + blastn.db + '\n')
 			if blastn.outfmt == 6:
-				sys.stdout.write(' - outfmt   : table \n')
+				logging(' - outfmt   : table \n')
 			elif blastn.outfmt == 5:
-				sys.stdout.write(' - outfmt   : xml \n')
+				logging(' - outfmt   : xml \n')
 			else:
-				sys.stdout.write(' - outfmt   : ' + blastn.outfmt + '\n') 
+				logging(' - outfmt   : ' + blastn.outfmt + '\n') 
 			if blastn.evalue:
-				sys.stdout.write(' - evalue   : ' + blastn.evalue + '\n')
+				logging(' - evalue   : ' + blastn.evalue + '\n')
 			if blastn.perc_identity:
-				sys.stdout.write(' - perc id  : ' + blastn.perc_identity + '\n')	
-			sys.stdout.write('MetaCV Parameter:\n ')
+				logging(' - perc id  : ' + blastn.perc_identity + '\n')	
+			logging('MetaCV Parameter:\n ')
 			if settings.use_contigs == True:
-				sys.stdout.write(' - input: contigs \n')
+				logging(' - input: contigs \n')
 			else:
-				sys.stdout.write(' - input: RAW \n')
+				logging(' - input: RAW \n')
 				
 	if settings.summary:
-		sys.stdout.write('Summary       : yes \n')
+		logging('Summary       : yes \n')
 	else:
-		sys.stdout.write('Summary       : no \n')
+		logging('Summary       : no \n')
 		
 	# only continue when keyboard command comes
 	if settings.automatic:
@@ -170,11 +172,26 @@ def ParamFileArguments(instance):
 
 # test the input file for etxension of fastq files
 
-def testForFQ(testfile):
-	if  testfile.endswith(".fq") or testfile.endswith(".fastq"):
+def testForFQ(testFile):
+	if  testFile.endswith(".fq") or testFile.endswith(".fastq"):
 		return True
 	else:
 		return False
+
+def logging(message):
+	sys.stdout.write(message)
+	Settings.logfile.write(message)
+	Settings.logfile.flush()
+		
+def updateReads(testFile):
+	
+	if testFile.endswith("fq") or testFile.endswith("fastq"):
+		logging("Reads for further processing: %i \n\n" % (int(len(open(testFile).readlines()))/4))
+	elif testFile.endswith("fa") or testFile.endswith("fasta"):
+		logging("Reads for further processing: %i \n\n" % (int(len(open(testFile).readlines()))/2))
+	elif testFile.endswith(".res"):
+		logging("Classified: %i \n\n"% (int(len(open(testFile).readlines()))))
+
 			
 # class for manage the attributes of the tasks in the workingQueue
 class Task:
@@ -193,6 +210,7 @@ class Task:
 	def setParameter(self, parameter):
 		self.parameter = parameter
 		
+		
 	def getTask(self):
 		return self.task
 		
@@ -204,3 +222,13 @@ class Task:
 	
 	def setOutputDir(self, outputDir):
 		self.outputDir = outputDir
+
+class Logger:
+	
+	def __init__(self,logdir):
+		self.terminal = sys.stdout
+		self.log = open(logdir+"summary.log", "w")
+
+	
+		
+

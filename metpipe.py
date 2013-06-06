@@ -21,7 +21,7 @@ import multiprocessing
 from socket import errno
 from collections import deque
 # import own functions and classes 
-from src.utils import consoleSummary, createTasks, getDHMS
+from src.utils import consoleSummary, createTasks, getDHMS, Logger
 from src.settings import Settings
 from src.programs import Programs
 
@@ -99,7 +99,6 @@ queue = createTasks(settings, Programs())
 # print the summary of the settings
 consoleSummary(settings)
 
-
 # working queue - run until queue is empty or an error occured
 while(queue):
     actualElement = queue.popleft()
@@ -111,6 +110,6 @@ while(queue):
         sys.exit()
 
 
-
+settings.logfile.close()
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')
