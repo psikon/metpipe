@@ -483,6 +483,39 @@ while true
 		esac
 	done
 
+while true
+	do
+		if [ -f program/krona/bin/ktImportBLAST ] && [ -f program/krona/taxonomy/gi_taxid.dat ] ; then
+			echo "Krona tools found! Requiered for graphical results"
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "Krona tools not found. (required for analysis)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				wget http://sourceforge.net/projects/krona/files/latest/download
+				tar xvf download
+				rm download
+				mv Krona* krona
+				cd krona/
+				./install.pl --prefix .
+				./updateTaxonomy.sh
+				cd ..
+			cd ..
+			break;;
+		n|N|no|NO|No)
+		break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
 echo "\n Checking Installations\n"
 echo "[Read preprocessing]"
 if [ -f program/fastqc/fastqc ] && [ -f program/trim_galore/trim_galore ]; then
@@ -523,6 +556,13 @@ if  [ -f program/metacv/metacv ] && [ -f program/db/cvdb_2059.cnt ]; then
 	ln -s -f metacv/metacv program/bacterial && chmod 775 program/bacterial
 else
 	echo "MetaCV not installed"
+fi
+
+if [ -f program/krona/bin/ktImportBLAST ] && [ -f program/krona/taxonomy/gi_taxid.dat ] ; then
+			echo "Analysis - Krona Tools OK!"
+	ln -s -f krona/
+else
+	echo "Krona Tools not installed"
 fi
 
 if [ -f program/db/taxon.db ]  && [ -f program/db/geneid.db ]; then
