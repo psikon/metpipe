@@ -32,9 +32,13 @@ class Settings:
     VELVETG = ''
     METAVELVET = ''
     CONCAT = ''
+    FLASH = ''
     BLASTN = ''
     METACV = ''
     CONVERTER = ''
+    PARSER = ''
+    KRONA_BLAST = ''
+    KRONA_TEXT = ''
     # Program Settings
     trim = True
     quality = True
@@ -78,9 +82,15 @@ class Settings:
         Settings.VELVETG = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
         Settings.CONCAT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'concat')
         Settings.METAVELVET = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'metavelvetg')
+        Settings.FLASH = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'concat2')
         Settings.BLASTN = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
         Settings.METACV = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
         Settings.CONVERTER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'converter')
+        Settings.PARSER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'xmlparser')
+        Settings.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
+                                               os.sep + 'bin' + os.sep + 'ktImportBLAST')
+        Settings.KRONA_TEXT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
+                                               os.sep + 'bin' + os.sep + 'ktImportText')
         # define databases
         Settings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'nt')
         Settings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, '16S')
@@ -152,6 +162,34 @@ class Concat_Parameter:
         self.pretty_out = conf.getboolean('concat', 'pretty_output')
         self.score = conf.get('concat', 'score')
 
+
+class FLASH_Parameter:
+    minOverlap = 10
+    maxOverlap = ""
+    maxMismatchDensity = ""
+    phred = 33
+    readLength = 250
+    fragmentLength = 400
+    fragmentLengthStddev = 40
+    interleavedInput = False
+    interleavedOutput = True
+    arguments = {'minOverlap' : '-m ', 'maxOverlap' : '-M ', 'maxMismatchDensity': '-x ',
+                 'phred' : '-p ', 'readLength' : '-r ', 'fragmentLength' : '-f ', 
+                 'fragmentLengthStddev' : '-s ', 'interleavedInput' : '--interleaved-input', 
+                 'interleavedOutput' : '--interleaved-output'}
+    def __init__(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(Settings.param)
+        self.minOverlap = conf.get('FLASH','min-overlap')
+        self.maxOverlap = conf.get('FLASH','max-overlap')
+        self.maxMismatchDensity = conf.get('FLASH', 'max-mismatch-density')
+        self.phred = conf.get('FLASH','phred-offset')
+        self.readLength = conf.get('FLASH','read-len')
+        self.fragmentLength = conf.get('FLASH','fragment-len')
+        self.fragmentLengthStddev = conf.get('FLASH','fragment-len-stddev')
+        self.interleavedInput = conf.getboolean('FLASH', 'interleaved-input')
+        self.interleavedOutput = conf.getboolean('FLASH', 'interleaved-output')
+        
 # Parameter for velveth
 class Velveth_Parameter:
 
@@ -441,3 +479,19 @@ class Blastn_Parameter:
         self.num_alignments = conf.get('blastn', 'num_alignments')
         self.html = conf.getboolean('blastn', 'html')
         self.max_target_seqs = conf.get('blastn', 'max_target_seqs')
+
+class xmlParser():
+    # Parser settings
+    parser_maxHit = 20
+    parser_maxHSP = 20
+    parser_reset_at = 1000
+    
+    def __init__(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(Settings.param)
+        self.parser_maxHit = conf.get('xmlParser', 'max_hit')
+        self.parser_maxHsp = conf.get('xmlParser', 'max_hsp')
+        self.parser_reset_at = conf.get('xmlParser', 'reset_at')
+
+class Krona_Parameter():
+    pass

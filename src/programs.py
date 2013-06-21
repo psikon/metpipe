@@ -5,8 +5,9 @@ import sys, os
 import shutil
 import time
 # own imports
-from src.utils import  getDHMS, createOutputDir, ParamFileArguments, moveFiles, testForFQ,logging,updateReads
-from src.settings import Settings, FastQC_Parameter, TrimGalore_Parameter, Concat_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter, Blastn_Parameter, MetaCV_Parameter
+from src.utils import  getDHMS, createOutputDir, ParamFileArguments, moveFiles, testForFQ,logging,updateReads, convertInput
+from src.settings import Settings, FastQC_Parameter, TrimGalore_Parameter, Concat_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter, Blastn_Parameter, MetaCV_Parameter,\
+    FLASH_Parameter
 
 
 class Programs:
@@ -30,7 +31,7 @@ class Programs:
                                                                                     Settings.threads, 
                                                                                     Settings.output + os.sep + outputdir,
                                                                                     ParamFileArguments(FastQC_Parameter()),
-                                                                                    ' '.join(str(i)for i in Settings.input))))
+                                                                                    convertInput(Settings.input))))
             p.wait()
 
             # update the Settings.quality_report var for log purposes
@@ -61,7 +62,7 @@ class Programs:
             p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, 
                                                                  ParamFileArguments(TrimGalore_Parameter())
                                                                  , (Settings.output + os.sep + outputdir),
-                                                                 ' '.join(str(i)for i in Settings.input))),
+                                                                 convertInput(Settings.input))),
                                  stderr=subprocess.PIPE)
             for line in p.stderr:
                 logging(line)
@@ -70,7 +71,7 @@ class Programs:
             p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, 
                                                                  ParamFileArguments(TrimGalore_Parameter()),
                                                                  (Settings.output + os.sep + outputdir),
-                                                                 ' '.join(str(i)for i in Settings.input)))
+                                                                 convertInput(Settings.input)))
                                  , stdout=subprocess.PIPE, stderr=trimlog)
         p.wait()
         
@@ -90,7 +91,7 @@ class Programs:
         return True
     
     def assembly(self, outputdir):
-        
+
         createOutputDir(Settings.output + os.sep + outputdir + os.sep)
         # update information on cmd
         logging('\nStep:       Creating Hastables \n')
@@ -102,7 +103,7 @@ class Programs:
                                                                            Settings.output + os.sep + outputdir,
                                                                            Settings.kmer, 
                                                                            ParamFileArguments(Velveth_Parameter()) ,
-                                                                           ' '.join(str(i)for i in Settings.input))),
+                                                                           convertInput(Settings.input))),
                                  stdout=subprocess.PIPE, stderr=open(Settings.logdir + 'velveth.err.txt', 'w')) 
             for line in p.stdout:
                 logging(line)
@@ -112,14 +113,14 @@ class Programs:
                                                                            Settings.output + os.sep + outputdir,
                                                                            Settings.kmer, 
                                                                            ParamFileArguments(Velveth_Parameter()) ,
-                                                                           ' '.join(str(i)for i in Settings.input))),
+                                                                           convertInput(Settings.input))),
                                  stdout=velvethlog, stderr=open(Settings.logdir + 'velveth.err.txt', 'w'))
         p.wait()
         
         # update information on cmd
         logging('\nStep:       Create Graph for Assembly \n')
         logging('Arguments: ' + ParamFileArguments(Velvetg_Parameter()) + '\n\n')
-
+        
         # start velvetg to create the graph for the metagenomic assembly
         velvetglog = open(Settings.logdir + 'velvetg.log.txt', 'w')
         if Settings.verbose:
@@ -166,11 +167,62 @@ class Programs:
         
         return True
     
+    def flash(self, outputdir):
+        createOutputDir(Settings.output + os.sep + outputdir)
+        # update information on cmd
+        logging('\nStep:       Concatenate the reads with FLASH \n')
+        logging('Arguments: ' + ParamFileArguments(FLASH_Parameter()) + '\n')
+        flashlog = open(Settings.logdir + 'flash.log.txt', 'w')
+            if Settings.verbose:
+                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+                                                                     Settings.output + os.sep + outputdir,
+                                                                     ParamFileArguments(FLASH_Parameter()),
+                                                                     convertInput(Settings.input))),
+                                     stdout=subprocess.PIPE)
+                for line in p.stdout:
+                    logging(line)
+                    flashlog.write(line)
+            else:
+                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+                                                                     Settings.output + os.sep + outputdir,
+                                                                     ParamFileArguments(FLASH_Parameter()),
+                                                                     convertInput(Settings.input))),
+                                     stdout=flashlog)
+        elif len(Settings.input) ==1 and FLASH_Parameter().interleavedInput:
+            if Settings.verbose:
+                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+                                                                     Settings.output + os.sep + outputdir,
+                                                                     ParamFileArguments(FLASH_Parameter()),
+                                                                     Settings.input[1])),
+                                    stdout=subprocess.PIPE)
+                for line in p.stdout:
+                    logging(line)
+                    flashlog.write(line)
+            else:
+                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+                                                                     Settings.output + os.sep + outputdir,
+                                                                     ParamFileArguments(FLASH_Parameter()),
+                                                                     Settings.input[1])),
+                                     stdout=flashlog)
+                
+        else:
+            logging('Nothing to merge - PLease check input')
+            return False
+        
+        Settings.contigs = [Settings.output + os.sep + outputdir + os.sep + 'out.extendedFrags.fastq']
+        updateReads(Settings.contigs[0])
+        # print out the processing time of this step
+        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
+        Settings.actual_time = time.time()
+        return True
+                
+        
+        
     def concat(self, outputdir):
         
         createOutputDir(Settings.output + os.sep + outputdir)
         # update information on cmd
-        logging('\nStep:       Concatenate the reads \n')
+        logging('\nStep:       Concatenate the reads with stitch \n')
         logging('Arguments: ' + ParamFileArguments(Concat_Parameter()) + '\n')
         
         concatlog = open(Settings.logdir + 'concat.log.txt', 'w')
@@ -231,6 +283,13 @@ class Programs:
         logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
         Settings.actual_time = time.time()
         
+        return True
+    
+    def assembly_with_Preprocessing(self,outputdir):
+        
+        self.flash(outputdir)
+        Settings.input = Settings.contigs
+        self.assembly(outputdir)
         return True
     
     def convertToFasta(self, outputdir):
@@ -412,8 +471,30 @@ class Programs:
         
         return True
     
-    def summary(self):
-        pass
+    def summary(self, outputdir):
+        if Settings.blast_output:
+            if Settings.blast_output.endswith(".xml"):
+                # parser the Blast xml file to a DB
+                print ParamFileArguments(xmlParser())
+                p = subprocess.Popen(shlex.split('%s -o %s %s %s %s' % (Settings.PARSER,
+                                                                        Settings.output + os.sep + outputdir + os.sep +"metpipe.db", 
+                                                                        ParamFileArguments(xmlParser()),
+                                                                        Settings.blast_output[0])))
+                # fuer Krona Daten umwandeln
+            
+            else:
+                print 'Tabular einlesen'
+                p = subprocess.Popen(shlex.split('%s %s') % (Settings.KRONA_BLAST,
+                                                         Settings.blast_output[0]))
+            return True
+        else:
+            print 'no Blast Output found'
+            return False
+            
+            
+            
+        
+        
         
         
         

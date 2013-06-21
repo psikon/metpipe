@@ -154,6 +154,42 @@ while true
 while true
 	do
 		# checking for install
+		if [ -f program/flash/flash ]; then
+			echo "Installation of flash found"
+			break
+		fi
+
+
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "flash not found. Needed for concatination (optional).\n Download and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				# Download of flash
+				wget http://sourceforge.net/projects/flashpage/files/latest/download
+				tar xvfz download
+				rm download
+				mv FLASH* flash
+				cd flash
+				   make
+				   make clean
+				cd ..
+			cd ..
+			break;;
+		n|N|no|NO|No)
+			break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+
+while true
+	do
+		# checking for install
 		if [ -f program/metavelvet/meta-velvetg ] && [ -f program/velvet/velvetg ]; then
 			echo "Installation of MetaVelvet found"
 			break
@@ -485,6 +521,36 @@ while true
 
 while true
 	do
+		if [ -f program/XMLparser/bigBlastParser ] ; then
+			echo "XML Parser found! Requiered for R analysis"
+			break
+		fi
+	
+		if [ "$quiet" = "y" ]; then	
+			CONFIRM="y"
+		else
+			echo -n "XML Parser not found. (required for R analysis)\nDownload and install it? <y|n> :"
+			read CONFIRM
+		fi
+	case $CONFIRM in
+		y|Y|YES|yes|Yes) 
+			cd program/
+				git clone https://github.com/gschofl/bigBlastParser.git
+				mv bigBlastParser XMLParser
+				cd bigBlastParser/
+				    make
+   				    make clean
+				cd ..
+			cd ..
+			break;;
+		n|N|no|NO|No)
+		break;
+		;;
+		*) echo Please enter only y or n
+		esac
+	done
+while true
+	do
 		if [ -f program/krona/bin/ktImportBLAST ] && [ -f program/krona/taxonomy/gi_taxid.dat ] ; then
 			echo "Krona tools found! Requiered for graphical results"
 			break
@@ -532,6 +598,13 @@ if [ -f program/stitch/stitch/stitch.py ]; then
 	ln -s -f stitch/stitch/stitch.py program/concat && chmod 775 program/concat
 else 
 	echo "Concatenation not installed"
+fi
+
+if [ -f program/flash/flash ]; then
+	echo "Assembly - Concatenation OK!"
+	ln -s -f flash/flash program/concat2 && chmod 775 program/concat2
+else 
+	echo "Concatenation not installed"
 fi	
 
 if [ -f program/velvet/velveth ] && [ -f program/velvet/velvetg ] && [ -f program/metavelvet/meta-velvetg ]; then
@@ -563,6 +636,10 @@ if [ -f program/krona/bin/ktImportBLAST ] && [ -f program/krona/taxonomy/gi_taxi
 	ln -s -f krona/
 else
 	echo "Krona Tools not installed"
+fi
+if [ -f program/XMLparser/bigBlastParser ]  then
+	echo "XML Parser OK!"
+	ln -s -f XMLParser/bigBlastParser xmlparser && chmod 775 program/xmlparser
 fi
 
 if [ -f program/db/taxon.db ]  && [ -f program/db/geneid.db ]; then

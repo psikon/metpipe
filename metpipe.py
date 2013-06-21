@@ -43,7 +43,7 @@ if __name__ == '__main__':
                         'Annotation'], help='skip steps in the pipeline (default=None)')
     parser.add_argument('-o', dest='output', action='store', default=RESULT_DIR,
                         help='use alternative output folder')
-    parser.add_argument('-a', dest='assembler', default='MetaVelvet', choices=['metavelvet', 'concat'],
+    parser.add_argument('-a', dest='assembler', default='MetaVelvet', choices=['metavelvet', 'concat','flash','flash+metavelvet'],
                         help='assembling program to use (default= MetaVelvet)')
     parser.add_argument('-k', dest='kmer', type=int, default=DEFAULT_KMER,
                         help='k-mer size to be used (default=' + str(DEFAULT_KMER) + ')')

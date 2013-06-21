@@ -5,6 +5,7 @@ from datetime import date
 from src.settings import TrimGalore_Parameter, Blastn_Parameter, Settings
 
 
+
 # simple function to create a dir
 def createOutputDir(path):
 		
@@ -32,6 +33,10 @@ def createTasks(settings_instance, program_instance):
 	else:
 		if settings_instance.assembler.lower() == 'concat':	
 			queue.append(Task(settings_instance, program_instance.concat, 'concat'))
+		elif settings_instance.assembler.lower() == 'flash':
+			queue.append(Task(settings_instance, program_instance.flash, 'flash'))
+		elif settings_instance.assembler.lower() == 'flash+metavelvet':
+			queue.append(Task(settings_instance,program_instance.assembly_with_Preprocessing,'assembly_with_Preprocessing'))
 		else:
 			queue.append(Task(settings_instance, program_instance.assembly, 'assembly'))
 	# Annotation
@@ -45,6 +50,10 @@ def createTasks(settings_instance, program_instance):
 			queue.append(Task(settings_instance, program_instance.metaCV, 'metacv'))
 		else:
 			queue.append(Task(settings_instance, program_instance.blastn, 'blastn'))
+	if settings_instance.skip.lower() == 'summary':
+		pass
+	else:
+		queue.append(Task(settings_instance, program_instance.summary,'analysis'))
 	return queue
 
 # before start the first run - print all important settings on the cmd
@@ -69,10 +78,7 @@ def consoleSummary(settings):
 	if  settings.skip.lower() == 'assembly':
 		logging('Assembly      : skipped \n')
 	else:
-		if settings.assembler == 'concat':
-			logging('Assembly      : ' + settings.assembler + '\n')
-		else:
-			logging('Assembly      : ' + settings.assembler + '\n')	
+		logging('Assembly      : ' + settings.assembler + '\n')
 	if  settings.skip.lower() == 'annotation':
 		logging('Classify      : skipped \n')
 	else:
@@ -149,6 +155,13 @@ def moveFiles(src, dst, fileExtension):
 		if os.path.exists(dst + os.sep + f):
 			os.remove(dst + os.sep + f)
 		shutil.move(src + f, dst)
+		
+def convertInput(input):
+	if len(input)>1:
+		return str(' '.join(str(i)for i in input))
+	else:
+		return str(input[0])
+		
 
 # important function to get all used arguments from a settings object and convert it to an argument string
 def ParamFileArguments(instance):
