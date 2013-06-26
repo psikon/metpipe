@@ -176,7 +176,7 @@ while true
 				mv FLASH* flash
 				cd flash
 				   make
-				   make clean
+				   #make clean
 				cd ..
 			cd ..
 			break;;
@@ -537,7 +537,7 @@ while true
 			cd program/
 				git clone https://github.com/gschofl/bigBlastParser.git
 				mv bigBlastParser XMLParser
-				cd bigBlastParser/
+				cd XMLParser/
 				    make
    				    make clean
 				cd ..
