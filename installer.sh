@@ -24,17 +24,25 @@ exit 0;
 		esac
 	done
 
-printf "Creating File Structure ...\n"
+##################################
+# Step 1 - create infrastructure #
+##################################
+
+printf "Step 1/5 Creating File Structure ...\n"
 
 if ! [ -d programs ]; then
 	mkdir programs
 	cd programs/
-	mkdir db/ temp/ bin/
+	mkdir db/ temp/ 
 	cd ..
 fi
 
-printf "Downloading Components ...\n"
-	
+#########################################
+# Step 2 - get all requiered components #
+#########################################
+
+printf "Step 2/5 Downloading Components ...\n"
+
 	if ! [ -e programs/fastqc/fastqc ]
 	then
 		printf "[FastQC] \n"
@@ -105,101 +113,212 @@ printf "Downloading Components ...\n"
 		git clone https://github.com/gschofl/bigBlastParser.git programs/xmlParser
 	fi
 
-	printf "Extracting ...\n"
+##############################################
+# Step 3 - Extract and Compile the Downloads #
+##############################################
+
+	printf "Step 3/5 Extracting ...\n"
 
 	if [ "$fastqc" = "y" ] 
 	then
+		printf "Installing FastQC ."
 		unzip -o -q -d programs/ programs/temp/fastqc.zip 
+		printf "."
 		mv programs/FastQC programs/fastqc 
+		
+		if ! [ $? -eq 0 ]
+		then 
+			printf "ERROR: Installation of FASTQC failed"
+			exit 1;
+		fi
+        printf ". OK!\n"
 	fi
 	if [ "$trimgalore" = "y" ] 
 	then
+		printf "Installing TrimGalore! ."
 		unzip -o -q -d programs/ programs/temp/trim_galore.zip
+		printf "."
 		mv programs/trim_galore_zip programs/trim_galore 
+		
+		if ! [ $? -eq 0 ]
+		then 
+			printf "ERROR: Installation of TrimGalore! failed"
+			exit 1;
+		fi
+		printf ". OK!\n"
 	fi
 
 	if [ "$flash" = "y" ] 
 	then
+		printf "Installing Flash ."
 		tar -C programs/ -xzvf programs/temp/flash.tar.gz  > /dev/null
+		printf "."
 		mv programs/FLASH* programs/flash
 		cd programs/flash
 			make -s
+			printf "."
+			# clean up the installation manually
 			rm *.o
+			
+			if ! [ $? -eq 0 ]
+			then 
+				printf "ERROR: Installation of Flash failed"
+				exit 1;
+			fi
+		    printf " OK!\n"
 		cd ../.. 
 	fi
 
 	if [ "$velvet" = "y" ] 
 	then
+		printf "Installing Velvet ."
 		tar -C programs/ -xzvf programs/temp/velvet.tgz > /dev/null  
 		cd programs/velvet
-			 compile Velvet with Multicore and MiSeq k-mers
+			printf "."
 			make -s 'MAXKMERLENGTH=251' 'BIGASSEMBLY=1' 'LONGSEQUENCES=1' 'OPENMP=1'
+			
+			if ! [ $? -eq 0 ]
+			then 
+				printf "ERROR: Installation of Velvet failed"
+				exit 1;
+			fi
+			printf ". OK!\n"
 		cd ../..
 	fi
 
 	if [ "$metavelvet" = "y" ]
 	then 
+		printf "Installing MetaVelvet ."
 		tar -C programs/ -xzvf programs/temp/metavelvet.tgz > /dev/null
+		printf "."
 		mv programs/MetaVelvet* programs/metavelvet
 		cd programs/metavelvet
+			# compile MetaVelevet with MiSeq k-mers 
 			make -s 'MAXKMERLENGTH=251' > /dev/null
+			
+			if ! [ $? -eq 0 ]
+			then 
+				printf "ERROR: Installation of MetaVelvet failed"
+			exit 1;
+		fi
+		printf ". OK!\n"
 		cd ../..
 	fi
 
 	if [ "$blast" = "y" ]
 	then 
-		tar -C programs/ -xzvf programs/temp/blast.tar.gz > /dev/null 
+		printf "Installing Blast ."
+		tar -C programs/ -xzvf programs/temp/blast.tar.gz > /dev/null
+		printf "." 
 		mv programs/ncbi-blast* programs/blast
+		
+		if ! [ $? -eq 0 ]
+		then 
+			printf "ERROR: Installation of Blast failed"
+			exit 1;
+		fi
+		printf ". OK!\n"
 	fi
 
 	if [ "$metacv" = "y" ]
 	then 
+		printf "Installing MetaCV ."
 		tar -C programs/ -xzvf programs/temp/metacv.tgz > /dev/null 
+		printf "." 
 		mv programs/metacv_* programs/metacv 
 		cd programs/metacv
 			make -s 
+			
+			if ! [ $? -eq 0 ]
+			then 
+				printf "ERROR: Installation of MetaCV failed"
+				exit 1;
+			fi
 		cd ../..
+		printf ". OK!\n"
 	fi
 
 	if [ "$fastx" = "y" ]
 	then 
+		printf "Installing FastX ."
 		tar -C programs/ -xvjf programs/temp/fastx.tar.bz2 > /dev/null 
+		printf "." 
 		mv programs/bin programs/fastx 
+
+		if ! [ $? -eq 0 ]
+		then 
+			printf "ERROR: Installation of MetaCV failed"
+			exit 1;
+		fi
+		printf ". OK!\n"
 	fi
 
 	if [ "$krona" = "y" ]
 	then 
+		printf "Installing Krona Webtools ."
 		tar -C programs/ -xvf programs/temp/krona.tar > /dev/null && 
+		printf "." 
 		mv programs/Krona* programs/krona
+		printf "." 
 		./programs/krona/install.pl --prefix . > /dev/null
+
+		if ! [ $? -eq 0 ]
+		then 
+			printf "ERROR: Installation of Krona Webtools failed"
+			exit 1;
+		fi
+		printf " OK!\n"
 	fi
 
 	if [ "$xmlParser" = "y" ]
 	then 
+		printf "Installing XML Parser ."
 		cd programs/xmlParser/
 			make -s
+			printf "."
+			if ! [ $? -eq 0 ]
+			then 
+				printf "ERROR: Installation of Krona Webtools failed"
+				exit 1;
+			fi
 			make clean
+			printf " OK!\n"
 		cd ../..
 	fi
 
-
-	printf "Creating Databases ... \n"
+	# installing R-packages einfügen
+	printf "Step 4/5 Creating Databases ... \n"
 	
 	printf "[create or update nt database]\n"
 	cd programs/db/
-	#	./../blast/bin/update_blastdb.pl --passive --decompress nt
+		counter="0"
+		# try to install blast nt db
+		./../blast/bin/update_blastdb.pl --passive --decompress nt
+		# when exit code not 0, repeat the download 3 times
+		while ! [ $? -eq 0 ] && ! [ "$counter" -eq 3 ]
+		do		
+			./../blast/bin/update_blastdb.pl --passive --decompress nt
+			counter=$(($counter+1))
+			printf "\n"
+		done
 	
-
 	printf "[create or update taxonomy database]\n"
 	
-	#if ! [ -e taxon.db ] && ! [ -f geneid.db ]
-	#then
-	#	R -q -e "require(ncbi);createTaxonDB('.')"
-	#fi
+	# create taxonomy database for metaR - package
+	if ! [ -e taxon.db ] && ! [ -f geneid.db ]
+	then
+		R -q -e "require(ncbi);createTaxonDB('.')"
+	fi
 	
-	#cd ../krona/
-	#	./updateTaxonomy.sh
-	#cd ../db/
+	# create taxonomy table for krona webtools
+	cd ../krona/
+		if ! [ -e taxonomy/gi_taxid.dat ] 
+		then
+			./updateTaxonomy.sh
+		fi
+	cd ../db/
+
+	# try to download MetaCV db, on failure repeat download 3 times
 	counter="0"
 	while  ! [ -e cvk6_2059.cnt ] && ! [ "$counter" -eq 3 ]
 	do

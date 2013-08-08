@@ -471,7 +471,7 @@ class Programs:
         
         return True
     
-    def summary(self, outputdir):
+    def analysis(self, outputdir):
         if Settings.blast_output:
             if Settings.blast_output.endswith(".xml"):
                 # parser the Blast xml file to a DB
@@ -480,7 +480,8 @@ class Programs:
                                                                         Settings.output + os.sep + outputdir + os.sep +"metpipe.db", 
                                                                         ParamFileArguments(xmlParser()),
                                                                         Settings.blast_output[0])))
-                # fuer Krona Daten umwandeln
+                # R Analyse starten
+                #p = subprocess.Popen(shlex.split('R -q -f annotate.R -%s -%s' % ) )
             
             else:
                 print 'Tabular einlesen'
