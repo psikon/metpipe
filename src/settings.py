@@ -3,6 +3,7 @@ import sys
 import os
 
 # class for general settings of the pipeline and variables needed from every program
+
 class Settings:
 
     # general settings
@@ -24,21 +25,6 @@ class Settings:
     quality_report = []
     metaCV_output = []
     blast_output = ''
-    # EXECUTABLES 
-    program_dir = ''
-    FASTQC = ''
-    TRIMGALORE = ''
-    VELVETH = ''
-    VELVETG = ''
-    METAVELVET = ''
-    CONCAT = ''
-    FLASH = ''
-    BLASTN = ''
-    METACV = ''
-    CONVERTER = ''
-    PARSER = ''
-    KRONA_BLAST = ''
-    KRONA_TEXT = ''
     # Program Settings
     trim = True
     quality = True
@@ -76,26 +62,43 @@ class Settings:
         Settings.summary = summary
         Settings.automatic = automatic
         # define program paths
-        Settings.FASTQC = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'quality')
-        Settings.TRIMGALORE = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'filter')
-        Settings.VELVETH = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'velveth')
-        Settings.VELVETG = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
-        Settings.CONCAT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'concat')
-        Settings.METAVELVET = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'metavelvetg')
-        Settings.FLASH = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'concat2')
-        Settings.BLASTN = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
-        Settings.METACV = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
-        Settings.CONVERTER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'converter')
-        Settings.PARSER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'xmlparser')
-        Settings.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
-                                               os.sep + 'bin' + os.sep + 'ktImportBLAST')
-        Settings.KRONA_TEXT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
-                                               os.sep + 'bin' + os.sep + 'ktImportText')
+        
         # define databases
         Settings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'nt')
         Settings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, '16S')
         Settings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'cvk6_2059')
-  
+
+class Executables:
+#    FASTQC  = ''
+#    TRIMGALORE  = ''
+#    VELVETH  = ''
+#    VELVETG  = ''
+#    FLASH  = ''
+#    METAVELVET  = ''
+#    BLASTN  = ''
+#    METACV  = ''
+#    CONVERTER  = ''
+#    PARSER  = ''
+#    KRONA_BLAST  = ''
+#    KRONA_TEXT  = ''
+    
+    def __init__(self):
+        Executables.FASTQC = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastqc', os.sep, 'fastqc')
+        Executables.TRIMGALORE = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'trim_galore', os.sep, 'trim_galore')
+        Executables.VELVETH = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'velveth')
+        Executables.VELVETG = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'velvetg')
+        Executables.METAVELVET = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'metavelvetg')
+        Executables.FLASH = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'concat2')
+        Executables.BLASTN = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
+        Executables.METACV = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
+        Executables.CONVERTER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'converter')
+        Executables.PARSER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'xmlparser')
+        Executables.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
+                                               os.sep + 'bin' + os.sep + 'ktImportBLAST')
+        Executables.KRONA_TEXT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
+                                               os.sep + 'bin' + os.sep + 'ktImportText')
+
+
 # Parameters for FastQC 
 class FastQC_Parameter:
 

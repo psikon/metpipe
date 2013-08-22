@@ -2,6 +2,7 @@
 
 # First imports
 import os, sys
+from IPython.utils.io import stdout
 
 # Setting up the paths
 SRC_DIR = '%s%ssrc' % (sys.path[0], os.sep)
@@ -23,7 +24,7 @@ from collections import deque
 # import own functions and classes 
 from src.utils import consoleSummary, createTasks, getDHMS, Logger
 from src.settings import Settings
-from src.programs import Programs
+#from src.programs import Programs
 
 # Get the starting time
 starting_time = time.time()
@@ -88,28 +89,36 @@ except OSError as exception:
 if not os.path.isfile(args.param):
     print ('param file %s is not readable' % (args.param))
     sys.exit()
+    
 # create the global settings object
 settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time, args.input,
                     args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, 
                     args.use_contigs, args.assembler, args.classify, args.summary,args.auto)
 
 # fill the pipeline with tasks
-queue = deque([])
-queue = createTasks(settings, Programs())
-# print the summary of the settings
-consoleSummary(settings)
+#queue = deque([])
+#queue = createTasks(settings, Programs())
+## print the summary of the settings
+#consoleSummary(settings)
+#
+## working queue - run until queue is empty or an error occured
+#while(queue):
+#    actualElement = queue.popleft()
+#    if actualElement.getTask()(actualElement.getOutputDir()):
+#        continue
+#    else: 
+#        sys.stderr.write('ERROR!!! \nPlease check the log files for further information')
+#        print '\nPIPELINE NOT COMPLETE'
+#        sys.exit()
+#
+#
+#settings.logfile.close()
 
-# working queue - run until queue is empty or an error occured
-while(queue):
-    actualElement = queue.popleft()
-    if actualElement.getTask()(actualElement.getOutputDir()):
-        continue
-    else: 
-        sys.stderr.write('ERROR!!! \nPlease check the log files for further information')
-        print '\nPIPELINE NOT COMPLETE'
-        sys.exit()
+from src.preprocess import *
 
-
-settings.logfile.close()
-sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
-sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')
+pre = Preprocess()
+pre.qualityCheck("test")
+#pre.trim_and_filter("test")
+    
+#sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
+#sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')
