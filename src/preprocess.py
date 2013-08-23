@@ -1,50 +1,131 @@
 import subprocess
 import shlex
-import sys, os
-import shutil
-import time
-from src.utils import createOutputDir, ParamFileArguments, convertInput
+import sys, os, time
+from src.utils import ParamFileArguments
 from src.settings import Settings, FastQC_Parameter, TrimGalore_Parameter, Executables
-from src.log_functions import *
+from src.log_functions import Logging
+from src.file_functions import create_outputdir, str_input, is_exe, is_fastq, update_reads
 
 class Preprocess:
     
-    paired_end = True
-    verbose = False
     input = ''
-    quality = True
-    trimming = True
-    logdir = ''
+    logfile = ''
+    quality_dir = ''
+    trim_dir = ''
     
-    def __init__(self):
+    def __init__(self, quality_dir, trim_dir, input):
+        
+        # init the important classes and variables
         self.exe = Executables()
         self.log = Logging()
+        self.input = str_input(input)
+        # define the dirs for log and processing
+        self.quality_dir = Settings.output + os.sep + quality_dir
+        self.trim_dir = Settings.output + os.sep + trim_dir
+        self.logfile = Settings.logdir + os.sep + "trimming.log.txt"
         
+        # TODO: test for fastq noch mit rein
+        
+        # run the preprocessing functions when the module is initialized
+        if Settings.quality:
+            # is executable existing and runnable?
+            if not is_exe(self.exe.FASTQC):
+                sys.stdout.write(os.linesep)
+                sys.stderr.write('Executable for FastQC not found - Please reinstall\n')
+                sys.stdout.write(os.linesep)
+            else:
+                self.qualityCheck()
+                # only for cmd output
+                Settings.step_number = +1
+                          
+        if Settings.trim:
+            if not is_exe(self.exe.TRIMGALORE):
+                sys.stdout.write(os.linesep)
+                sys.stderr.write('Executable for TrimGalore! not found - Please reinstall\n')
+                sys.stdout.write(os.linesep)
+            else:
+                self.trim_and_filter()
+                # update the input to the processed input
+                Settings.input = update_reads(self.trim_dir, 'val', 'fq')
+                
     def __del__(self):
         pass
     
-    def qualityCheck(self,outputdir):
-        # checke ob exe exitiert ansonsten mach felhlerbereicht
-        createOutputDir(Settings.output + os.sep + outputdir)
-        self.log.printStep(1,'quality analysis',ParamFileArguments(FastQC_Parameter()))
-        p = subprocess.Popen(shlex.split('%s -t %s -o %s --extract %s %s' % (self.exe.FASTQC, 
-                                                                                Settings.threads, 
-                                                                                Settings.output + os.sep + outputdir,
-                                                                                ParamFileArguments(FastQC_Parameter()),
-                                                                                convertInput(Settings.input))),
-                             stdout=subprocess.PIPE, stderr = subprocess.PIPE)
-    
+    def qualityCheck(self):
+        
+        # create a dir for output
+        create_outputdir(self.quality_dir)
+        
+        # print actual informations about the step on stdout
+        self.log.print_step(Settings.step_number, 'Preprocess', 'quality analysis',
+                            ParamFileArguments(FastQC_Parameter()))
+        
+        # run FastQC with the given parameter, in seperate threads and extract the output
+        p = subprocess.Popen(shlex.split('%s -t %s -o %s --extract %s %s' 
+                                         % (self.exe.FASTQC,
+                                            Settings.threads,
+                                            self.quality_dir, 
+                                            ParamFileArguments(FastQC_Parameter()),
+                                            self.input)),
+                             stdout = subprocess.PIPE,
+                             stderr = subprocess.PIPE)
+        # during processing pipe the output and print it on screen
+        # no logfile needed, because FastQC is a log function
         while p.poll() is None:
-            self.log.updateCMD(p.stderr.readline().rstrip('\n'))
+            if Settings.verbose:
+                self.log.print_verbose(p.stderr.readline())
+            else:
+                self.log.print_compact(p.stderr.readline().rstrip('\n'))
+        # wait until process is finished
         p.wait()
+        # print summary of the process after completion
+        self.log.print_verbose("Quality check complete for %s\n" % (self.input))
+        self.log.print_verbose('processed in: ' + 
+                               self.log.getDHMS(time.time() - Settings.actual_time) 
+                               + '\n')
+        # raise the step_number
+        Settings.step_number += 1
+        sys.stdout.write(os.linesep)
     
-    def trim_and_filter(self,outputdir):
-        createOutputDir(Settings.output + os.sep + outputdir)
-        p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, 
-                                                                 ParamFileArguments(TrimGalore_Parameter())
-                                                                 , (Settings.output + os.sep + outputdir),
-                                                                 convertInput(Settings.input))),
-                                 )
+    def trim_and_filter(self):
+        
+        # create a dir for output
+        create_outputdir(self.trim_dir)
+        
+        # print actual informations about the step on stdout
+        self.log.print_step(Settings.step_number, 'Preprocess', 'quality based trimming and filtering',
+                            ParamFileArguments(TrimGalore_Parameter()))
+        # open the log file
+        self.logfile = self.log.open_logfile(self.logfile)
+        
+        # start trim_galore with the given parameter and specified output dir
+        p = subprocess.Popen(shlex.split('%s %s -o %s %s' % 
+                                         (self.exe.TRIMGALORE,
+                                          ParamFileArguments(TrimGalore_Parameter()),
+                                          self.trim_dir,
+                                          self.input)),
+                            stdout = subprocess.PIPE,
+                            stderr = subprocess.PIPE)
+        # wait until process is finished
+        p.wait()
+        # after processing write all generated output to the log file
+        for line in p.stderr:
+            if Settings.verbose:
+                # in verbose mode additionally print output to stdout 
+                self.log.print_verbose(line)
+                self.logfile.write(line)
+            else:
+                self.logfile.write(line)
+
+        # print summary of the process after completion
+        self.log.print_verbose('Trimming and filtering complete \n')
+        self.log.print_verbose('processed in: ' + 
+                               self.log.getDHMS(time.time() - Settings.actual_time) 
+                               + '\n')
+        # raise the step_number
+        Settings.step_number += 1
+        sys.stdout.write(os.linesep)
         
         
-        p.wait
+        
+        

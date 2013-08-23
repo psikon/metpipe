@@ -2,7 +2,6 @@
 
 # First imports
 import os, sys
-from IPython.utils.io import stdout
 
 # Setting up the paths
 SRC_DIR = '%s%ssrc' % (sys.path[0], os.sep)
@@ -22,7 +21,7 @@ import multiprocessing
 from socket import errno
 from collections import deque
 # import own functions and classes 
-from src.utils import consoleSummary, createTasks, getDHMS, Logger
+from src.utils import consoleSummary, createTasks, Logger
 from src.settings import Settings
 #from src.programs import Programs
 
@@ -93,7 +92,7 @@ if not os.path.isfile(args.param):
 # create the global settings object
 settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time, args.input,
                     args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, 
-                    args.use_contigs, args.assembler, args.classify, args.summary,args.auto)
+                    args.use_contigs, args.assembler, args.classify, args.summary,args.auto, 1)
 
 # fill the pipeline with tasks
 #queue = deque([])
@@ -116,9 +115,7 @@ settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.ski
 
 from src.preprocess import *
 
-pre = Preprocess()
-pre.qualityCheck("test")
-#pre.trim_and_filter("test")
+pre = Preprocess("quality_check","trimmed", settings.input)
     
 #sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 #sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')

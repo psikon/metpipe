@@ -14,6 +14,7 @@ class Settings:
     starting_time = ''
     actual_time = ''
     automatic = False
+    step_number = 1
     # File settings
     input = []
     contigs = []
@@ -39,7 +40,7 @@ class Settings:
     
     def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, starting_time=None, 
                  infile=None, output=None, logdir=None, param=None, trim=None, quality=None, 
-                 use_contigs=None,assembler=None, classify=None, summary=None,automatic=None):
+                 use_contigs=None,assembler=None, classify=None, summary=None,automatic=None, step_number= None):
 
         Settings.kmer = kmer
         Settings.threads = threads
@@ -61,6 +62,7 @@ class Settings:
         Settings.classify = classify.lower() 
         Settings.summary = summary
         Settings.automatic = automatic
+        Settings.step_number = step_number
         # define program paths
         
         # define databases
@@ -69,19 +71,7 @@ class Settings:
         Settings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'cvk6_2059')
 
 class Executables:
-#    FASTQC  = ''
-#    TRIMGALORE  = ''
-#    VELVETH  = ''
-#    VELVETG  = ''
-#    FLASH  = ''
-#    METAVELVET  = ''
-#    BLASTN  = ''
-#    METACV  = ''
-#    CONVERTER  = ''
-#    PARSER  = ''
-#    KRONA_BLAST  = ''
-#    KRONA_TEXT  = ''
-    
+
     def __init__(self):
         Executables.FASTQC = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastqc', os.sep, 'fastqc')
         Executables.TRIMGALORE = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'trim_galore', os.sep, 'trim_galore')
@@ -97,7 +87,7 @@ class Executables:
                                                os.sep + 'bin' + os.sep + 'ktImportBLAST')
         Executables.KRONA_TEXT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
                                                os.sep + 'bin' + os.sep + 'ktImportText')
-
+        
 
 # Parameters for FastQC 
 class FastQC_Parameter:
@@ -150,21 +140,6 @@ class TrimGalore_Parameter:
         self.length_1 = conf.get('TrimGalore', 'length_1')
         self.length_2 = conf.get('TrimGalore', 'length_2')
         self.trim = conf.getboolean('TrimGalore', 'trim1')
-
-# Parameter for concatenation of the reads
-class Concat_Parameter:
-
-    pretty_out = False
-    score = 20
-    # dict with the arguments string
-    arguments = {'pretty_out' : '-p', 'score' : '-s '}
-       
-    def __init__(self):
-        conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
-        self.pretty_out = conf.getboolean('concat', 'pretty_output')
-        self.score = conf.get('concat', 'score')
-
 
 class FLASH_Parameter:
     minOverlap = 10

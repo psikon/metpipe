@@ -4,18 +4,6 @@ from collections import deque
 from datetime import date
 from src.settings import TrimGalore_Parameter, Blastn_Parameter, Settings
 
-
-
-# simple function to create a dir
-def createOutputDir(path):
-		
-		try:
-			os.makedirs(path)
-		except OSError:
-			# if dir exists and is dir go ahead
-			if not os.path.isdir(path):
-				raise
-
 # function to fill the working queue with tasks based on the cli commands
 def createTasks(settings_instance, program_instance):
 	queue = deque()
@@ -140,28 +128,6 @@ def consoleSummary(settings):
 	else:
 		return raw_input('\nContinue?\n')
 
-def getDHMS(seconds):
-	
-	minutes, seconds = divmod(seconds, 60)
-	hours, minutes = divmod(minutes, 60)
-	days, hours = divmod(hours, 24)
-	return "%d days, %d hours, %d minutes, %d seconds" % (days, hours, minutes, seconds)
-
-# copy files into another dir
-def moveFiles(src, dst, fileExtension):
-	listofFiles = [f for f in os.listdir(src) if f.endswith(fileExtension)]
-	print 
-	for f in listofFiles:
-		if os.path.exists(dst + os.sep + f):
-			os.remove(dst + os.sep + f)
-		shutil.move(src + f, dst)
-		
-def convertInput(input):
-	if len(input)>1:
-		return str(' '.join(str(i)for i in input))
-	else:
-		return str(input[0])
-		
 
 # important function to get all used arguments from a settings object and convert it to an argument string
 def ParamFileArguments(instance):
@@ -183,27 +149,14 @@ def ParamFileArguments(instance):
 	
 	return args
 
-# test the input file for etxension of fastq files
 
-def testForFQ(testFile):
-	if  testFile.endswith(".fq") or testFile.endswith(".fastq"):
-		return True
-	else:
-		return False
 
 def logging(message):
 	sys.stdout.write(message)
 	Settings.logfile.write(message)
 	Settings.logfile.flush()
 		
-def updateReads(testFile):
-	
-	if testFile.endswith("fq") or testFile.endswith("fastq"):
-		logging("Reads for further processing: %i \n\n" % (int(len(open(testFile).readlines()))/4))
-	elif testFile.endswith("fa") or testFile.endswith("fasta"):
-		logging("Reads for further processing: %i \n\n" % (int(len(open(testFile).readlines()))/2))
-	elif testFile.endswith(".res"):
-		logging("Classified: %i \n\n"% (int(len(open(testFile).readlines()))))
+
 
 			
 # class for manage the attributes of the tasks in the workingQueue
@@ -243,14 +196,6 @@ class Logger:
 		self.log = open(logdir+"summary.log", "w")
 
 	
-class Unbuffered:
-   def __init__(self, stream):
-       self.stream = stream
-   def write(self, data):
-       self.stream.write(data)
-       self.stream.flush()
-   def __getattr__(self, attr):
-       return getattr(self.stream, attr)
 
 	
 
