@@ -17,6 +17,7 @@ class Logging:
     def print_verbose(self, message):
         sys.stdout.write(message)
     
+    # simple print a newline
     def newline(self):
         sys.stdout.write(os.linesep)
         
@@ -33,9 +34,9 @@ class Logging:
     # opens a log file for writing
     def open_logfile(self, destination):
         return open(destination, 'w')
-    
+     
+     # check path for exists and filesize
     def remove_empty_logfile(self, path):
-        
         if os.path.isfile(path) and os.path.getsize(path) == 0:
             os.remove(path)
         
