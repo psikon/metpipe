@@ -17,6 +17,9 @@ class Logging:
     def print_verbose(self, message):
         sys.stdout.write(message)
     
+    def newline(self):
+        sys.stdout.write(os.linesep)
+        
     # function for the normal compacter output - gives only informations about 
     # the calculation at the moment
     def print_compact(self, message):
@@ -31,6 +34,11 @@ class Logging:
     def open_logfile(self, destination):
         return open(destination, 'w')
     
+    def remove_empty_logfile(self, path):
+        
+        if os.path.isfile(path) and os.path.getsize(path) == 0:
+            os.remove(path)
+        
     # convert the output get from time()-function to human readable output
     def getDHMS(self, seconds):
         minutes, seconds = divmod(seconds, 60)

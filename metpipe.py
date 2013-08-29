@@ -114,8 +114,10 @@ settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.ski
 #settings.logfile.close()
 
 from src.preprocess import *
+from src.assembly import *
 
 pre = Preprocess("quality_check","trimmed", settings.input)
+ass = Assembly("assembly", settings.input, settings.assembler)
     
-#sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
+sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 #sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')

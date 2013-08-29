@@ -35,8 +35,8 @@ class Preprocess:
                 sys.stdout.write(os.linesep)
             else:
                 self.qualityCheck()
-                # only for cmd output
-                Settings.step_number = +1
+                # raise the step number for cmd output
+                Settings.step_number = Settings.step_number + 1
                           
         if Settings.trim:
             if not is_exe(self.exe.TRIMGALORE):
@@ -47,6 +47,8 @@ class Preprocess:
                 self.trim_and_filter()
                 # update the input to the processed input
                 Settings.input = update_reads(self.trim_dir, 'val', 'fq')
+                # raise the step number for cmd output
+                Settings.step_number = Settings.step_number + 1
                 
     def __del__(self):
         pass
@@ -59,6 +61,7 @@ class Preprocess:
         # print actual informations about the step on stdout
         self.log.print_step(Settings.step_number, 'Preprocess', 'quality analysis',
                             ParamFileArguments(FastQC_Parameter()))
+        self.log.newline()
         
         # run FastQC with the given parameter, in seperate threads and extract the output
         p = subprocess.Popen(shlex.split('%s -t %s -o %s --extract %s %s' 
@@ -83,9 +86,7 @@ class Preprocess:
         self.log.print_verbose('processed in: ' + 
                                self.log.getDHMS(time.time() - Settings.actual_time) 
                                + '\n')
-        # raise the step_number
-        Settings.step_number += 1
-        sys.stdout.write(os.linesep)
+        self.log.newline
     
     def trim_and_filter(self):
         
@@ -95,6 +96,8 @@ class Preprocess:
         # print actual informations about the step on stdout
         self.log.print_step(Settings.step_number, 'Preprocess', 'quality based trimming and filtering',
                             ParamFileArguments(TrimGalore_Parameter()))
+        self.log.newline()
+        
         # open the log file
         self.logfile = self.log.open_logfile(self.logfile)
         
@@ -122,9 +125,7 @@ class Preprocess:
         self.log.print_verbose('processed in: ' + 
                                self.log.getDHMS(time.time() - Settings.actual_time) 
                                + '\n')
-        # raise the step_number
-        Settings.step_number += 1
-        sys.stdout.write(os.linesep)
+        self.log.newline
         
         
         
