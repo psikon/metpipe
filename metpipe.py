@@ -115,9 +115,11 @@ settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.ski
 
 from src.preprocess import *
 from src.assembly import *
+from src.annotation import *
 
-pre = Preprocess("quality_check","trimmed", settings.input)
-ass = Assembly("assembly", settings.input, settings.assembler)
-    
+preprocess = Preprocess("quality_check","trimmed", settings.input)
+assembly = Assembly("assembly", settings.input, settings.assembler)
+annotate = Annotation(Settings.input, 'blastn', 'metacv', settings.classify)
+
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 #sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')

@@ -66,9 +66,9 @@ class Settings:
         # define program paths
         
         # define databases
-        Settings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'nt')
-        Settings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, '16S')
-        Settings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep , 'db', os.sep, 'cvk6_2059')
+        Settings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'nt')
+        Settings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, '16S')
+        Settings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'cvk6_2059')
 
 class Executables:
 
@@ -79,9 +79,9 @@ class Executables:
         Executables.VELVETG = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'velvet', os.sep,'velvetg')
         Executables.METAVELVET = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metavelvet', os.sep, 'meta-velvetg')
         Executables.FLASH = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'flash', os.sep, 'flash')
-        Executables.BLASTN = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'blastn')
+        Executables.BLASTN = '%s%s%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'blast', os.sep, 'bin', os.sep, 'blastn')
         Executables.METACV = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
-        Executables.CONVERTER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'converter')
+        Executables.CONVERTER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastx', os.sep, 'fastq_to_fasta')
         Executables.PARSER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'xmlparser')
         Executables.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
                                                os.sep + 'bin' + os.sep + 'ktImportBLAST')

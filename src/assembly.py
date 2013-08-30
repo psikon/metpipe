@@ -2,12 +2,11 @@
 import subprocess
 import shlex
 import sys, os
-import shutil
 import time
 # imports of own functions and classes
 from src.utils import ParamFileArguments
 from src.settings import Settings, Executables, FLASH_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter
-from src.file_functions import create_outputdir, move, str_input, is_paired, is_fastq, update_reads, is_exe
+from src.file_functions import create_outputdir, str_input, is_paired, is_fastq, update_reads, is_exe
 from src.log_functions import Logging
 
 
@@ -39,7 +38,8 @@ class Assembly:
             else:
                 # start processing and update the input for next step
                 self.concatinate(self.out)
-                Settings.input = update_reads(self.out,'extendedFrags','fastq')
+                Settings.input = update_reads(self.out, 'extendedFrags', 'fastq')
+                Settings.step_number = Settings.step_number + 1
 
         if mode.lower() == 'metavelvet':
             # is executable existing and runnable?
@@ -58,7 +58,8 @@ class Assembly:
             else:
                 # start processing and update the input for next step
                 self.assemble_reads(self.out)
-                Settings.input = update_reads(self.out,'meta-velvetg','fa')
+                Settings.input = update_reads(self.out, 'meta-velvetg', 'fa')
+                Settings.step_number = Settings.step_number + 1
         
         if mode.lower() == 'both':
             #TODO: not working because of auto mode --> see logs
@@ -83,10 +84,11 @@ class Assembly:
             else:
                 # start processing and update the input for next step
                 self.concatinate(self.out)
-                self.input = update_reads(self.out,'extendedFrags','fastq')
+                self.input = update_reads(self.out, 'extendedFrags', 'fastq')
                 
                 self.assemble_reads(self.out)
-                Settings.input = update_reads(self.out,'meta-velvetg','fa')
+                Settings.input = update_reads(self.out, 'meta-velvetg', 'fa')
+                Settings.step_number = Settings.step_number + 1
             
     def __del__(self):
        pass
@@ -106,10 +108,10 @@ class Assembly:
         # start the program Flash with parameter from the conf file a
         # errors will be piped to extra error logfile
         p = subprocess.Popen(shlex.split('%s -t %d -d %s %s %s' % (self.exe.FLASH,
-                                                                  Settings.threads,
-                                                                  outputdir,
-                                                                  ParamFileArguments(FLASH_Parameter()),
-                                                                  self.input)),
+                                                                   Settings.threads,
+                                                                   outputdir,
+                                                                   ParamFileArguments(FLASH_Parameter()),
+                                                                   self.input)),
                             stdout = subprocess.PIPE, 
                             stderr = self.log.open_logfile(self.logdir + 'flash.err.log'))
         # during processing print Flash output in verbose mode and update the logfile
@@ -118,6 +120,7 @@ class Assembly:
                 self.log.print_verbose(p.stdout.readline())
                 logfile.write(p.stdout.readline())
             else:
+                self.log.print_compact(p.stdout.readline().rstrip('\n'))
                 logfile.write(p.stdout.readline())
         # wait until process is finished        
         p.wait()
@@ -131,9 +134,6 @@ class Assembly:
         self.log.print_verbose('processed in: ' + 
                                self.log.getDHMS(time.time() - Settings.actual_time) 
                                + '\n')
-        
-        # raise the step_number
-        Settings.step_number = Settings.step_number + 1
         self.log.newline()
         
     def assemble_reads(self, outputdir):
@@ -152,10 +152,10 @@ class Assembly:
         # start the program velveth with parameter from the conf file and automatic detection
         # of the input file format
         # errors will be piped to extra error logfile
-        p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Executables.VELVETH, 
+        p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (self.exe.VELVETH, 
                                                                        outputdir,
                                                                        Settings.kmer, 
-                                                                       ParamFileArguments(Velveth_Parameter()) ,
+                                                                       ParamFileArguments(Velveth_Parameter()),
                                                                        self.input)),
                             stdout = subprocess.PIPE, 
                             stderr = self.log.open_logfile(self.logdir + 'velveth.err.log')) 
@@ -183,7 +183,7 @@ class Assembly:
         
         # start the program velvetg in the dir of velveth, with the parameter of the conf file
         # errors will be piped to extra error logfile
-        p = subprocess.Popen(shlex.split('%s %s %s' % (Executables.VELVETG, 
+        p = subprocess.Popen(shlex.split('%s %s %s' % (self.exe.VELVETG, 
                                                        outputdir,
                                                        ParamFileArguments(Velvetg_Parameter()))),
                              stdout = subprocess.PIPE,
@@ -203,7 +203,7 @@ class Assembly:
         self.log.remove_empty_logfile(self.logdir + 'velvetg.err.log')
         
         # print actual informations about the step on stdout
-        self.log.print_step(Settings.step_number, 'Assembly', 'metagenomic Assembly',
+        self.log.print_step(Settings.step_number, 'Assembly', 'Metagenomic Assembly',
                            ParamFileArguments(MetaVelvet_Parameter()))
         self.log.newline()
         
@@ -213,7 +213,7 @@ class Assembly:
         # start the program meta-velvetg in the dir of velveth and velvetg, 
         # with the parameter of the conf file
         # errors will be piped to extra error logfile
-        p = subprocess.Popen(shlex.split('%s %s %s' % (Executables.METAVELVET, 
+        p = subprocess.Popen(shlex.split('%s %s %s' % (self.exe.METAVELVET, 
                                                        outputdir,
                                                        ParamFileArguments(MetaVelvet_Parameter()))),
                                 stdout = subprocess.PIPE, 
@@ -238,8 +238,6 @@ class Assembly:
         self.log.print_verbose('processed in: ' + 
                                self.log.getDHMS(time.time() - Settings.actual_time) 
                                + '\n')
-        # raise the step_number
-        Settings.step_number = Settings.step_number + 1
         self.log.newline()
 
         

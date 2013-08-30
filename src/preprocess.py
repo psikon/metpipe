@@ -4,7 +4,7 @@ import sys, os, time
 from src.utils import ParamFileArguments
 from src.settings import Settings, FastQC_Parameter, TrimGalore_Parameter, Executables
 from src.log_functions import Logging
-from src.file_functions import create_outputdir, str_input, is_exe, is_fastq, update_reads
+from src.file_functions import create_outputdir, str_input, is_exe, update_reads
 
 class Preprocess:
     
@@ -22,7 +22,7 @@ class Preprocess:
         # define the dirs for log and processing
         self.quality_dir = Settings.output + os.sep + quality_dir
         self.trim_dir = Settings.output + os.sep + trim_dir
-        self.logfile = Settings.logdir + os.sep + "trimming.log.txt"
+        self.logfile = Settings.logdir + os.sep + 'trimming.log.txt'
         
         # TODO: test for fastq noch mit rein
         
@@ -82,7 +82,7 @@ class Preprocess:
         # wait until process is finished
         p.wait()
         # print summary of the process after completion
-        self.log.print_verbose("Quality check complete for %s\n" % (self.input))
+        self.log.print_verbose('Quality check complete for %s\n' % (self.input))
         self.log.print_verbose('processed in: ' + 
                                self.log.getDHMS(time.time() - Settings.actual_time) 
                                + '\n')

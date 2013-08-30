@@ -18,279 +18,279 @@ class Programs:
     def __del__(self):
         pass
        
-    # handle the program FastQC - an standard tool to determine the quality of short read sequencing files 
-    def fastqc(self, outputdir):
-    
-        createOutputDir(Settings.output + os.sep + outputdir)
-        # update information on cmd
-        logging('\nStep:       Quality analysis with FastQC \n')
-        logging('Arguments: ' + ParamFileArguments(FastQC_Parameter()) + '\n\n')
-        if (Settings.input[0].endswith(".fastq")):
-            # start FastQC and wait until task complete
-            p = subprocess.Popen(shlex.split('%s -t %s -o %s -q --extract %s %s' % (Settings.FASTQC, 
-                                                                                    Settings.threads, 
-                                                                                    Settings.output + os.sep + outputdir,
-                                                                                    ParamFileArguments(FastQC_Parameter()),
-                                                                                    convertInput(Settings.input))))
-            p.wait()
-
-            # update the Settings.quality_report var for log purposes
-            for r, d, f in os.walk(Settings.output + os.sep + outputdir + os.sep):
-                for files in f:
-                    if files.endswith('_data.txt'):
-                        Settings.quality_report.append(os.path.join(r, files))
-        else:
-            logging("! ERROR: %s not a fastq file! \n"%(' '.join(str(i)for i in Settings.input)))
-                        
-        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
-        Settings.actual_time = time.time()
-        
-        
-        return True
-       
-    def trimming(self, outputdir):
-        
-        createOutputDir(Settings.output + os.sep + outputdir)
-        # update information on cmd
-        logging('\nStep:       Quality trimming and filtering \n')
-        logging('Arguments: ' + ParamFileArguments(TrimGalore_Parameter()) + '\n\n')
-        
-        # start TrimGalore and wait until task complete
-        trimlog = open(Settings.logdir + 'trim.log.txt', 'w')
-        if Settings.verbose:
-            
-            p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, 
-                                                                 ParamFileArguments(TrimGalore_Parameter())
-                                                                 , (Settings.output + os.sep + outputdir),
-                                                                 convertInput(Settings.input))),
-                                 stderr=subprocess.PIPE)
-            for line in p.stderr:
-                logging(line)
-                trimlog.write(line)
-        else:   
-            p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, 
-                                                                 ParamFileArguments(TrimGalore_Parameter()),
-                                                                 (Settings.output + os.sep + outputdir),
-                                                                 convertInput(Settings.input)))
-                                 , stdout=subprocess.PIPE, stderr=trimlog)
-        p.wait()
-        
-        # search for the processed input files and update input files in settings object
-    
-        if len(Settings.input) > 1:
-            Settings.input = [Settings.output + os.sep + outputdir + os.sep + [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)][1],
-						      Settings.output + os.sep + outputdir + os.sep + [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)][0]]
-        else:
-            Settings.input = [Settings.output + os.sep + outputdir + os.sep + [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)][0]]
-        
-        # print out the processing time of this step
-        updateReads(Settings.input[0])
-        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
-        Settings.actual_time = time.time()
-        
-        return True
-    
-    def assembly(self, outputdir):
-
-        createOutputDir(Settings.output + os.sep + outputdir + os.sep)
-        # update information on cmd
-        logging('\nStep:       Creating Hastables \n')
-        logging('Arguments: ' + ParamFileArguments(Velveth_Parameter()) + '\n\n')
-        # start velveth and wait for completion
-        velvethlog = open(Settings.logdir + 'velveth.log.txt', 'w')
-        if Settings.verbose:
-            p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, 
-                                                                           Settings.output + os.sep + outputdir,
-                                                                           Settings.kmer, 
-                                                                           ParamFileArguments(Velveth_Parameter()) ,
-                                                                           convertInput(Settings.input))),
-                                 stdout=subprocess.PIPE, stderr=open(Settings.logdir + 'velveth.err.txt', 'w')) 
-            for line in p.stdout:
-                logging(line)
-                velvethlog.write(line)
-        else:
-            p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, 
-                                                                           Settings.output + os.sep + outputdir,
-                                                                           Settings.kmer, 
-                                                                           ParamFileArguments(Velveth_Parameter()) ,
-                                                                           convertInput(Settings.input))),
-                                 stdout=velvethlog, stderr=open(Settings.logdir + 'velveth.err.txt', 'w'))
-        p.wait()
-        
-        # update information on cmd
-        logging('\nStep:       Create Graph for Assembly \n')
-        logging('Arguments: ' + ParamFileArguments(Velvetg_Parameter()) + '\n\n')
-        
-        # start velvetg to create the graph for the metagenomic assembly
-        velvetglog = open(Settings.logdir + 'velvetg.log.txt', 'w')
-        if Settings.verbose:
-            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, 
-                                                           Settings.output + os.sep + outputdir,
-                                                           ParamFileArguments(Velvetg_Parameter()))),
-                                 stdout=subprocess.PIPE, stderr=open(Settings.logdir + 'velvetg.err.txt', 'w'))
-            for line in p.stdout:
-                logging(line)
-                velvetglog.write(line)
-        else:
-            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, 
-                                                           Settings.output + os.sep + outputdir,
-                                                           ParamFileArguments(Velvetg_Parameter()))),
-                                 stdout=velvetglog, stderr=open(Settings.logdir + 'velvetg.err.txt', 'w'))
-        p.wait()
-        
-        # update information on cmd
-        logging('\nStep:       Search for metagenomic Contigs \n')
-        logging('Arguments: ' + ParamFileArguments(MetaVelvet_Parameter()) + '\n')
-        metavelvetlog = open(Settings.logdir + 'meta-velvetg.log.txt', 'w')
-        if Settings.verbose:
-            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET, 
-                                                           Settings.output + os.sep + outputdir,
-                                                           ParamFileArguments(MetaVelvet_Parameter()))),
-                                 stdout=subprocess.PIPE, stderr=open(Settings.logdir + 'meta-velvetg.err.txt', 'w'))
-            for line in p.stdout:
-                logging(line)
-                metavelvetlog.write(line)
-        else:
-            p = subprocess.Popen(shlex.split('%s %s%s' % (Settings.METAVELVET, 
-                                                          Settings.output + os.sep + outputdir + os.sep,
-                                                          ParamFileArguments(MetaVelvet_Parameter()))),
-                                 stdout=metavelvetlog, stderr=open(Settings.logdir + 'meta-velvetg.err.txt', 'w'))
-        p.wait()
-        
-        # update Settings.contigs for further processing
-        Settings.contigs = [Settings.output + os.sep + outputdir + os.sep + 'meta-velvetg.contigs.fa']
-        updateReads(Settings.contigs[0])
-        
-        # print out the processing time of this step
-        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
-        Settings.actual_time = time.time()
-        
-        return True
-    
-    def flash(self, outputdir):
-        createOutputDir(Settings.output + os.sep + outputdir)
-        # update information on cmd
-        logging('\nStep:       Concatenate the reads with FLASH \n')
-        logging('Arguments: ' + ParamFileArguments(FLASH_Parameter()) + '\n')
-        flashlog = open(Settings.logdir + 'flash.log.txt', 'w')
-            if Settings.verbose:
-                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
-                                                                     Settings.output + os.sep + outputdir,
-                                                                     ParamFileArguments(FLASH_Parameter()),
-                                                                     convertInput(Settings.input))),
-                                     stdout=subprocess.PIPE)
-                for line in p.stdout:
-                    logging(line)
-                    flashlog.write(line)
-            else:
-                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
-                                                                     Settings.output + os.sep + outputdir,
-                                                                     ParamFileArguments(FLASH_Parameter()),
-                                                                     convertInput(Settings.input))),
-                                     stdout=flashlog)
-        elif len(Settings.input) ==1 and FLASH_Parameter().interleavedInput:
-            if Settings.verbose:
-                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
-                                                                     Settings.output + os.sep + outputdir,
-                                                                     ParamFileArguments(FLASH_Parameter()),
-                                                                     Settings.input[1])),
-                                    stdout=subprocess.PIPE)
-                for line in p.stdout:
-                    logging(line)
-                    flashlog.write(line)
-            else:
-                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
-                                                                     Settings.output + os.sep + outputdir,
-                                                                     ParamFileArguments(FLASH_Parameter()),
-                                                                     Settings.input[1])),
-                                     stdout=flashlog)
-                
-        else:
-            logging('Nothing to merge - PLease check input')
-            return False
-        
-        Settings.contigs = [Settings.output + os.sep + outputdir + os.sep + 'out.extendedFrags.fastq']
-        updateReads(Settings.contigs[0])
-        # print out the processing time of this step
-        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
-        Settings.actual_time = time.time()
-        return True
-                
-        
-        
-    def concat(self, outputdir):
-        
-        createOutputDir(Settings.output + os.sep + outputdir)
-        # update information on cmd
-        logging('\nStep:       Concatenate the reads with stitch \n')
-        logging('Arguments: ' + ParamFileArguments(Concat_Parameter()) + '\n')
-        
-        concatlog = open(Settings.logdir + 'concat.log.txt', 'w')
-        if len(Settings.input) > 1:
-            # for paired end files
-            
-            if Settings.verbose:
-                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, 
-                                                                                     str(Settings.input[0]),
-                                                                                     str(Settings.input[1]),
-                                                                                     Settings.output + os.sep + outputdir, 
-                                                                                     Settings.threads,
-                                                                                     ParamFileArguments(Concat_Parameter()))),
-                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
-                                     stderr=subprocess.PIPE)
-                for line in p.stderr:
-                    logging(line)
-                    concatlog.write(line)
-            else:
-                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, 
-                                                                                     str(Settings.input[0]),
-                                                                                     str(Settings.input[1]),
-                                                                                     Settings.output + os.sep + outputdir, 
-                                                                                     Settings.threads,
-                                                                                     ParamFileArguments(Concat_Parameter()))),
-                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
-                                     stderr=concatlog)
-        else:
-            # for single end files
-            if Settings.verbose:
-                p = subprocess.Popen(shlex.split('%s -i %s -o %s -t %s %s ' % (Settings.CONCAT, 
-                                                                               str(Settings.input),
-                                                                               Settings.output + os.sep + outputdir, 
-                                                                               Settings.threads,
-                                                                               ParamFileArguments(Concat_Parameter()))),
-                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt'),
-                                     stderr=subprocess.PIPE)
-                for line in p.stderr:
-                    logging(line)
-                    concatlog.write(line)
-            else:
-                p = subprocess.Popen(shlex.split('%s -i %s -o %s -t %s %s ' % (Settings.CONCAT, 
-                                                                               str(Settings.input),
-                                                                               Settings.output + os.sep + outputdir, 
-                                                                               Settings.threads,
-                                                                               ParamFileArguments(Concat_Parameter()))),
-                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
-                                     stderr=concatlog)
-        p.wait()
-        
-        # move files from the first level to the specified output folder
-        moveFiles(Settings.output + os.sep , Settings.output + os.sep + outputdir + os.sep, '.fastq')
-        # update the Setings.input var for further processing
-        Settings.contigs = [Settings.output + os.sep + outputdir + os.sep + 'concat-contigs.fastq']
-        updateReads(Settings.input[0])
-        
-        # print out the processing time of this step
-        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
-        Settings.actual_time = time.time()
-        
-        return True
-    
-    def assembly_with_Preprocessing(self,outputdir):
-        
-        self.flash(outputdir)
-        Settings.input = Settings.contigs
-        self.assembly(outputdir)
-        return True
+#    # handle the program FastQC - an standard tool to determine the quality of short read sequencing files 
+#    def fastqc(self, outputdir):
+#    
+#        createOutputDir(Settings.output + os.sep + outputdir)
+#        # update information on cmd
+#        logging('\nStep:       Quality analysis with FastQC \n')
+#        logging('Arguments: ' + ParamFileArguments(FastQC_Parameter()) + '\n\n')
+#        if (Settings.input[0].endswith(".fastq")):
+#            # start FastQC and wait until task complete
+#            p = subprocess.Popen(shlex.split('%s -t %s -o %s -q --extract %s %s' % (Settings.FASTQC, 
+#                                                                                    Settings.threads, 
+#                                                                                    Settings.output + os.sep + outputdir,
+#                                                                                    ParamFileArguments(FastQC_Parameter()),
+#                                                                                    convertInput(Settings.input))))
+#            p.wait()
+#
+#            # update the Settings.quality_report var for log purposes
+#            for r, d, f in os.walk(Settings.output + os.sep + outputdir + os.sep):
+#                for files in f:
+#                    if files.endswith('_data.txt'):
+#                        Settings.quality_report.append(os.path.join(r, files))
+#        else:
+#            logging("! ERROR: %s not a fastq file! \n"%(' '.join(str(i)for i in Settings.input)))
+#                        
+#        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
+#        Settings.actual_time = time.time()
+#        
+#        
+#        return True
+#       
+#    def trimming(self, outputdir):
+#        
+#        createOutputDir(Settings.output + os.sep + outputdir)
+#        # update information on cmd
+#        logging('\nStep:       Quality trimming and filtering \n')
+#        logging('Arguments: ' + ParamFileArguments(TrimGalore_Parameter()) + '\n\n')
+#        
+#        # start TrimGalore and wait until task complete
+#        trimlog = open(Settings.logdir + 'trim.log.txt', 'w')
+#        if Settings.verbose:
+#            
+#            p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, 
+#                                                                 ParamFileArguments(TrimGalore_Parameter())
+#                                                                 , (Settings.output + os.sep + outputdir),
+#                                                                 convertInput(Settings.input))),
+#                                 stderr=subprocess.PIPE)
+#            for line in p.stderr:
+#                logging(line)
+#                trimlog.write(line)
+#        else:   
+#            p = subprocess.Popen(shlex.split('%s %s -o %s %s' % (Settings.TRIMGALORE, 
+#                                                                 ParamFileArguments(TrimGalore_Parameter()),
+#                                                                 (Settings.output + os.sep + outputdir),
+#                                                                 convertInput(Settings.input)))
+#                                 , stdout=subprocess.PIPE, stderr=trimlog)
+#        p.wait()
+#        
+#        # search for the processed input files and update input files in settings object
+#    
+#        if len(Settings.input) > 1:
+#            Settings.input = [Settings.output + os.sep + outputdir + os.sep + [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)][1],
+#						      Settings.output + os.sep + outputdir + os.sep + [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)][0]]
+#        else:
+#            Settings.input = [Settings.output + os.sep + outputdir + os.sep + [f for f in os.listdir(Settings.output + os.sep + outputdir) if (f.endswith('.fq') and 'val' in f)][0]]
+#        
+#        # print out the processing time of this step
+#        updateReads(Settings.input[0])
+#        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
+#        Settings.actual_time = time.time()
+#        
+#        return True
+#    
+#    def assembly(self, outputdir):
+#
+#        createOutputDir(Settings.output + os.sep + outputdir + os.sep)
+#        # update information on cmd
+#        logging('\nStep:       Creating Hastables \n')
+#        logging('Arguments: ' + ParamFileArguments(Velveth_Parameter()) + '\n\n')
+#        # start velveth and wait for completion
+#        velvethlog = open(Settings.logdir + 'velveth.log.txt', 'w')
+#        if Settings.verbose:
+#            p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, 
+#                                                                           Settings.output + os.sep + outputdir,
+#                                                                           Settings.kmer, 
+#                                                                           ParamFileArguments(Velveth_Parameter()) ,
+#                                                                           convertInput(Settings.input))),
+#                                 stdout=subprocess.PIPE, stderr=open(Settings.logdir + 'velveth.err.txt', 'w')) 
+#            for line in p.stdout:
+#                logging(line)
+#                velvethlog.write(line)
+#        else:
+#            p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (Settings.VELVETH, 
+#                                                                           Settings.output + os.sep + outputdir,
+#                                                                           Settings.kmer, 
+#                                                                           ParamFileArguments(Velveth_Parameter()) ,
+#                                                                           convertInput(Settings.input))),
+#                                 stdout=velvethlog, stderr=open(Settings.logdir + 'velveth.err.txt', 'w'))
+#        p.wait()
+#        
+#        # update information on cmd
+#        logging('\nStep:       Create Graph for Assembly \n')
+#        logging('Arguments: ' + ParamFileArguments(Velvetg_Parameter()) + '\n\n')
+#        
+#        # start velvetg to create the graph for the metagenomic assembly
+#        velvetglog = open(Settings.logdir + 'velvetg.log.txt', 'w')
+#        if Settings.verbose:
+#            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, 
+#                                                           Settings.output + os.sep + outputdir,
+#                                                           ParamFileArguments(Velvetg_Parameter()))),
+#                                 stdout=subprocess.PIPE, stderr=open(Settings.logdir + 'velvetg.err.txt', 'w'))
+#            for line in p.stdout:
+#                logging(line)
+#                velvetglog.write(line)
+#        else:
+#            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.VELVETG, 
+#                                                           Settings.output + os.sep + outputdir,
+#                                                           ParamFileArguments(Velvetg_Parameter()))),
+#                                 stdout=velvetglog, stderr=open(Settings.logdir + 'velvetg.err.txt', 'w'))
+#        p.wait()
+#        
+#        # update information on cmd
+#        logging('\nStep:       Search for metagenomic Contigs \n')
+#        logging('Arguments: ' + ParamFileArguments(MetaVelvet_Parameter()) + '\n')
+#        metavelvetlog = open(Settings.logdir + 'meta-velvetg.log.txt', 'w')
+#        if Settings.verbose:
+#            p = subprocess.Popen(shlex.split('%s %s %s' % (Settings.METAVELVET, 
+#                                                           Settings.output + os.sep + outputdir,
+#                                                           ParamFileArguments(MetaVelvet_Parameter()))),
+#                                 stdout=subprocess.PIPE, stderr=open(Settings.logdir + 'meta-velvetg.err.txt', 'w'))
+#            for line in p.stdout:
+#                logging(line)
+#                metavelvetlog.write(line)
+#        else:
+#            p = subprocess.Popen(shlex.split('%s %s%s' % (Settings.METAVELVET, 
+#                                                          Settings.output + os.sep + outputdir + os.sep,
+#                                                          ParamFileArguments(MetaVelvet_Parameter()))),
+#                                 stdout=metavelvetlog, stderr=open(Settings.logdir + 'meta-velvetg.err.txt', 'w'))
+#        p.wait()
+#        
+#        # update Settings.contigs for further processing
+#        Settings.contigs = [Settings.output + os.sep + outputdir + os.sep + 'meta-velvetg.contigs.fa']
+#        updateReads(Settings.contigs[0])
+#        
+#        # print out the processing time of this step
+#        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
+#        Settings.actual_time = time.time()
+#        
+#        return True
+#    
+#    def flash(self, outputdir):
+#        createOutputDir(Settings.output + os.sep + outputdir)
+#        # update information on cmd
+#        logging('\nStep:       Concatenate the reads with FLASH \n')
+#        logging('Arguments: ' + ParamFileArguments(FLASH_Parameter()) + '\n')
+#        flashlog = open(Settings.logdir + 'flash.log.txt', 'w')
+#            if Settings.verbose:
+#                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+#                                                                     Settings.output + os.sep + outputdir,
+#                                                                     ParamFileArguments(FLASH_Parameter()),
+#                                                                     convertInput(Settings.input))),
+#                                     stdout=subprocess.PIPE)
+#                for line in p.stdout:
+#                    logging(line)
+#                    flashlog.write(line)
+#            else:
+#                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+#                                                                     Settings.output + os.sep + outputdir,
+#                                                                     ParamFileArguments(FLASH_Parameter()),
+#                                                                     convertInput(Settings.input))),
+#                                     stdout=flashlog)
+#        elif len(Settings.input) ==1 and FLASH_Parameter().interleavedInput:
+#            if Settings.verbose:
+#                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+#                                                                     Settings.output + os.sep + outputdir,
+#                                                                     ParamFileArguments(FLASH_Parameter()),
+#                                                                     Settings.input[1])),
+#                                    stdout=subprocess.PIPE)
+#                for line in p.stdout:
+#                    logging(line)
+#                    flashlog.write(line)
+#            else:
+#                p = subprocess.Popen(shlex.split('%s -d %s %s %s' % (Settings.FLASH,
+#                                                                     Settings.output + os.sep + outputdir,
+#                                                                     ParamFileArguments(FLASH_Parameter()),
+#                                                                     Settings.input[1])),
+#                                     stdout=flashlog)
+#                
+#        else:
+#            logging('Nothing to merge - PLease check input')
+#            return False
+#        
+#        Settings.contigs = [Settings.output + os.sep + outputdir + os.sep + 'out.extendedFrags.fastq']
+#        updateReads(Settings.contigs[0])
+#        # print out the processing time of this step
+#        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
+#        Settings.actual_time = time.time()
+#        return True
+#                
+#        
+#        
+#    def concat(self, outputdir):
+#        
+#        createOutputDir(Settings.output + os.sep + outputdir)
+#        # update information on cmd
+#        logging('\nStep:       Concatenate the reads with stitch \n')
+#        logging('Arguments: ' + ParamFileArguments(Concat_Parameter()) + '\n')
+#        
+#        concatlog = open(Settings.logdir + 'concat.log.txt', 'w')
+#        if len(Settings.input) > 1:
+#            # for paired end files
+#            
+#            if Settings.verbose:
+#                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, 
+#                                                                                     str(Settings.input[0]),
+#                                                                                     str(Settings.input[1]),
+#                                                                                     Settings.output + os.sep + outputdir, 
+#                                                                                     Settings.threads,
+#                                                                                     ParamFileArguments(Concat_Parameter()))),
+#                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
+#                                     stderr=subprocess.PIPE)
+#                for line in p.stderr:
+#                    logging(line)
+#                    concatlog.write(line)
+#            else:
+#                p = subprocess.Popen(shlex.split('%s -i %s -j %s -o %s -t %s %s ' % (Settings.CONCAT, 
+#                                                                                     str(Settings.input[0]),
+#                                                                                     str(Settings.input[1]),
+#                                                                                     Settings.output + os.sep + outputdir, 
+#                                                                                     Settings.threads,
+#                                                                                     ParamFileArguments(Concat_Parameter()))),
+#                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
+#                                     stderr=concatlog)
+#        else:
+#            # for single end files
+#            if Settings.verbose:
+#                p = subprocess.Popen(shlex.split('%s -i %s -o %s -t %s %s ' % (Settings.CONCAT, 
+#                                                                               str(Settings.input),
+#                                                                               Settings.output + os.sep + outputdir, 
+#                                                                               Settings.threads,
+#                                                                               ParamFileArguments(Concat_Parameter()))),
+#                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt'),
+#                                     stderr=subprocess.PIPE)
+#                for line in p.stderr:
+#                    logging(line)
+#                    concatlog.write(line)
+#            else:
+#                p = subprocess.Popen(shlex.split('%s -i %s -o %s -t %s %s ' % (Settings.CONCAT, 
+#                                                                               str(Settings.input),
+#                                                                               Settings.output + os.sep + outputdir, 
+#                                                                               Settings.threads,
+#                                                                               ParamFileArguments(Concat_Parameter()))),
+#                                     stdout=open(Settings.output + os.sep + outputdir + os.sep + 'alignments.txt', 'w'),
+#                                     stderr=concatlog)
+#        p.wait()
+#        
+#        # move files from the first level to the specified output folder
+#        moveFiles(Settings.output + os.sep , Settings.output + os.sep + outputdir + os.sep, '.fastq')
+#        # update the Setings.input var for further processing
+#        Settings.contigs = [Settings.output + os.sep + outputdir + os.sep + 'concat-contigs.fastq']
+#        updateReads(Settings.input[0])
+#        
+#        # print out the processing time of this step
+#        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
+#        Settings.actual_time = time.time()
+#        
+#        return True
+#    
+#    def assembly_with_Preprocessing(self,outputdir):
+#        
+#        self.flash(outputdir)
+#        Settings.input = Settings.contigs
+#        self.assembly(outputdir)
+#        return True
     
     def convertToFasta(self, outputdir):
         

@@ -1,6 +1,9 @@
 import os, sys
 import glob
 import shutil
+import subprocess
+import shlex
+from src.settings import Executables
 
 # function to create a dir for the results of processing
 def create_outputdir(path):
@@ -57,4 +60,23 @@ def update_reads(directory, word, ending):
 def is_exe(program_path):
     
     return os.path.isfile(program_path) and os.access(program_path, os.X_OK)
+
+def merge_files(input, output):
+    merge = open(output + os.sep + 'merged.fasta','w')
+    for i in range(len(input)):
+        shutil.copyfileobj(open(input[i],'rb'),merge)
+    merge.close()
+    return update_reads(output,'merged','fasta')
+    
+
+def convert_fastq(input, output):
+    
+    for i in range(len(input)):
+        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (Executables().CONVERTER,
+                                                                     input[i],
+                                                                     output + os.sep + 
+                                                                     'converted.' + str(i) + 
+                                                                     '.fasta')))
+        p.wait()
+    return update_reads(output,'converted','fasta')
         
