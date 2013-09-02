@@ -12,7 +12,7 @@
 # PURPOSE:  Longer description of the purpose of this script.
 #
 #set -n    # Check syntax without execution.
-set -x    # Trace execution.
+#set -x    # Trace execution.
 
 #### URLS AND DESTINATION PATHS #####################################
 
@@ -599,11 +599,11 @@ install_r_pkgs() {
     ## Bioconductor dependencies & devtools
     local bioc_pkgs="'BiocGenerics','IRanges','GenomicRanges','Biostrings','XVector','devtools'"
     local rmisc= rentrez= biofiles= blastr= ncbi=
-    eval rmisc=( ${__pkgdir}/rmisc*gz )
-    eval rentrez=( ${__pkgdir}/Rentrez*gz )
-    eval biofiles=( ${__pkgdir}/biofiles*gz )
-    eval blastr=( ${__pkgdir}/blastr*gz )
-    eval ncbi=( ${__pkgdir}/ncbi*gz )
+    eval rmisc={ ${__pkgdir}/rmisc*gz }
+    eval rentrez={ ${__pkgdir}/Rentrez*gz }
+    eval biofiles={ ${__pkgdir}/biofiles*gz } 
+    eval blastr={ ${__pkgdir}/blastr*gz }
+    eval ncbi={ ${__pkgdir}/ncbi*gz }
     
     R --quiet --no-save > /dev/null <<-RDOC
     is.installed <- function(pkg) is.element(pkg, .packages(TRUE))

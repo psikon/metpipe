@@ -291,75 +291,75 @@ class Programs:
 #        Settings.input = Settings.contigs
 #        self.assembly(outputdir)
 #        return True
-    
-    def convertToFasta(self, outputdir):
-        
-        logging('\nStep:       Converting Fastq to Fasta \n')
-        
-        # if the assembly step was skipped --> merge the two paired-end files
-        if len(Settings.blast_input) > 1:
-            merge = open(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq', 'wb')
-            shutil.copyfileobj(open(Settings.input[0], 'rb'), merge)
-            shutil.copyfileobj(open(Settings.input[1], 'rb'), merge)
-            merge.close()
-            Settings.blast_input = [Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq']   
-
-        # convert fastq files to fasta
-        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (Settings.CONVERTER, 
-                                                                     Settings.blast_input[0],
-                                                                     Settings.output + os.sep + outputdir + os.sep + 'contigs.fasta')))
-        p.wait()
-        
-        # remove the intermediary file 
-        if os.path.exists(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq'):
-            os.remove(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq')
-        # update the Input for blastn
-        Settings.blast_input = [Settings.output + os.sep + outputdir + os.sep + 'contigs.fasta']
-        
-    def blastn(self, outputdir):
-        
-        createOutputDir(Settings.output + os.sep + outputdir)
-        
-        # if the assembled reads will be used for classifcation
-        if Settings.use_contigs == True:
-            Settings.blast_input = Settings.contigs
-        else:
-            Settings.blast_input = Settings.input
-
-        # check the input files for filetype - fastq Files need conversion into fasta for blastn
-        if len(Settings.blast_input) > 1: 
-            if testForFQ(' '.join(str(i)for i in Settings.blast_input)):
-                self.convertToFasta(outputdir)
-        else: 
-            if testForFQ(Settings.blast_input[0]):
-                self.convertToFasta(outputdir)
-            
-        # update information of cmd
-        logging('\nStep:       Classify with Blastn \n')
-        logging('Arguments: ' + ParamFileArguments(Blastn_Parameter()) + '\n')
-        # create outputfile name
-        if Blastn_Parameter().outfmt == 5:
-            outfile = 'blastn.xml' 
-        else: 
-            outfile = 'blastn.tab'
-            
-        # start blastn and wait until completion
-        p = subprocess.Popen(shlex.split('%s -db %s -query %s -out %s -num_threads %s %s ' % 
-                                         (Settings.BLASTN,
-                                          Settings.blastdb_nt,
-                                          Settings.blast_input[0],
-                                          Settings.output + os.sep + outputdir + os.sep + outfile,
-                                          Settings.threads, ParamFileArguments(Blastn_Parameter()))))
-        p.wait()
-        
-        # save path to the blastn results
-        Settings.blast_output = Settings.output + os.sep + outputdir + os.sep + outfile
-        
-        # print out the processing time of this step
-        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
-        Settings.actual_time = time.time()
-        
-        return True
+#    
+#    def convertToFasta(self, outputdir):
+#        
+#        logging('\nStep:       Converting Fastq to Fasta \n')
+#        
+#        # if the assembly step was skipped --> merge the two paired-end files
+#        if len(Settings.blast_input) > 1:
+#            merge = open(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq', 'wb')
+#            shutil.copyfileobj(open(Settings.input[0], 'rb'), merge)
+#            shutil.copyfileobj(open(Settings.input[1], 'rb'), merge)
+#            merge.close()
+#            Settings.blast_input = [Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq']   
+#
+#        # convert fastq files to fasta
+#        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (Settings.CONVERTER, 
+#                                                                     Settings.blast_input[0],
+#                                                                     Settings.output + os.sep + outputdir + os.sep + 'contigs.fasta')))
+#        p.wait()
+#        
+#        # remove the intermediary file 
+#        if os.path.exists(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq'):
+#            os.remove(Settings.output + os.sep + outputdir + os.sep + 'merged.reads.fastq')
+#        # update the Input for blastn
+#        Settings.blast_input = [Settings.output + os.sep + outputdir + os.sep + 'contigs.fasta']
+#        
+#    def blastn(self, outputdir):
+#        
+#        createOutputDir(Settings.output + os.sep + outputdir)
+#        
+#        # if the assembled reads will be used for classifcation
+#        if Settings.use_contigs == True:
+#            Settings.blast_input = Settings.contigs
+#        else:
+#            Settings.blast_input = Settings.input
+#
+#        # check the input files for filetype - fastq Files need conversion into fasta for blastn
+#        if len(Settings.blast_input) > 1: 
+#            if testForFQ(' '.join(str(i)for i in Settings.blast_input)):
+#                self.convertToFasta(outputdir)
+#        else: 
+#            if testForFQ(Settings.blast_input[0]):
+#                self.convertToFasta(outputdir)
+#            
+#        # update information of cmd
+#        logging('\nStep:       Classify with Blastn \n')
+#        logging('Arguments: ' + ParamFileArguments(Blastn_Parameter()) + '\n')
+#        # create outputfile name
+#        if Blastn_Parameter().outfmt == 5:
+#            outfile = 'blastn.xml' 
+#        else: 
+#            outfile = 'blastn.tab'
+#            
+#        # start blastn and wait until completion
+#        p = subprocess.Popen(shlex.split('%s -db %s -query %s -out %s -num_threads %s %s ' % 
+#                                         (Settings.BLASTN,
+#                                          Settings.blastdb_nt,
+#                                          Settings.blast_input[0],
+#                                          Settings.output + os.sep + outputdir + os.sep + outfile,
+#                                          Settings.threads, ParamFileArguments(Blastn_Parameter()))))
+#        p.wait()
+#        
+#        # save path to the blastn results
+#        Settings.blast_output = Settings.output + os.sep + outputdir + os.sep + outfile
+#        
+#        # print out the processing time of this step
+#        logging('processed in: ' + getDHMS(time.time() - Settings.actual_time) + '\n')
+#        Settings.actual_time = time.time()
+#        
+#        return True
         
     def metaCV(self, outputdir):
         

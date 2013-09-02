@@ -47,4 +47,12 @@ class Logging:
         days, hours = divmod(hours, 24)
         return "%d days, %d hours, %d minutes, %d seconds" % (days, hours, minutes, seconds)
     
+    # return only the file of a path for better readable output on commandline
+    def cut_path(self, path):
+        tmp = []
+        for i in range(len(path)):
+            a, b = os.path.split(path[i])
+            tmp.append(b)
+        return ', '.join(tmp)
+    
     

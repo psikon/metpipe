@@ -24,7 +24,7 @@ class Preprocess:
         self.trim_dir = Settings.output + os.sep + trim_dir
         self.logfile = Settings.logdir + os.sep + 'trimming.log.txt'
         
-        # TODO: test for fastq noch mit rein
+        # test for fastq noch integrieren
         
         # run the preprocessing functions when the module is initialized
         if Settings.quality:

@@ -32,7 +32,7 @@ class Assembly:
         if mode.lower() == 'flash':
             # is executable existing and runnable?
             if is_executable(self.exe.FLASH, 'flash'):
-                # start processing and update the input for next step
+                # start concatination and update the input for next step
                 self.concatinate(self.out)
                 Settings.input = update_reads(self.out, 'extendedFrags', 'fastq')
                 Settings.step_number = Settings.step_number + 1
@@ -40,7 +40,7 @@ class Assembly:
         if mode.lower() == 'metavelvet':
             # is executable existing and runnable?
             if is_executable(self.exe.VELVETH, 'velveth') and is_executable(self.exe.VELVETG, 'velvetg') and is_executable(self.exe.METAVELVET, 'metavelvet'):
-                # start processing and update the input for next step
+                # start assembly and update the input for next step
                 self.assemble_reads(self.out)
                 Settings.input = update_reads(self.out, 'meta-velvetg', 'fa')
                 Settings.step_number = Settings.step_number + 1

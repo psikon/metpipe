@@ -118,7 +118,7 @@ from src.assembly import *
 from src.annotation import *
 
 preprocess = Preprocess("quality_check","trimmed", settings.input)
-assembly = Assembly("assembly", settings.input, settings.assembler)
+#assembly = Assembly("assembly", settings.input, settings.assembler)
 annotate = Annotation(Settings.input, 'blastn', 'metacv', settings.classify)
 
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
