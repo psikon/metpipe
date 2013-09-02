@@ -7,7 +7,7 @@ import time
 # imports of own functions and classes
 from src.utils import ParamFileArguments
 from src.settings import Settings, Executables, Blastn_Parameter, MetaCV_Parameter
-from src.file_functions import create_outputdir, str_input, is_paired, is_fastq, update_reads, is_exe, convert_fastq, merge_files
+from src.file_functions import create_outputdir, str_input, is_paired, is_fastq, update_reads, is_executable, convert_fastq, merge_files
 from src.log_functions import Logging
 
 class Annotation:
@@ -25,15 +25,24 @@ class Annotation:
         self.metacv_out = Settings.output + os.sep + metacv_out
         
         if mode.lower() == 'blastn':
-            self.blastn(self.blast_out)
-            Settings.step_number = Settings.step_number + 1
+            if is_executable(self.exe.BLASTN, 'blastn'):
+                self.blastn(self.blast_out)
+                Settings.step_number = Settings.step_number + 1
+            else:
+                pass
         elif mode.lower() == 'metacv':
-            self.metacv(self.metacv_out)
-            Settings.step_number = Settings.step_number + 1
+            if is_executable(self.exe.METACV, 'metacv'):
+                self.metacv(self.metacv_out)
+                Settings.step_number = Settings.step_number + 1
+            else:
+                pass
         else: 
-            self.blastn(self.blast_out)
-            self.metacv(self.metacv_out)
-            Settings.step_number = Settings.step_number + 1
+            if is_executable(self.exe.BLASTN, 'blastn') and is_executable(self.exe.METACV, 'metacv'):
+                self.blastn(self.blast_out)
+                self.metacv(self.metacv_out)
+                Settings.step_number = Settings.step_number + 1
+            else:
+                pass
             
     def __del__(self):
         pass   

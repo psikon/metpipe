@@ -57,9 +57,14 @@ def update_reads(directory, word, ending):
    return [(directory + os.sep +  f) for f in files]
 
 # test the executable - is it existing and callable?
-def is_exe(program_path):
-    
-    return os.path.isfile(program_path) and os.access(program_path, os.X_OK)
+def is_executable(program_path, name):
+    if os.path.isfile(program_path) and os.access(program_path, os.X_OK):
+        return True
+    else: 
+        sys.stdout.write(os.linesep)
+        sys.stderr.write('Executable for ' + name + ' not found - Please reinstall\n')
+        sys.stdout.write(os.linesep)
+        return False
 
 def merge_files(input, output):
     merge = open(output + os.sep + 'merged.fasta','w')

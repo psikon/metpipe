@@ -4,7 +4,7 @@ import sys, os, time
 from src.utils import ParamFileArguments
 from src.settings import Settings, FastQC_Parameter, TrimGalore_Parameter, Executables
 from src.log_functions import Logging
-from src.file_functions import create_outputdir, str_input, is_exe, update_reads
+from src.file_functions import create_outputdir, str_input, is_executable, update_reads
 
 class Preprocess:
     
@@ -29,26 +29,20 @@ class Preprocess:
         # run the preprocessing functions when the module is initialized
         if Settings.quality:
             # is executable existing and runnable?
-            if not is_exe(self.exe.FASTQC):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for FastQC not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            else:
+            if is_executable(self.exe.FASTQC, 'fastqc'):
                 self.qualityCheck()
                 # raise the step number for cmd output
                 Settings.step_number = Settings.step_number + 1
                           
         if Settings.trim:
-            if not is_exe(self.exe.TRIMGALORE):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for TrimGalore! not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            else:
+            if is_executable(self.exe.TRIMGALORE, 'trim galore'):
                 self.trim_and_filter()
                 # update the input to the processed input
                 Settings.input = update_reads(self.trim_dir, 'val', 'fq')
                 # raise the step number for cmd output
                 Settings.step_number = Settings.step_number + 1
+            else:
+                pass
                 
     def __del__(self):
         pass

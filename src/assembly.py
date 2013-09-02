@@ -6,7 +6,7 @@ import time
 # imports of own functions and classes
 from src.utils import ParamFileArguments
 from src.settings import Settings, Executables, FLASH_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter
-from src.file_functions import create_outputdir, str_input, is_paired, is_fastq, update_reads, is_exe
+from src.file_functions import create_outputdir, str_input, is_paired, is_fastq, update_reads, is_executable
 from src.log_functions import Logging
 
 
@@ -31,11 +31,7 @@ class Assembly:
         # run the assembling functions when the module is initialized
         if mode.lower() == 'flash':
             # is executable existing and runnable?
-            if not is_exe(self.exe.FLASH):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for Flash not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            else:
+            if is_executable(self.exe.FLASH, 'flash'):
                 # start processing and update the input for next step
                 self.concatinate(self.out)
                 Settings.input = update_reads(self.out, 'extendedFrags', 'fastq')
@@ -43,45 +39,19 @@ class Assembly:
 
         if mode.lower() == 'metavelvet':
             # is executable existing and runnable?
-            if not is_exe(self.exe.VELVETH):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for Velveth not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            elif not is_exe(self.exe.VELVETG):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for Velvetg not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            elif not is_exe(self.exe.METAVELVET):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for MetaVelvet not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            else:
+            if is_executable(self.exe.VELVETH, 'velveth') and is_executable(self.exe.VELVETG, 'velvetg') and is_executable(self.exe.METAVELVET, 'metavelvet'):
                 # start processing and update the input for next step
                 self.assemble_reads(self.out)
                 Settings.input = update_reads(self.out, 'meta-velvetg', 'fa')
                 Settings.step_number = Settings.step_number + 1
+            else:
+                pass
         
         if mode.lower() == 'both':
             #TODO: not working because of auto mode --> see logs
             
             # is executable existing and runnable?
-            if not is_exe(self.exe.FLASH):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for Flash not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            elif not is_exe(self.exe.VELVETH):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for Velveth not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            elif not is_exe(self.exe.VELVETG):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for Velvetg not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            elif not is_exe(self.exe.METAVELVET):
-                sys.stdout.write(os.linesep)
-                sys.stderr.write('Executable for MetaVelvet not found - Please reinstall\n')
-                sys.stdout.write(os.linesep)
-            else:
+            if is_executable(self.exe.FLASH, 'flash') and is_executable(self.exe.VELVETH, 'velveth') and is_executable(self.exe.VELVETG, 'velvetg') and is_exe(self.exe.METAVELVET, 'metavelvet'):
                 # start processing and update the input for next step
                 self.concatinate(self.out)
                 self.input = update_reads(self.out, 'extendedFrags', 'fastq')
@@ -89,6 +59,8 @@ class Assembly:
                 self.assemble_reads(self.out)
                 Settings.input = update_reads(self.out, 'meta-velvetg', 'fa')
                 Settings.step_number = Settings.step_number + 1
+            else:
+                pass
             
     def __del__(self):
        pass
