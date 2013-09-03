@@ -97,3 +97,10 @@ def blast_output(value):
         return 'blastn.tab'
     else:
         return 'blastn.blast'
+
+def is_xml(file):
+    
+    if file.endswith('.xml'):
+        return True
+    else:
+        return False

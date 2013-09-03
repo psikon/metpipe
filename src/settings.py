@@ -460,16 +460,42 @@ class Blastn_Parameter:
 
 class xmlParser():
     # Parser settings
-    parser_maxHit = 20
-    parser_maxHSP = 20
-    parser_reset_at = 1000
+    maxHit = 20
+    maxHSP = 20
+    reset_at = 1000
+    arguments = {'maxHit' : '--max_hit ', 'maxHSP' : '--max_hsp ', 'reset_at' : '--reset_at '}
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
         conf.read(Settings.param)
-        self.parser_maxHit = conf.get('xmlParser', 'max_hit')
-        self.parser_maxHsp = conf.get('xmlParser', 'max_hsp')
-        self.parser_reset_at = conf.get('xmlParser', 'reset_at')
+        self.maxHit = conf.get('xmlParser', 'max_hit')
+        self.maxHsp = conf.get('xmlParser', 'max_hsp')
+        self.reset_at = conf.get('xmlParser', 'reset_at')
 
+class Rannotate():
+    # settings for annotation of the db with R
+    coverage = 0.5
+    bitscore = 0.98
+    arguments = {'coverage' : ' --coverage ', 'bitscore' : '--bitscore '}
+       
+    def __init__(self): 
+        conf = ConfigParser.ConfigParser()
+        conf.read(Settings.param)
+        #self.coverage = conf.get('Annotation', 'coverage')
+        #self.bitscore = conf.get('Annotation', 'bitscore')
+        
+class subsetDB():
+    classifier = ''
+    bitscore = 0.98
+    rank = 'superkingdom'
+    arguments = {'classifier' : '--classifier ', 'bitscore' : '--bitscore ', 'rank' : '--rank '}
+    
+    def __init__(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(Settings.param)
+        #self.classifier = conf.get('subsetDB', 'classifier')
+        #self.bitscore = conf.get('subsetDB', 'bitscore')
+        #self.rank = conf.get('subsetDB', 'rank')
+    
 class Krona_Parameter():
     pass
