@@ -5,7 +5,7 @@ import sys, os
 import time
 # imports of own functions and classes
 from src.utils import ParamFileArguments
-from src.settings import Settings, Executables, FLASH_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter
+from src.settings import RunSettings, Executables, FLASH_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter
 from src.file_functions import create_outputdir, str_input, is_paired, is_fastq, update_reads, is_executable
 from src.log_functions import Logging
 
@@ -19,14 +19,15 @@ class Assembly:
     out = ''
     logdir = ''
     
-    def __init__(self, outdir, input, mode):
+    def __init__(self, outdir, files_instance, mode):
         
         # init all important variables and classes
         self.log = Logging()
-        self.logdir = Settings.logdir
+        self.logdir = RunSettings.logdir
         self.exe = Executables()
-        self.out = Settings.output + os.sep + outdir
-        self.input = str_input(input)
+        self.files = files_instance
+        self.out = RunSettings.output + os.sep + outdir
+        self.input = str_input(self.files.get_input())
         
         # run the assembling functions when the module is initialized
         if mode.lower() == 'flash':
@@ -34,16 +35,18 @@ class Assembly:
             if is_executable(self.exe.FLASH, 'flash'):
                 # start concatination and update the input for next step
                 self.concatinate(self.out)
-                Settings.input = update_reads(self.out, 'extendedFrags', 'fastq')
-                Settings.step_number = Settings.step_number + 1
+                self.files.set_input(update_reads(self.out, 'extendedFrags', 'fastq'))
+                self.files.set_concatinated_output(update_reads(self.out, 'extendedFrags', 'fastq'))
+                RunSettings.step_number = RunSettings.step_number + 1
 
         if mode.lower() == 'metavelvet':
             # is executable existing and runnable?
             if is_executable(self.exe.VELVETH, 'velveth') and is_executable(self.exe.VELVETG, 'velvetg') and is_executable(self.exe.METAVELVET, 'metavelvet'):
                 # start assembly and update the input for next step
                 self.assemble_reads(self.out)
-                Settings.input = update_reads(self.out, 'meta-velvetg', 'fa')
-                Settings.step_number = Settings.step_number + 1
+                self.files.set_input(update_reads(self.out, 'meta-velvetg', 'fa'))
+                self.files.set_assembled_output(update_reads(self.out, 'meta-velvetg', 'fa'))
+                RunSettings.step_number = RunSettings.step_number + 1
             else:
                 pass
         
@@ -57,8 +60,8 @@ class Assembly:
                 self.input = update_reads(self.out, 'extendedFrags', 'fastq')
                 
                 self.assemble_reads(self.out)
-                Settings.input = update_reads(self.out, 'meta-velvetg', 'fa')
-                Settings.step_number = Settings.step_number + 1
+                RunSettings.input = update_reads(self.out, 'meta-velvetg', 'fa')
+                RunSettings.step_number = RunSettings.step_number + 1
             else:
                 pass
             
@@ -71,16 +74,16 @@ class Assembly:
         create_outputdir(outputdir)
         
         # print actual informations about the step on stdout
-        self.log.print_step(Settings.step_number, 'Assembly', 'Concatinate Reads',
+        self.log.print_step(RunSettings.step_number, 'Assembly', 'Concatinate Reads',
                             ParamFileArguments(FLASH_Parameter()))
         
         # open the logfile
-        logfile = self.log.open_logfile(Settings.logdir + 'concatination.log')
+        logfile = self.log.open_logfile(RunSettings.logdir + 'concatination.log')
         
         # start the program Flash with parameter from the conf file a
         # errors will be piped to extra error logfile
         p = subprocess.Popen(shlex.split('%s -t %d -d %s %s %s' % (self.exe.FLASH,
-                                                                   Settings.threads,
+                                                                   RunSettings.threads,
                                                                    outputdir,
                                                                    ParamFileArguments(FLASH_Parameter()),
                                                                    self.input)),
@@ -88,7 +91,7 @@ class Assembly:
                             stderr = self.log.open_logfile(self.logdir + 'flash.err.log'))
         # during processing print Flash output in verbose mode and update the logfile
         while p.poll() is None:
-            if Settings.verbose:
+            if RunSettings.verbose:
                 self.log.print_verbose(p.stdout.readline())
                 logfile.write(p.stdout.readline())
             else:
@@ -104,7 +107,7 @@ class Assembly:
         self.log.newline()
         self.log.print_verbose('Concatination complete \n')
         self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - Settings.actual_time) 
+                               self.log.getDHMS(time.time() - RunSettings.actual_time) 
                                + '\n')
         self.log.newline()
         
@@ -114,7 +117,7 @@ class Assembly:
         create_outputdir(outputdir)
         
         # print actual informations about the step on stdout
-        self.log.print_step(Settings.step_number, 'Assembly', 'Creating Hashmaps',
+        self.log.print_step(RunSettings.step_number, 'Assembly', 'Creating Hashmaps',
                            ParamFileArguments(Velveth_Parameter()))
         self.log.newline()
         
@@ -126,14 +129,14 @@ class Assembly:
         # errors will be piped to extra error logfile
         p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (self.exe.VELVETH, 
                                                                        outputdir,
-                                                                       Settings.kmer, 
+                                                                       RunSettings.kmer, 
                                                                        ParamFileArguments(Velveth_Parameter()),
                                                                        self.input)),
                             stdout = subprocess.PIPE, 
                             stderr = self.log.open_logfile(self.logdir + 'velveth.err.log')) 
         # during processing print velveth output in verbose mode and update the logfile
         while p.poll() is None:
-           if Settings.verbose:
+           if RunSettings.verbose:
                self.log.print_verbose(p.stdout.readline())
                velveth_log.write(p.stdout.readline())
            else:
@@ -146,7 +149,7 @@ class Assembly:
         self.log.remove_empty_logfile(self.logdir + 'velveth.err.log')
         
         # print actual informations about the step on stdout
-        self.log.print_step(Settings.step_number, 'Assembly', 'Creating Graph',
+        self.log.print_step(RunSettings.step_number, 'Assembly', 'Creating Graph',
                            ParamFileArguments(Velvetg_Parameter()))
         self.log.newline()
         
@@ -162,7 +165,7 @@ class Assembly:
                              stderr = self.log.open_logfile(self.logdir + 'velvetg.err.log'))
         # during processing print velveth output in verbose mode and update the logfile
         while p.poll() is None:
-           if Settings.verbose:
+           if RunSettings.verbose:
                self.log.print_verbose(p.stdout.readline())
                velvetg_log.write(p.stdout.readline())
            else:
@@ -175,7 +178,7 @@ class Assembly:
         self.log.remove_empty_logfile(self.logdir + 'velvetg.err.log')
         
         # print actual informations about the step on stdout
-        self.log.print_step(Settings.step_number, 'Assembly', 'Metagenomic Assembly',
+        self.log.print_step(RunSettings.step_number, 'Assembly', 'Metagenomic Assembly',
                            ParamFileArguments(MetaVelvet_Parameter()))
         self.log.newline()
         
@@ -192,7 +195,7 @@ class Assembly:
                                 stderr = self.log.open_logfile(self.logdir + 'metavelvet.err.log'))
         # during processing print velveth output in verbose mode and update the logfile                         
         while p.poll() is None:
-            if Settings.verbose:
+            if RunSettings.verbose:
                self.log.print_verbose(p.stdout.readline())
                meta_log.write(p.stdout.readline())
             else:
@@ -208,7 +211,7 @@ class Assembly:
         self.log.newline()
         self.log.print_verbose('Assembly complete \n')
         self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - Settings.actual_time) 
+                               self.log.getDHMS(time.time() - RunSettings.actual_time) 
                                + '\n')
         self.log.newline()
 

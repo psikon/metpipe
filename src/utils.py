@@ -2,7 +2,7 @@ import os, sys
 import shutil
 from collections import deque
 from datetime import date
-from src.settings import TrimGalore_Parameter, Blastn_Parameter, Settings
+from src.settings import TrimGalore_Parameter, Blastn_Parameter, RunSettings
 
 # function to fill the working queue with tasks based on the cli commands
 def createTasks(settings_instance, program_instance):

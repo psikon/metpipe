@@ -21,8 +21,7 @@ import multiprocessing
 from socket import errno
 from collections import deque
 # import own functions and classes 
-from src.utils import consoleSummary, createTasks, Logger
-from src.settings import Settings
+from src.settings import RunSettings, FileSettings
 #from src.programs import Programs
 
 # Get the starting time
@@ -90,9 +89,11 @@ if not os.path.isfile(args.param):
     sys.exit()
     
 # create the global settings object
-settings = Settings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time, args.input,
+settings = RunSettings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.skip, starting_time,
                     args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, 
                     args.use_contigs, args.assembler, args.classify, args.summary,args.auto, 1)
+
+files = FileSettings(args.input)
 
 # fill the pipeline with tasks
 #queue = deque([])
@@ -117,9 +118,20 @@ from src.preprocess import *
 from src.assembly import *
 from src.annotation import *
 
-preprocess = Preprocess("quality_check","trimmed", settings.input)
-#assembly = Assembly("assembly", settings.input, settings.assembler)
-annotate = Annotation(Settings.input, 'blastn', 'metacv', settings.classify)
-
+#### Einbauen wichtig !!!!
+print settings.output + os.sep +os.sep
+print os.path.normpath(settings.output + os.sep)
+#print 'Input: '+ str(files.get_input())
+#preprocess = Preprocess("quality_check","trimmed", files)
+#print 'Input: '+ str(files.get_input())
+#print 'Trimmed: ' + str(files.get_preprocessed_output())
+#assembly = Assembly("assembly",files, settings.assembler)
+#print 'Input: '+ str(files.get_input())
+#print 'Concatinated: ' + str(files.get_concatinated_output())
+#print 'Assembled' + str(files.get_assembled_output())
+#annotate = Annotation(files, 'blastn', 'metacv', settings.classify)
+#print 'Input: '+ str(files.get_input())
+#print 'blastn: ' + str(files.get_blastn_output())
+#analysis = Analysis()
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 #sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')

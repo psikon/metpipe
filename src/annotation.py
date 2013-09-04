@@ -6,24 +6,27 @@ import shutil
 import time
 # imports of own functions and classes
 from src.utils import ParamFileArguments
-from src.settings import Settings, Executables, Blastn_Parameter, MetaCV_Parameter
+from src.settings import RunSettings, Executables, Blastn_Parameter, MetaCV_Parameter
 from src.file_functions import *
 from src.log_functions import Logging
 
 class Annotation:
     
+    raw = ''
     input = ''
     blast_out = ''
     metacv_out = ''
     
-    def __init__(self, input, blast_out, metacv_out, mode):
+    def __init__(self, files_instance, blast_out, metacv_out, mode):
         # init all important variables and classes
         self.log = Logging()
-        self.logdir = Settings.logdir
+        self.logdir = RunSettings.logdir
         self.exe = Executables()
-        self.input = input
-        self.blast_out = Settings.output + os.sep + blast_out
-        self.metacv_out = Settings.output + os.sep + metacv_out
+        self.files = files_instance
+        self.input = self.files.get_input()
+        self.raw = self.files.get_raw()
+        self.blast_out = RunSettings.output + os.sep + blast_out
+        self.metacv_out = RunSettings.output + os.sep + metacv_out
         
         # run the annotation functions when the module is initialized
         if mode.lower() == 'blastn':
@@ -31,7 +34,9 @@ class Annotation:
             if is_executable(self.exe.BLASTN, 'blastn'):
                 # start annotation with blastn
                 self.blastn(self.blast_out)
-                Settings.step_number = Settings.step_number + 1
+                # verbessern
+                self.files.set_blastn_output(update_reads(self.blast_out,'blastn','xml'))
+                RunSettings.step_number = RunSettings.step_number + 1
             else:
                 pass
         elif mode.lower() == 'metacv':
@@ -39,7 +44,7 @@ class Annotation:
             if is_executable(self.exe.METACV, 'metacv'):
                 # start annotation with metacv
                 self.metacv(self.metacv_out)
-                Settings.step_number = Settings.step_number + 1
+                RunSettings.step_number = RunSettings.step_number + 1
             else:
                 pass
         else: 
@@ -48,7 +53,7 @@ class Annotation:
                 # start annotation with both tools 
                 self.blastn(self.blast_out)
                 self.metacv(self.metacv_out)
-                Settings.step_number = Settings.step_number + 1
+                RunSettings.step_number = RunSettings.step_number + 1
             else:
                 pass
             
@@ -62,16 +67,16 @@ class Annotation:
         create_outputdir(outputdir)
         
         # blastn can only run with dfasta files, so input has to be converted
-        if all(is_fastq(i) for i in Settings.input):
+        if all(is_fastq(i) for i in self.input):
             # print actual informations about the step on stdout
-            self.log.print_step(Settings.step_number, 'Assembly', 'convert fastq files',
+            self.log.print_step(RunSettings.step_number, 'Assembly', 'convert fastq files',
                                 self.log.cut_path(self.input))
             self.input = convert_fastq(self.input, self.blast_out)
         
         # blastn can only annotated one file, so input has to be merged to one file
         if is_paired(self.input):
             # print actual informations about the step on stdout
-            self.log.print_step(Settings.step_number, 'Assembly', 'merging reads to on file',
+            self.log.print_step(RunSettings.step_number, 'Annotation', 'merging reads to on file',
                                 self.log.cut_path(self.input))
             self.input = merge_files(self.input, self.blast_out)
         
@@ -79,17 +84,17 @@ class Annotation:
         outfile = blast_output(Blastn_Parameter().outfmt)
         
         # print actual informations about the step on stdout
-        self.log.print_step(Settings.step_number, 'Assembly', 'blast sequences against nt database',
+        self.log.print_step(RunSettings.step_number, 'Annotation', 'blast sequences against nt database',
                             ParamFileArguments(Blastn_Parameter()))
         
         # start blastn and wait until completion
         # logfile is not requiered, because blastn has no log function and no output to stdout
         p = subprocess.Popen(shlex.split('%s -db %s -query %s -out %s -num_threads %s %s ' % 
                                          (self.exe.BLASTN,
-                                          Settings.blastdb_nt,
+                                          RunSettings.blastdb_nt,
                                           str_input(self.input),
                                           outputdir + os.sep + outfile,
-                                          Settings.threads, ParamFileArguments(Blastn_Parameter()))))
+                                          RunSettings.threads, ParamFileArguments(Blastn_Parameter()))))
         # wait until process is complete
         p.wait()
         
@@ -99,9 +104,43 @@ class Annotation:
         # print summary of the process after completion
         self.log.print_verbose('Annotation with blastn complete \n')
         self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - Settings.actual_time) 
+                               self.log.getDHMS(time.time() - RunSettings.actual_time) 
                                + '\n')
         self.log.newline
         
     def metacv(self,outputdir):
-        pass
+        
+        # create a dir for output
+        create_outputdir(outputdir)
+        
+        #if RunSettings.use_contigs:
+        #    self.raw = str_input(self.input)
+        #else:
+        #    pass
+        # print actual informations about the step on stdout
+        self.log.print_step(RunSettings.step_number, 'Annotation', 'annotate bacterial reads with MetaCV',
+                            ParamFileArguments(MetaCV_Parameter()))
+        
+        print self.raw
+        print shlex.split('%s classify %s %s %s ' % (self.exe.METACV,
+                                        RunSettings.metacv_db,
+                                        ' '.join(str(i)for i in self.raw),
+                                        'metpipe'))
+        print self.exe.METACV
+        p = subprocess.Popen(shlex.split('%s -h' % (self.exe.METACV)))
+#        p = subprocess.Popen(shlex.split('%s classify %s %s %s ' % 
+#                                        (self.exe.METACV,
+#                                         RunSettings.metacv_db,
+#                                         str_input(self.raw),
+#                                         'metpipe')),
+#                                         #ParamFileArguments(MetaCV_Parameter()))),
+#                                 stderr = self.log.open_logfile('metacv.err.log'), 
+#                                 stdout = subprocess.PIPE)
+        while p.poll() is None:
+            if RunSettings.verbose:
+                self.log.print_verbose(p.stdout.readline())
+            else:
+                self.log.print_compact(p.stdout.readline().rstrip('\n'))
+        # wait until process is finished        
+        p.wait()
+        

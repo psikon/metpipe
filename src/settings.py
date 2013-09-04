@@ -4,7 +4,7 @@ import os
 
 # class for general settings of the pipeline and variables needed from every program
 
-class Settings:
+class RunSettings:
 
     # general settings
     kmer = 85
@@ -15,17 +15,10 @@ class Settings:
     actual_time = ''
     automatic = False
     step_number = 1
-    # File settings
-    input = []
-    contigs = []
-    blast_input = []
-    output = ''
     logdir = ''
     logfile=''
     param = ''
-    quality_report = []
-    metaCV_output = []
-    blast_output = ''
+    output = ''
     # Program Settings
     trim = True
     quality = True
@@ -38,37 +31,35 @@ class Settings:
     blastdb_nt = ''
     
     
-    def __init__(self, kmer=None, threads=None, program_dir=None, verbose=False, skip=None, starting_time=None, 
-                 infile=None, output=None, logdir=None, param=None, trim=None, quality=None, 
-                 use_contigs=None,assembler=None, classify=None, summary=None,automatic=None, step_number= None):
+    def __init__(self, kmer = None, threads = None, program_dir = None, verbose = False, skip = None, 
+                 starting_time = None, output = None, logdir = None, param = None, trim = None, 
+                 quality = None, use_contigs = None, assembler = None, classify = None, 
+                 summary = None, automatic = None, step_number = None):
 
-        Settings.kmer = kmer
-        Settings.threads = threads
-        Settings.verbose = verbose
-        Settings.skip = skip.lower()
-        Settings.starting_time = starting_time
-        Settings.actual_time = starting_time
-        Settings.input = infile
-        Settings.contigs = []
-        Settings.blast_input = []
-        Settings.output = output
-        Settings.logdir = logdir
-        Settings.logfile = open(logdir+"summary.log","w")
-        Settings.param = param
-        Settings.trim = trim
-        Settings.quality = quality 
-        Settings.use_contigs = use_contigs
-        Settings.assembler = assembler.lower()
-        Settings.classify = classify.lower() 
-        Settings.summary = summary
-        Settings.automatic = automatic
-        Settings.step_number = step_number
+        RunSettings.kmer = kmer
+        RunSettings.threads = threads
+        RunSettings.verbose = verbose
+        RunSettings.skip = skip.lower()
+        RunSettings.starting_time = starting_time
+        RunSettings.actual_time = starting_time
+        RunSettings.output = output
+        RunSettings.logdir = logdir
+        RunSettings.logfile = open(logdir+"summary.log","w")
+        RunSettings.param = param
+        RunSettings.trim = trim
+        RunSettings.quality = quality 
+        RunSettings.use_contigs = use_contigs
+        RunSettings.assembler = assembler.lower()
+        RunSettings.classify = classify.lower() 
+        RunSettings.summary = summary
+        RunSettings.automatic = automatic
+        RunSettings.step_number = step_number
         # define program paths
         
         # define databases
-        Settings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'nt')
-        Settings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, '16S')
-        Settings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'cvk6_2059')
+        RunSettings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'nt')
+        RunSettings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, '16S')
+        RunSettings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'cvk6_2059')
 
 class Executables:
 
@@ -80,7 +71,7 @@ class Executables:
         Executables.METAVELVET = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metavelvet', os.sep, 'meta-velvetg')
         Executables.FLASH = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'flash', os.sep, 'flash')
         Executables.BLASTN = '%s%s%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'blast', os.sep, 'bin', os.sep, 'blastn')
-        Executables.METACV = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'bacterial')
+        Executables.METACV = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metacv', os.sep, 'metacv')
         Executables.CONVERTER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastx', os.sep, 'fastq_to_fasta')
         Executables.PARSER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'xmlparser')
         Executables.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
@@ -89,6 +80,91 @@ class Executables:
                                                os.sep + 'bin' + os.sep + 'ktImportText')
         
 
+class FileSettings:
+    
+    # variables for the input and output of the programs
+    raw = []
+    input = []
+    quality_report = []
+    preprocessed_output = []
+    concatinated_output = []
+    assembled_output = []
+    blastn_output = []
+    metacv_output = []
+    parser_output = []
+    annotated_output = []
+    subseted_output = []
+    
+    def __init__(self, raw = None):
+        self.raw = raw
+        self.input = raw
+
+    def get_raw(self):
+        return self.raw
+    
+    def set_raw(self, value):
+        self.raw = value
+    
+    def get_input(self):
+        return self.input
+    
+    def set_input(self, value):
+        self.input = value
+        
+    def get_quality_report(self):
+        return self.quality_report
+    
+    def set_quality_report(self, value):
+        self.quality_report = value
+        
+    def get_preprocessed_output(self):
+        return self.preprocessed_output
+    
+    def set_preprocessed_output(self, value):
+        self.preprocessed_output = value
+        
+    def get_concatinated_output(self):
+        return self.concatinated_output
+    
+    def set_concatinated_output(self, value):
+        self.concatinated_output = value
+        
+    def get_assembled_output(self):
+        return self.assembled_output
+    
+    def set_assembled_output(self, value):
+        self.assembled_output = value
+        
+    def get_blastn_output(self):
+        return self.blastn_output
+    
+    def set_blastn_output(self, value):
+        self.blastn_output = value
+        
+    def get_metacv_output(self):
+        return self.metacv_output
+    
+    def set_metacv_output(self, value):
+        self.metacv_output = value
+        
+    def get_parser_output(self):
+        return self.parser_output
+    
+    def set_parser_output(self, value):
+        self.parser_output = value
+    
+    def get_annotated_output(self):
+        return self.annotated_output
+    
+    def set_annotated_output(self, value):
+        self.annotated_output = value
+        
+    def get_subseted_output(self):
+        return self.subseted_output
+    
+    def set_subseted_output(self, value):
+        self.subseted_output = value
+    
 # Parameters for FastQC 
 class FastQC_Parameter:
 
@@ -100,7 +176,7 @@ class FastQC_Parameter:
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
+        conf.read(RunSettings.param)
         self.nogroup = conf.getboolean('FastQC', 'nogroup')
         self.kmers = conf.get('FastQC', 'kmers')
         self.contaminants = conf.get('FastQC', 'contaminants')
@@ -127,7 +203,7 @@ class TrimGalore_Parameter:
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
+        conf.read(RunSettings.param)
         self.quality = conf.get('TrimGalore', 'quality')
         self.phred = conf.get('TrimGalore', 'phred')
         self.adapter = conf.get('TrimGalore', 'adapter')
@@ -157,7 +233,7 @@ class FLASH_Parameter:
                  'interleavedOutput' : '--interleaved-output'}
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
+        conf.read(RunSettings.param)
         self.minOverlap = conf.get('FLASH','min-overlap')
         self.maxOverlap = conf.get('FLASH','max-overlap')
         self.maxMismatchDensity = conf.get('FLASH', 'max-mismatch-density')
@@ -183,13 +259,13 @@ class Velveth_Parameter:
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
-        self.file_layout = conf.get('MetaVelvet', 'file_layout')
-        self.read_type = conf.get('MetaVelvet', 'read_type')
-        self.strand_specific = conf.getboolean('MetaVelvet', 'strand_specific')
-        self.reuse_Sequences = conf.getboolean('MetaVelvet', 'reuse_Sequences')
-        self.noHash = conf.getboolean('MetaVelvet', 'noHash')
-        self.create_binary = conf.getboolean('MetaVelvet', 'create_binary')
+        conf.read(RunSettings.param)
+        self.file_layout = conf.get('Velvet', 'file_layout')
+        self.read_type = conf.get('Velvet', 'read_type')
+        self.strand_specific = conf.getboolean('Velvet', 'strand_specific')
+        self.reuse_Sequences = conf.getboolean('Velvet', 'reuse_Sequences')
+        self.noHash = conf.getboolean('Velvet', 'noHash')
+        self.create_binary = conf.getboolean('Velvet', 'create_binary')
 
 # Parameter for velvetg
 class Velvetg_Parameter:
@@ -218,43 +294,43 @@ class Velvetg_Parameter:
     conserveLong = False
     # dict with the arguments string
     arguments = {'cov_cutoff' : '-cov_cutoff ', 'ins_length' : '-ins_length ',
-                     'read_trkg' : '-read_trkg ', 'min_contig_lgth' : '-min_contig_lgth ',
-                     'exp_cov' : '-exp_cov ', 'long_cov' : '-long_cov ', 'long_cov_cutoff':'-long_cov_cutoff ',
-                     'ins_length_long' : '-ins_length_long ', 'ins_length_sd' : '-ins_length_sd ',
-                     'scaffolding':'-scaffolding ', 'max_branch_length':'-max_branch_length ',
-                     'max_divergence' : '-max_divergence ', 'max_gap_count' : '-max_gap_count ',
-                     'min_pair_count' : '-min_pair_count ', 'max_coverage' : '-max_coverage ',
-                     'coverage_mask' : '-coverage_mask ', 'long_mult_cutoff' : '-long_mult_cutoff ',
-                     'unused_reads' : '-unused_reads ', 'alignments' : '-alignments ',
-                     'exportFiltered' : '-exportFiltered ','paired_exp_fraction' : '-paired_exp_fraction ', 
-                     'shortMatePaired' : '-shortMatePaired ','conserveLong' : '-conserveLong '}  
+                 'read_trkg' : '-read_trkg ', 'min_contig_lgth' : '-min_contig_lgth ',
+                 'exp_cov' : '-exp_cov ', 'long_cov' : '-long_cov ', 'long_cov_cutoff':'-long_cov_cutoff ',
+                 'ins_length_long' : '-ins_length_long ', 'ins_length_sd' : '-ins_length_sd ',
+                 'scaffolding':'-scaffolding ', 'max_branch_length':'-max_branch_length ',
+                 'max_divergence' : '-max_divergence ', 'max_gap_count' : '-max_gap_count ',
+                 'min_pair_count' : '-min_pair_count ', 'max_coverage' : '-max_coverage ',
+                 'coverage_mask' : '-coverage_mask ', 'long_mult_cutoff' : '-long_mult_cutoff ',
+                 'unused_reads' : '-unused_reads ', 'alignments' : '-alignments ',
+                 'exportFiltered' : '-exportFiltered ','paired_exp_fraction' : '-paired_exp_fraction ', 
+                 'shortMatePaired' : '-shortMatePaired ','conserveLong' : '-conserveLong '}  
     
     def __init__(self):
         
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
-        self.cov_cutoff = conf.get('MetaVelvet', 'cov_cutoff')
-        self.ins_length = conf.get('MetaVelvet', 'ins_length')
-        self.read_trkg = conf.getboolean('MetaVelvet', 'read_trkg')
-        self.min_contig_lgth = conf.get('MetaVelvet', 'min_contig_lgth')
-        self.exp_cov = conf.get('MetaVelvet', 'exp_cov')
-        self.long_cov_cutoff = conf.get('MetaVelvet', 'long_cov_cutoff')
-        self.ins_length_long = conf.get('MetaVelvet', 'ins_length_long')
-        self.ins_length_sd = conf.get('MetaVelvet', 'ins_length_sd')
-        self.scaffolding = conf.getboolean('MetaVelvet', 'scaffolding')
-        self.max_branch_length = conf.get('MetaVelvet', 'max_branch_length')
-        self.max_divergence = conf.get('MetaVelvet', 'max_divergence')
-        self.max_gap_count = conf.get('MetaVelvet', 'max_gap_count')
-        self.min_pair_count = conf.get('MetaVelvet', 'min_pair_count')
-        self.max_coverage = conf.get('MetaVelvet', 'max_coverage')
-        self.coverage_mask = conf.get('MetaVelvet', 'coverage_mask')
-        self.long_mult_cutoff = conf.get('MetaVelvet', 'long_mult_cutoff')
-        self.unused_reads = conf.getboolean('MetaVelvet', 'unused_reads')
-        self.alignments = conf.getboolean('MetaVelvet', 'alignments')
-        self.exportFiltered = conf.getboolean('MetaVelvet', 'exportFiltered')
-        self.paired_exp_fraction = conf.get('MetaVelvet', 'paired_exp_fraction')
-        self.shortMatePaired = conf.getboolean('MetaVelvet', 'shortMatePaired')
-        self.conserveLong = conf.getboolean('MetaVelvet', 'conserveLong') 
+        conf.read(RunSettings.param)
+        self.cov_cutoff = conf.get('Velvet', 'cov_cutoff')
+        self.ins_length = conf.get('Velvet', 'ins_length')
+        self.read_trkg = conf.getboolean('Velvet', 'read_trkg')
+        self.min_contig_lgth = conf.get('Velvet', 'min_contig_lgth')
+        self.exp_cov = conf.get('Velvet', 'exp_cov')
+        self.long_cov_cutoff = conf.get('Velvet', 'long_cov_cutoff')
+        self.ins_length_long = conf.get('Velvet', 'ins_length_long')
+        self.ins_length_sd = conf.get('Velvet', 'ins_length_sd')
+        self.scaffolding = conf.getboolean('Velvet', 'scaffolding')
+        self.max_branch_length = conf.get('Velvet', 'max_branch_length')
+        self.max_divergence = conf.get('Velvet', 'max_divergence')
+        self.max_gap_count = conf.get('Velvet', 'max_gap_count')
+        self.min_pair_count = conf.get('Velvet', 'min_pair_count')
+        self.max_coverage = conf.get('Velvet', 'max_coverage')
+        self.coverage_mask = conf.get('Velvet', 'coverage_mask')
+        self.long_mult_cutoff = conf.get('Velvet', 'long_mult_cutoff')
+        self.unused_reads = conf.getboolean('Velvet', 'unused_reads')
+        self.alignments = conf.getboolean('Velvet', 'alignments')
+        self.exportFiltered = conf.getboolean('Velvet', 'exportFiltered')
+        self.paired_exp_fraction = conf.get('Velvet', 'paired_exp_fraction')
+        self.shortMatePaired = conf.getboolean('Velvet', 'shortMatePaired')
+        self.conserveLong = conf.getboolean('Velvet', 'conserveLong') 
         
 # Parameter for meta-velvetg 
 class MetaVelvet_Parameter:
@@ -293,7 +369,7 @@ class MetaVelvet_Parameter:
      
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)   
+        conf.read(RunSettings.param)   
         self.discard_chimera = conf.get('MetaVelvet', 'discard_chimera')
         self.max_chimera_rate = conf.get('MetaVelvet', 'max_chimera_rate')
         self.repeat_cov_sd = conf.get('MetaVelvet', 'repeat_cov_sd')
@@ -326,7 +402,7 @@ class MetaCV_Parameter:
 
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)   
+        conf.read(RunSettings.param)   
         self.seq = conf.get('MetaCV', 'seq')
         self.mode = conf.get('MetaCV', 'mode')
         self.orf = conf.get('MetaCV', 'orf')        
@@ -406,7 +482,7 @@ class Blastn_Parameter:
 
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
+        conf.read(RunSettings.param)
         self.import_search_strategy = conf.get('blastn', 'import_search_strategy')
         self.db = conf.get('blastn', 'db')
         self.dbsize = conf.get('blastn', 'dbsize')
@@ -467,7 +543,7 @@ class xmlParser():
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
+        conf.read(RunSettings.param)
         self.maxHit = conf.get('xmlParser', 'max_hit')
         self.maxHsp = conf.get('xmlParser', 'max_hsp')
         self.reset_at = conf.get('xmlParser', 'reset_at')
@@ -480,7 +556,7 @@ class Rannotate():
        
     def __init__(self): 
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
+        conf.read(RunSettings.param)
         #self.coverage = conf.get('Annotation', 'coverage')
         #self.bitscore = conf.get('Annotation', 'bitscore')
         
@@ -492,7 +568,7 @@ class subsetDB():
     
     def __init__(self):
         conf = ConfigParser.ConfigParser()
-        conf.read(Settings.param)
+        conf.read(RunSettings.param)
         #self.classifier = conf.get('subsetDB', 'classifier')
         #self.bitscore = conf.get('subsetDB', 'bitscore')
         #self.rank = conf.get('subsetDB', 'rank')

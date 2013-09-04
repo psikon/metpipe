@@ -6,20 +6,22 @@ import shutil
 import time
 # imports of own functions and classes
 from src.utils import ParamFileArguments
-from src.settings import Settings, Executables, xmlParser, Rannotate, subsetDB
+from src.settings import RunSettings, Executables, xmlParser, Rannotate, subsetDB
 from src.file_functions import create_outputdir, str_input, update_reads, is_exe, is_xml
 from src.log_functions import Logging
 
 class Analysis:
     
+    output
     blast_out = ''
     metacv_out = ''
     krona = False
     logdir = ''
     
-    def __init__(self, blast_out, metacv_out, krona):
+    def __init__(self, out ,blast_out, metacv_out, krona):
         self.log = Logging()
         self.exe = Executables()
+        self.output = Settings.output + os.sep + out
         self.blast_out = blast_out
         self.metacv_out = metacv_out
         self.krona = krona
