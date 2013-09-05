@@ -74,6 +74,8 @@ class Executables:
         Executables.METACV = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metacv', os.sep, 'metacv')
         Executables.CONVERTER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastx', os.sep, 'fastq_to_fasta')
         Executables.PARSER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'xmlParser', os.sep, 'bigBlastParser' )
+        Executables.ANNOTATE = '%s%s%s%s%s' % (sys.path[0], os.sep, 'src', os.sep, 'annoate.R')
+        Executables.SUBSET = '%s%s%s%s%s' % (sys.path[0], os.sep, 'src', os.sep, 'subsetDB.R')
         Executables.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
                                                os.sep + 'bin' + os.sep + 'ktImportBLAST')
         Executables.KRONA_TEXT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 

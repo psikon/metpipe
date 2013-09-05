@@ -80,13 +80,23 @@ class Analysis:
         
     def annotate_db(self, input, output):
         
+        # create a dir for output
         create_outputdir(output)
-        
+         # generate filename for db
         outfile = output + os.sep + Rannotate().get_name() + '.db'
         print outfile
         
         if os.path.exists(outfile):
             os.remove(outfile)
 
-        p = subprocess.Popen(shlex.split('%s -i %s -o %s' % (self.exe., input, outfile)))
-    
+        p = subprocess.Popen(shlex.split('%s -i %s -o %s %s' % (self.exe.ANNOTATE, 
+                                                                input, 
+                                                                outfile, 
+                                                                ParamFileArguments(Rannotate()))),
+                             stdout = subprocess.PIPE)
+        while p.poll() is None:
+            if RunSettings.verbose:
+                self.log.print_verbose(p.stdout.readline())
+            else:
+                self.log.print_compact(p.stdout.readline().rstrip('\n'))
+        p.wait()
