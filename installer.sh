@@ -111,8 +111,8 @@ create_metpipe_dir() {
     fi
 
     cp ${__force} ./pkg/*.tar.gz ${__pkgdir}
-    cp ${__force} ./src/{*.py,*.R} ${__srcdir}
-    cp ${__force} ./{*.py,*.txt,*.conf,*.R,*.md} ${__metdir} 
+    cp ${__force} ./src/*.py ${__srcdir}
+    cp ${__force} ./{*.py,*.txt,*.conf,*.md} ${__metdir} 
 
     echo ""
     echo "Where do you want to install the binaries [${__metdir}/bin]: " | tr -d "\n"
@@ -461,8 +461,8 @@ get_nt_db() {
             ## if a path was provided count the number of nt.xx.nsq files in
             ## the db directory.
             ## Abort if 0 or not all 14 are available 
-            nt_files=$(ls ${__nt_dir}/nt.{01..14}.nsq 2> /dev/null | wc -l)
-            [ $nt_files -gt 0 -a $nt_files -eq 14 ] || die 1 "ERROR: No or not all nt database files found at ${__nt_dir}.\n"
+            nt_files=$(ls ${__nt_dir}/nt.{01..12}.nsq 2> /dev/null | wc -l)
+            [ $nt_files -gt 0 -a $nt_files -eq 12 ] || die 1 "ERROR: No or not all nt database files found at ${__nt_dir}.\n"
         else
             local counter=0
             local cwd=$(pwd)
@@ -545,7 +545,7 @@ get_metacv_db() {
     local skip=
     read skip
     eval skip=${skip:-y}
-    if [ "$skip" != "n" -o "$skip" != "N" ]; then
+    if [ "$skip" != "n" -a "$skip" != "N" ]; then
         echo ""
         return 0
     else
