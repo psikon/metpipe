@@ -14,19 +14,20 @@ class Annotation:
     
     raw = ''
     input = ''
+    logdir = ''
     blast_out = ''
     metacv_out = ''
     
-    def __init__(self, files_instance, blast_out, metacv_out, mode):
+    def __init__(self, files_instance, mode):
         # init all important variables and classes
         self.log = Logging()
-        self.logdir = RunSettings.logdir
         self.exe = Executables()
         self.files = files_instance
         self.input = self.files.get_input()
         self.raw = self.files.get_raw()
-        self.blast_out = RunSettings.output + os.sep + blast_out
-        self.metacv_out = RunSettings.output + os.sep + metacv_out
+        self.logdir = self.files.get_logdir()
+        self.blast_out = self.files.get_blastn_dir()
+        self.metacv_out = self.files.get_metacv_dir()
         
         # run the annotation functions when the module is initialized
         if mode.lower() == 'blastn':
@@ -61,7 +62,7 @@ class Annotation:
         pass   
         
             
-    def blastn(self,outputdir):
+    def blastn(self, outputdir):
             
         # create a dir for output
         create_outputdir(outputdir)
@@ -81,7 +82,7 @@ class Annotation:
             self.input = merge_files(self.input, self.blast_out)
         
         # define the outputformat for the blastn results
-        outfile = blast_output(Blastn_Parameter().outfmt)
+        outfile = outputdir + os.sep + blast_output(Blastn_Parameter().outfmt)
         
         # print actual informations about the step on stdout
         self.log.print_step(RunSettings.step_number, 'Annotation', 'blast sequences against nt database',
@@ -93,8 +94,9 @@ class Annotation:
                                          (self.exe.BLASTN,
                                           RunSettings.blastdb_nt,
                                           str_input(self.input),
-                                          outputdir + os.sep + outfile,
-                                          RunSettings.threads, ParamFileArguments(Blastn_Parameter()))))
+                                          outfile,
+                                          RunSettings.threads, 
+                                          ParamFileArguments(Blastn_Parameter()))))
         # wait until process is complete
         p.wait()
         

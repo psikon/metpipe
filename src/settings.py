@@ -73,7 +73,7 @@ class Executables:
         Executables.BLASTN = '%s%s%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'blast', os.sep, 'bin', os.sep, 'blastn')
         Executables.METACV = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metacv', os.sep, 'metacv')
         Executables.CONVERTER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastx', os.sep, 'fastq_to_fasta')
-        Executables.PARSER = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'xmlparser')
+        Executables.PARSER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'xmlParser', os.sep, 'bigBlastParser' )
         Executables.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
                                                os.sep + 'bin' + os.sep + 'ktImportBLAST')
         Executables.KRONA_TEXT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
@@ -82,6 +82,18 @@ class Executables:
 
 class FileSettings:
     
+    # important dirs for the pipeline
+    output = ''
+    logdir = ''
+    quality_dir = ''
+    trim_dir = ''
+    concat_dir = ''
+    assembly_dir = ''
+    blastn_dir = ''
+    metacv_dir = ''
+    parsed_db_dir = ''
+    annotated_db_dir = ''
+    subseted_db_dir = ''
     # variables for the input and output of the programs
     raw = []
     input = []
@@ -95,10 +107,58 @@ class FileSettings:
     annotated_output = []
     subseted_output = []
     
-    def __init__(self, raw = None):
+    def __init__(self, raw = None, output = None):
+        conf = ConfigParser.ConfigParser()
+        conf.read(RunSettings.param)
+        
         self.raw = raw
         self.input = raw
+        self.output = output + os.sep
+        self.quality_dir = conf.get('General', 'quality_dir')
+        self.trim_dir = conf.get('General', 'trim_dir')
+        self.concat_dir = conf.get('General', 'concat_dir')
+        self.assembly_dir = conf.get('General', 'assembly_dir')
+        self.blastn_dir = conf.get('General', 'blastn_dir')
+        self.metacv_dir = conf.get('General', 'metacv_dir')
+        self.parsed_db_dir = conf.get('General', 'parsed_db_dir')
+        self.annotated_db_dir = conf.get('General', 'annotated_db_dir')
+        self.subseted_db_dir = conf.get('General', 'subseted_db_dir')
+        self.logdir = conf.get('General', 'log_dir')
 
+    
+    def get_output(self):
+        return self.output
+    
+    def get_logdir(self):
+        return self.output + self.logdir + os.sep
+        
+    def get_quality_dir(self):
+        return self.output + self.quality_dir 
+        
+    def get_trim_dir(self):
+        return self.output + self.trim_dir
+    
+    def get_concat_dir(self):
+        return self.output + self.concat_dir
+        
+    def get_assembly_dir(self):
+        return self.output + self.assembly_dir
+   
+    def get_blastn_dir(self):
+        return self.output + self.blastn_dir
+       
+    def get_metacv_dir(self):
+        return self.output + self.metacv_dir
+    
+    def get_parsed_db_dir(self):
+        return self.output + self.parsed_db_dir
+    
+    def get_annotated_db_dir(self):
+        return self.output + self.annotated_db_dir
+        
+    def get_subseted_db_dir(self):
+        return self.output + self.subseted_db_dir
+        
     def get_raw(self):
         return self.raw
     
@@ -164,7 +224,7 @@ class FileSettings:
     
     def set_subseted_output(self, value):
         self.subseted_output = value
-    
+          
 # Parameters for FastQC 
 class FastQC_Parameter:
 
@@ -534,7 +594,7 @@ class Blastn_Parameter:
         self.html = conf.getboolean('blastn', 'html')
         self.max_target_seqs = conf.get('blastn', 'max_target_seqs')
 
-class xmlParser():
+class blastParser():
     # Parser settings
     maxHit = 20
     maxHSP = 20
@@ -544,10 +604,15 @@ class xmlParser():
     def __init__(self):
         conf = ConfigParser.ConfigParser()
         conf.read(RunSettings.param)
-        self.maxHit = conf.get('xmlParser', 'max_hit')
-        self.maxHsp = conf.get('xmlParser', 'max_hsp')
-        self.reset_at = conf.get('xmlParser', 'reset_at')
-
+        self.maxHit = conf.get('blastParser', 'max_hit')
+        self.maxHSP = conf.get('blastParser', 'max_hsp')
+        self.reset_at = conf.get('blastParser', 'reset_at')
+    
+    def get_name(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(RunSettings.param)
+        return conf.get('blastParser', 'name')
+    
 class Rannotate():
     # settings for annotation of the db with R
     coverage = 0.5
@@ -557,8 +622,13 @@ class Rannotate():
     def __init__(self): 
         conf = ConfigParser.ConfigParser()
         conf.read(RunSettings.param)
-        #self.coverage = conf.get('Annotation', 'coverage')
-        #self.bitscore = conf.get('Annotation', 'bitscore')
+        self.coverage = conf.get('Taxonomical Annotation', 'coverage')
+        self.bitscore = conf.get('Taxonomical Annotation', 'bitscore')
+        
+    def get_name(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(RunSettings.param)
+        return conf.get('Taxonomical Annotation', 'name')
         
 class subsetDB():
     classifier = ''

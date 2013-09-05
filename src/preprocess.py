@@ -9,11 +9,11 @@ from src.file_functions import create_outputdir, str_input, is_executable, updat
 class Preprocess:
     
     input = ''
-    logfile = ''
+    logdir = ''
     quality_dir = ''
     trim_dir = ''
     
-    def __init__(self, quality_dir, trim_dir, files_instance):
+    def __init__(self,files_instance):
         
         # init the important classes and variables
         self.exe = Executables()
@@ -21,9 +21,9 @@ class Preprocess:
         self.files = files_instance
         self.input = str_input(self.files.get_input())
         # define the dirs for log and processing
-        self.quality_dir = RunSettings.output + os.sep + quality_dir
-        self.trim_dir = RunSettings.output + os.sep + trim_dir
-        self.logfile = RunSettings.logdir + os.sep + 'trimming.log.txt'
+        self.quality_dir = self.files.get_quality_dir()
+        self.trim_dir = self.files.get_trim_dir()
+        self.logdir = self.files.get_logdir()
         
         # test for fastq noch integrieren
         
@@ -96,7 +96,7 @@ class Preprocess:
         self.log.newline()
         
         # open the log file
-        self.logfile = self.log.open_logfile(self.logfile)
+        self.logfile = self.log.open_logfile(self.logdir + 'trimming.log')
         
         # start trim_galore with the given parameter and specified output dir
         p = subprocess.Popen(shlex.split('%s %s -o %s %s' % 

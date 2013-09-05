@@ -16,17 +16,19 @@ class Assembly:
     
     input = ''
     interleaved = False
-    out = ''
+    concat_out = ''
+    assembly_out = ''
     logdir = ''
     
-    def __init__(self, outdir, files_instance, mode):
+    def __init__(self, files_instance, mode):
         
         # init all important variables and classes
         self.log = Logging()
-        self.logdir = RunSettings.logdir
         self.exe = Executables()
         self.files = files_instance
-        self.out = RunSettings.output + os.sep + outdir
+        self.logdir = self.files.get_logdir()
+        self.concat_out = self.files.get_concat_dir()
+        self.assembly_out = self.files.get_assembly_dir()
         self.input = str_input(self.files.get_input())
         
         # run the assembling functions when the module is initialized
@@ -34,18 +36,18 @@ class Assembly:
             # is executable existing and runnable?
             if is_executable(self.exe.FLASH, 'flash'):
                 # start concatination and update the input for next step
-                self.concatinate(self.out)
-                self.files.set_input(update_reads(self.out, 'extendedFrags', 'fastq'))
-                self.files.set_concatinated_output(update_reads(self.out, 'extendedFrags', 'fastq'))
+                self.concatinate(self.concat_out)
+                self.files.set_input(update_reads(self.concat_out, 'extendedFrags', 'fastq'))
+                self.files.set_concatinated_output(update_reads(self.concat_out, 'extendedFrags', 'fastq'))
                 RunSettings.step_number = RunSettings.step_number + 1
 
         if mode.lower() == 'metavelvet':
             # is executable existing and runnable?
             if is_executable(self.exe.VELVETH, 'velveth') and is_executable(self.exe.VELVETG, 'velvetg') and is_executable(self.exe.METAVELVET, 'metavelvet'):
                 # start assembly and update the input for next step
-                self.assemble_reads(self.out)
-                self.files.set_input(update_reads(self.out, 'meta-velvetg', 'fa'))
-                self.files.set_assembled_output(update_reads(self.out, 'meta-velvetg', 'fa'))
+                self.assemble_reads(self.assembly_out)
+                self.files.set_input(update_reads(self.assembly_out, 'meta-velvetg', 'fa'))
+                self.files.set_assembled_output(update_reads(self.assembly_out, 'meta-velvetg', 'fa'))
                 RunSettings.step_number = RunSettings.step_number + 1
             else:
                 pass
@@ -56,11 +58,11 @@ class Assembly:
             # is executable existing and runnable?
             if is_executable(self.exe.FLASH, 'flash') and is_executable(self.exe.VELVETH, 'velveth') and is_executable(self.exe.VELVETG, 'velvetg') and is_exe(self.exe.METAVELVET, 'metavelvet'):
                 # start processing and update the input for next step
-                self.concatinate(self.out)
+                self.concatinate(self.concat_out)
                 self.input = update_reads(self.out, 'extendedFrags', 'fastq')
                 
-                self.assemble_reads(self.out)
-                RunSettings.input = update_reads(self.out, 'meta-velvetg', 'fa')
+                self.assemble_reads(self.assembly_out)
+                RunSettings.input = update_reads(self.assembly_out, 'meta-velvetg', 'fa')
                 RunSettings.step_number = RunSettings.step_number + 1
             else:
                 pass
@@ -78,7 +80,7 @@ class Assembly:
                             ParamFileArguments(FLASH_Parameter()))
         
         # open the logfile
-        logfile = self.log.open_logfile(RunSettings.logdir + 'concatination.log')
+        logfile = self.log.open_logfile(self.logdir + 'concatination.log')
         
         # start the program Flash with parameter from the conf file a
         # errors will be piped to extra error logfile

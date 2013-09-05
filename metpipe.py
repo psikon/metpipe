@@ -93,7 +93,7 @@ settings = RunSettings(args.kmer, args.threads, PROGRAM_DIR, args.verbose, args.
                     args.output, args.output + os.sep + 'log' + os.sep, args.param, args.trim, args.quality, 
                     args.use_contigs, args.assembler, args.classify, args.summary,args.auto, 1)
 
-files = FileSettings(args.input)
+files = FileSettings(args.input, os.path.normpath(args.output))
 
 # fill the pipeline with tasks
 #queue = deque([])
@@ -117,21 +117,15 @@ files = FileSettings(args.input)
 from src.preprocess import *
 from src.assembly import *
 from src.annotation import *
+from src.analysis import *
 
-#### Einbauen wichtig !!!!
-print settings.output + os.sep +os.sep
-print os.path.normpath(settings.output + os.sep)
-#print 'Input: '+ str(files.get_input())
-#preprocess = Preprocess("quality_check","trimmed", files)
-#print 'Input: '+ str(files.get_input())
-#print 'Trimmed: ' + str(files.get_preprocessed_output())
-#assembly = Assembly("assembly",files, settings.assembler)
-#print 'Input: '+ str(files.get_input())
-#print 'Concatinated: ' + str(files.get_concatinated_output())
-#print 'Assembled' + str(files.get_assembled_output())
-#annotate = Annotation(files, 'blastn', 'metacv', settings.classify)
-#print 'Input: '+ str(files.get_input())
-#print 'blastn: ' + str(files.get_blastn_output())
-#analysis = Analysis()
+preprocess = Preprocess(files)
+print files.get_assembly_dir()
+assembly = Assembly(files, settings.assembler)
+#annotate = Annotation(files, settings.classify)
+
+files.set_blastn_output(files.get_blastn_dir() + os.sep + "blastn.xml")
+analysis = Analysis(files, True)
+
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 #sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')
