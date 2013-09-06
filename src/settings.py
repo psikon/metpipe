@@ -36,31 +36,68 @@ class RunSettings:
                  quality = None, use_contigs = None, assembler = None, classify = None, 
                  summary = None, automatic = None, step_number = None):
 
-        RunSettings.kmer = kmer
+        RunSettings.kmer = kmer #weg
         RunSettings.threads = threads
         RunSettings.verbose = verbose
         RunSettings.skip = skip.lower()
         RunSettings.starting_time = starting_time
         RunSettings.actual_time = starting_time
-        RunSettings.output = output
-        RunSettings.logdir = logdir
-        RunSettings.logfile = open(logdir+"summary.log","w")
+        RunSettings.output = output #weg
+        RunSettings.logdir = logdir #weg
+        RunSettings.logfile = open(logdir+"summary.log","w") #weg
         RunSettings.param = param
         RunSettings.trim = trim
         RunSettings.quality = quality 
         RunSettings.use_contigs = use_contigs
         RunSettings.assembler = assembler.lower()
         RunSettings.classify = classify.lower() 
-        RunSettings.summary = summary
-        RunSettings.automatic = automatic
+        RunSettings.summary = summary #weg
+        RunSettings.automatic = automatic #weg
         RunSettings.step_number = step_number
         # define program paths
         
-        # define databases
+        # define databases #weg
         RunSettings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'nt')
         RunSettings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, '16S')
         RunSettings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'cvk6_2059')
 
+    def get_threads(self):
+        return RunSettings.threads
+        
+    def get_verbose(self):
+        return RunSettings.verbose
+        
+    def get_starting_time(self):
+        return RunSettings.starting_time
+        
+    def get_actual_time(self):
+        return RunSettings.actual_time
+    
+    def get_parameterfile(self):
+        return RunSettings.param
+    
+    def get_quality(self):
+        return RunSettings.quality
+    
+    def get_trim(self):
+        return RunSettings.trim
+    
+    def get_assembler(self):
+        return RunSettings.assembler
+    
+    def get_classify(self):
+        return RunSettings.classify
+    
+    def get_use_contigs(self):
+        return RunSettings.use_contigs
+    
+    def get_step_number(self):
+        return RunSettings.step_number
+    
+    def set_step_number(self):
+        RunSettings.step_number = RunSettings.step_number + 1
+        
+        
 class Executables:
 
     def __init__(self):
@@ -74,7 +111,7 @@ class Executables:
         Executables.METACV = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metacv', os.sep, 'metacv')
         Executables.CONVERTER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastx', os.sep, 'fastq_to_fasta')
         Executables.PARSER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'xmlParser', os.sep, 'bigBlastParser' )
-        Executables.ANNOTATE = '%s%s%s%s%s' % (sys.path[0], os.sep, 'src', os.sep, 'annoate.R')
+        Executables.ANNOTATE = '%s%s%s%s%s' % (sys.path[0], os.sep, 'src', os.sep, 'annotate.R')
         Executables.SUBSET = '%s%s%s%s%s' % (sys.path[0], os.sep, 'src', os.sep, 'subsetDB.R')
         Executables.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
                                                os.sep + 'bin' + os.sep + 'ktImportBLAST')
@@ -631,19 +668,33 @@ class Rannotate():
         conf = ConfigParser.ConfigParser()
         conf.read(RunSettings.param)
         return conf.get('Taxonomical Annotation', 'name')
+    
+    def get_taxon_db(self):
+        conf = ConfigParser.ConfigParser()
+        conf.read(RunSettings.param)
+        return conf.get('Taxonomical Annotation', 'path')
         
 class subsetDB():
     classifier = ''
     bitscore = 0.98
-    rank = 'superkingdom'
-    arguments = {'classifier' : '--classifier ', 'bitscore' : '--bitscore ', 'rank' : '--rank '}
+    rank = ''
     
     def __init__(self):
-        conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
-        #self.classifier = conf.get('subsetDB', 'classifier')
-        #self.bitscore = conf.get('subsetDB', 'bitscore')
-        #self.rank = conf.get('subsetDB', 'rank')
+        self.conf = ConfigParser.ConfigParser()
+        self.conf.read(RunSettings.param)
+        
+    def get_bitscore(self):
+        return self.conf.get('Subsetting of Database', 'bitscore')
+    
+    def get_classifier(self):
+       return [x.strip(' ') for x in self.conf.get('Subsetting of Database', 'classifier').split(',')]
+        
+    
+    def get_rank(self):
+        return [x.strip(' ') for x in self.conf.get('Subsetting of Database', 'rank').split(',')]
+    
+    def get_taxon_db(self):
+        return self.conf.get('Subsetting of Database', 'path')
     
 class Krona_Parameter():
     pass

@@ -118,14 +118,16 @@ from src.preprocess import *
 from src.assembly import *
 from src.annotation import *
 from src.analysis import *
+from src.file_functions import update_reads
+from src.log_functions import Logging
+
+log = Logging()
 
 preprocess = Preprocess(files)
-print files.get_assembly_dir()
 assembly = Assembly(files, settings.assembler)
-#annotate = Annotation(files, settings.classify)
-
-files.set_blastn_output(files.get_blastn_dir() + os.sep + "blastn.xml")
+annotate = Annotation(files, settings.classify)
+files.set_blastn_output(update_reads(files.get_blastn_dir(),"blast",'xml'))
 analysis = Analysis(files, True)
 
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
-#sys.stdout.write('processed in ' + getDHMS(time.time()-Settings.starting_time)+'\n')
+sys.stdout.write('processed in ' + log.getDHMS(time.time()-RunSettings.starting_time)+'\n')

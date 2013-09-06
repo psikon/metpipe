@@ -70,7 +70,7 @@ class Annotation:
         # blastn can only run with dfasta files, so input has to be converted
         if all(is_fastq(i) for i in self.input):
             # print actual informations about the step on stdout
-            self.log.print_step(RunSettings.step_number, 'Assembly', 'convert fastq files',
+            self.log.print_step(RunSettings.step_number, 'Annotation', 'convert fastq files',
                                 self.log.cut_path(self.input))
             self.input = convert_fastq(self.input, self.blast_out)
         
