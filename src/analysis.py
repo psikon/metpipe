@@ -5,9 +5,8 @@ import sys, os
 import shutil
 import time
 # imports of own functions and classes
-from src.utils import ParamFileArguments
-from src.settings import RunSettings, Executables, blastParser, Rannotate, subsetDB
-from src.file_functions import create_outputdir, str_input, update_reads, is_xml, remove_file
+from src.settings import Executables, blastParser, Rannotate, subsetDB
+from src.file_functions import create_outputdir, str_input, update_reads, is_xml, remove_file, parse_parameter
 from src.log_functions import Logging
 
 class Analysis:
@@ -22,14 +21,16 @@ class Analysis:
     annotated_db_out = ''
     subseted_db_out = ''
     logdir = ''
-    
+    parameter_file = ''
     krona = False
    
     
-    def __init__(self, files_instance, krona):
+    def __init__(self, files_instance, settings_instance, parameter_file, krona):
         # init all important variables and classes
+        self.settings = settings_instance
+        self.parameter_file = parameter_file
         self.log = Logging()
-        self.exe = Executables()
+        self.exe = Executables(self.parameter_file)
         self.files = files_instance
         self.logdir = self.files.get_logdir()
         self.krona = krona
@@ -45,9 +46,9 @@ class Analysis:
         
         if is_xml(str_input(self.files.get_blastn_output())):
             self.parse_to_db(self.blast_output, self.parsed_db_out)
-            self.files.set_parser_output(update_reads(self.parsed_db_out, blastParser().get_name(), 'db'))
+            self.files.set_parser_output(update_reads(self.parsed_db_out, blastParser(self.parameter_file).get_name(), 'db'))
             self.annotate_db(self.files.get_parser_output(), self.annotated_db_out)
-            self.files.set_annotated_output(update_reads(self.annotated_db_out, Rannotate().get_name(), 'db'))
+            self.files.set_annotated_output(update_reads(self.annotated_db_out, Rannotate(self.parameter_file).get_name(), 'db'))
             self.subset_db(self.files.get_annotated_output(), self.subseted_db_out)
         
         if krona:
@@ -63,24 +64,24 @@ class Analysis:
         # create a dir for output
         create_outputdir(output)
         # generate filename for db
-        outfile = output + os.sep + blastParser().get_name() + '.db'
+        outfile = output + os.sep + blastParser(self.parameter_file).get_name() + '.db'
         # remove old databases with same name
         if os.path.exists(outfile):
             os.remove(outfile)
         # print actual informations about the step on stdout
-        self.log.print_step(RunSettings.step_number, 'Analysis', 
+        self.log.print_step(self.settings.get_step_number(), 'Analysis', 
                             'Parse database from blast results',
-                            ParamFileArguments(blastParser()))
+                            parse_parameter(blastParser(self.parameter_file)))
         # start the parser and wait until completion
         p = subprocess.Popen(shlex.split('%s -o %s %s %s' % (self.exe.PARSER,
                                                              outfile,
-                                                             ParamFileArguments(blastParser()),
+                                                             parse_parameter(blastParser(self.parameter_file)),
                                                              str_input(input))),
                               stdout = subprocess.PIPE,
                               stderr = self.log.open_logfile(self.logdir + 'parser.err.log'))
         # print information about the status
         while p.poll() is None:
-            if RunSettings.verbose:
+            if self.settings.get_verbose():
                 self.log.print_verbose(p.stdout.readline())
             else:
                 self.log.print_compact(p.stdout.readline().rstrip('\n'))
@@ -90,16 +91,16 @@ class Analysis:
         # print summary of the process after completion
         self.log.print_verbose('Parsing of blast XML File complete \n')
         self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - RunSettings.actual_time) 
+                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
                                + '\n')
         self.log.newline
         
     def annotate_db(self, input, output):
-        
+
         # create a dir for output
         create_outputdir(output)
         # generate filename for db
-        outfile = output + os.sep + Rannotate().get_name() + '.db'
+        outfile = output + os.sep + Rannotate(self.parameter_file).get_name() + '.db'
         logfile = self.log.open_logfile(self.logdir + 'annotation_of_db.log')
         
         # remove old databases with same name
@@ -107,20 +108,21 @@ class Analysis:
             os.remove(outfile)
         
         # print actual informations about the step on stdout    
-        self.log.print_step(RunSettings.step_number, 'Analysis', 
+        self.log.print_step(self.settings.get_step_number(), 'Analysis', 
                             'Annotate taxonomical data to blast database',
-                            ParamFileArguments(Rannotate()))
+                            parse_parameter(Rannotate(self.parameter_file)))
         
         # start the parser and wait until completion
-        p = subprocess.Popen(shlex.split('%s -i %s -o %s %s --taxon %s' % (self.exe.ANNOTATE, 
-                                                                           str_input(input), 
-                                                                           outfile, 
-                                                                           ParamFileArguments(Rannotate()),
-                                                                           Rannotate().get_taxon_db())),
+        p = subprocess.Popen(shlex.split('%s -i %s -o %s %s --taxon %s' 
+                                         % (self.exe.ANNOTATE, 
+                                            str_input(input), 
+                                            outfile, 
+                                            parse_parameter(Rannotate(self.parameter_file)),
+                                            Rannotate(self.parameter_file).get_taxon_db())),
                              stdout = subprocess.PIPE)
         # print information about the status
         while p.poll() is None:
-            if RunSettings.verbose:
+            if self.settings.get_verbose():
                 self.log.print_verbose(p.stdout.readline())
                 logfile.write(p.stdout.readline())
             else:
@@ -131,7 +133,7 @@ class Analysis:
         # print summary of the process after completion
         self.log.print_verbose('Taxonomical annotation of blast database complete \n')
         self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - RunSettings.actual_time) 
+                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
                                + '\n')
         self.log.newline
         
@@ -140,12 +142,12 @@ class Analysis:
         # create a dir for output
         create_outputdir(output)
         # create a subset Object to access the classifier and rank lists
-        subsetting = subsetDB()
+        subsetting = subsetDB(self.parameter_file)
         # because of multiple possible classifier the database will be subseted in a loop,
         # so that every classifier can be processed
         for i in range(len(subsetting.get_classifier())):
             # print actual informations about the step on stdout    
-            self.log.print_step(RunSettings.step_number, 
+            self.log.print_step(self.settings.get_step_number(), 
                                 'Analysis', 
                                 'Subset the database for %s' % (subsetting.get_classifier()[i]),
                                 '--bitscore %s --rank %s' % (subsetting.get_bitscore(),
@@ -170,7 +172,7 @@ class Analysis:
             
             # during processing print output in verbose mode and update the logfile
             while p.poll() is None:
-                if RunSettings.verbose:
+                if self.settings.get_verbose():
                     self.log.print_verbose(p.stdout.readline())
                     logfile.write(p.stdout.readline())
                 else:
@@ -182,7 +184,7 @@ class Analysis:
         # print summary of the process after completion
         self.log.print_verbose('Subsetting of annotated Blast database complete \n')
         self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - RunSettings.actual_time) 
+                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
                                + '\n')
         self.log.newline
         

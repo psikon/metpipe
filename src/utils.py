@@ -2,7 +2,7 @@ import os, sys
 import shutil
 from collections import deque
 from datetime import date
-from src.settings import TrimGalore_Parameter, Blastn_Parameter, RunSettings
+from src.settings import TrimGalore_Parameter, Blastn_Parameter, General
 
 # function to fill the working queue with tasks based on the cli commands
 def createTasks(settings_instance, program_instance):
@@ -129,33 +129,6 @@ def consoleSummary(settings):
 		return raw_input('\nContinue?\n')
 
 
-# important function to get all used arguments from a settings object and convert it to an argument string
-def ParamFileArguments(instance):
-
-	args = ''
-	# get all used vars of the instance
-	var = vars(instance)
-	for name in var:
-		# if var is boolean and true only print the name of the var in dict
-		if getattr(instance, name):
-			if str(getattr(instance, name)).lower() in 'true':
-				args += ' ' + instance.arguments.get(str(name))
-			# if var is boolean and false discard it
-			elif str(getattr(instance, name)).lower() in 'false':
-				pass
-			# else var has a value - print var from dict + value
-			else: 
-				args += ' ' + instance.arguments.get(str(name)) + getattr(instance, name)
-	
-	return args
-
-
-
-def logging(message):
-	sys.stdout.write(message)
-	Settings.logfile.write(message)
-	Settings.logfile.flush()
-		
 
 
 			
@@ -188,12 +161,6 @@ class Task:
 	
 	def setOutputDir(self, outputDir):
 		self.outputDir = outputDir
-
-class Logger:
-	
-	def __init__(self,logdir):
-		self.terminal = sys.stdout
-		self.log = open(logdir+"summary.log", "w")
 
 	
 

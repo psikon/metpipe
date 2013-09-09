@@ -4,120 +4,162 @@ import os
 
 # class for general settings of the pipeline and variables needed from every program
 
-class RunSettings:
+class General:
 
     # general settings
-    kmer = 85
     threads = 8
     verbose = False
     skip = ''
     starting_time = ''
     actual_time = ''
-    automatic = False
     step_number = 1
-    logdir = ''
-    logfile=''
-    param = ''
-    output = ''
     # Program Settings
     trim = True
     quality = True
     use_contigs = False
     assembler = ''
     classify = 'both'
-    summary = True
-    metacv_db = ''
-    blastdb_16S = ''
-    blastdb_nt = ''
     
     
-    def __init__(self, kmer = None, threads = None, program_dir = None, verbose = False, skip = None, 
-                 starting_time = None, output = None, logdir = None, param = None, trim = None, 
-                 quality = None, use_contigs = None, assembler = None, classify = None, 
-                 summary = None, automatic = None, step_number = None):
+    def __init__(self, threads = None, verbose = False, skip = None, 
+                 starting_time = None, trim = None, quality = None, use_contigs = None, assembler = None, 
+                 classify = None, step_number = None):
 
-        RunSettings.kmer = kmer #weg
-        RunSettings.threads = threads
-        RunSettings.verbose = verbose
-        RunSettings.skip = skip.lower()
-        RunSettings.starting_time = starting_time
-        RunSettings.actual_time = starting_time
-        RunSettings.output = output #weg
-        RunSettings.logdir = logdir #weg
-        RunSettings.logfile = open(logdir+"summary.log","w") #weg
-        RunSettings.param = param
-        RunSettings.trim = trim
-        RunSettings.quality = quality 
-        RunSettings.use_contigs = use_contigs
-        RunSettings.assembler = assembler.lower()
-        RunSettings.classify = classify.lower() 
-        RunSettings.summary = summary #weg
-        RunSettings.automatic = automatic #weg
-        RunSettings.step_number = step_number
-        # define program paths
-        
-        # define databases #weg
-        RunSettings.blastdb_nt = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'nt')
-        RunSettings.blastdb_16S = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, '16S')
-        RunSettings.metacv_db = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep , 'db', os.sep, 'cvk6_2059')
+        self.threads = threads
+        self.verbose = verbose
+        self.skip = skip.lower()
+        self.starting_time = starting_time
+        self.actual_time = starting_time
+        self.trim = trim
+        self.quality = quality 
+        self.use_contigs = use_contigs
+        self.assembler = assembler.lower()
+        self.classify = classify.lower() 
+        self.step_number = step_number
 
     def get_threads(self):
-        return RunSettings.threads
+        return self.threads
         
     def get_verbose(self):
-        return RunSettings.verbose
+        return self.verbose
         
     def get_starting_time(self):
-        return RunSettings.starting_time
+        return self.starting_time
         
     def get_actual_time(self):
-        return RunSettings.actual_time
+        return self.actual_time
     
     def get_parameterfile(self):
-        return RunSettings.param
+        return self.param
     
     def get_quality(self):
-        return RunSettings.quality
+        return self.quality
     
     def get_trim(self):
-        return RunSettings.trim
+        return self.trim
     
     def get_assembler(self):
-        return RunSettings.assembler
+        return self.assembler
     
     def get_classify(self):
-        return RunSettings.classify
+        return self.classify
     
     def get_use_contigs(self):
-        return RunSettings.use_contigs
+        return self.use_contigs
     
     def get_step_number(self):
-        return RunSettings.step_number
+        return self.step_number
     
     def set_step_number(self):
-        RunSettings.step_number = RunSettings.step_number + 1
+        self.step_number = self.step_number + 1
         
         
 class Executables:
-
-    def __init__(self):
-        Executables.FASTQC = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastqc', os.sep, 'fastqc')
-        Executables.TRIMGALORE = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'trim_galore', os.sep, 'trim_galore')
-        Executables.VELVETH = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'velvet', os.sep ,'velveth')
-        Executables.VELVETG = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'velvet', os.sep,'velvetg')
-        Executables.METAVELVET = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metavelvet', os.sep, 'meta-velvetg')
-        Executables.FLASH = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'flash', os.sep, 'flash')
-        Executables.BLASTN = '%s%s%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'blast', os.sep, 'bin', os.sep, 'blastn')
-        Executables.METACV = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'metacv', os.sep, 'metacv')
-        Executables.CONVERTER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'fastx', os.sep, 'fastq_to_fasta')
-        Executables.PARSER = '%s%s%s%s%s%s%s' % (sys.path[0], os.sep, 'programs', os.sep, 'xmlParser', os.sep, 'bigBlastParser' )
-        Executables.ANNOTATE = '%s%s%s%s%s' % (sys.path[0], os.sep, 'src', os.sep, 'annotate.R')
-        Executables.SUBSET = '%s%s%s%s%s' % (sys.path[0], os.sep, 'src', os.sep, 'subsetDB.R')
-        Executables.KRONA_BLAST = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
-                                               os.sep + 'bin' + os.sep + 'ktImportBLAST')
-        Executables.KRONA_TEXT = '%s%s%s%s%s' % (sys.path[0], os.sep, 'program', os.sep, 'krona' + 
-                                               os.sep + 'bin' + os.sep + 'ktImportText')
+    
+    conf = ConfigParser.ConfigParser()
+    FASTQC = ''
+    TRIMGALORE = ''
+    VELVETH = ''
+    VELVETG = ''
+    METAVELVET = ''
+    FLASH = ''
+    BLASTN = ''
+    BLAST_DB = ''
+    METACV_DB = ''
+    METACV = ''
+    CONVERTER = ''
+    PARSER = ''
+    ANNOTATE = ''
+    SUBSET = ''
+    KRONA_BLAST = ''
+    KRONA_TEXT = ''
+    
+    def __init__(self, parameter_file):
+        self.conf.read(parameter_file)
+        self.FASTQC = os.path.normpath(self.conf.get('FastQC', 'path')) + os.sep + 'fastqc'
+        self.TRIMGALORE = os.path.normpath(self.conf.get('TrimGalore', 'path')) + os.sep + 'trim_galore'
+        self.FLASH = os.path.normpath(self.conf.get('FLASH', 'path')) + os.sep + 'flash'
+        self.VELVETH = os.path.normpath(self.conf.get('Velvet', 'path')) + os.sep + 'velveth'
+        self.VELVETG = os.path.normpath(self.conf.get('Velvet', 'path')) + os.sep + 'velvetg'
+        self.METAVELVET = os.path.normpath(self.conf.get('MetaVelvet', 'path')) + os.sep + 'meta-velvetg'
+        self.METACV = os.path.normpath(self.conf.get('MetaCV', 'path')) + os.sep  + 'metacv'
+        self.METACV_DB = os.path.normpath(self.conf.get('MetaCV', 'db')) + os.sep 
+        self.BLASTN = os.path.normpath(self.conf.get('blastn', 'path')) + os.sep + 'blastn'
+        self.BLAST_DB = os.path.normpath(self.conf.get('blastn', 'db')) + os.sep + 'nt'
+        self.CONVERTER = os.path.normpath(self.conf.get('FastX', 'path')) + os.sep + 'fastq_to_fasta'
+        self.PARSER = os.path.normpath(self.conf.get('blastParser', 'path')) + os.sep + 'bigBlastParser'
+        self.ANNOTATE = os.path.normpath(self.conf.get('Taxonomical Annotation', 'path')) + os.sep + 'annotate.R'
+        self.SUBSET = os.path.normpath(self.conf.get('Subsetting of Database', 'path')) + os.sep + 'subsetDB.R'
+        self.KRONA_BLAST = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep 
+        self.KRONA_TEXT = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep 
         
+    def get_FastQC(self):
+        return self.FASTQC
+    
+    def get_TrimGalore(self):
+        return self.TRIMGALORE
+    
+    def get_Flash(self):
+        return self.FLASH
+    
+    def get_Velveth(self):
+        return self.VELVETH
+    
+    def get_Velvetg(self):
+        return self.VELVETG
+    
+    def get_MetaVelvet(self):
+        return self.METAVELVET
+    
+    def get_MetaCV(self):
+        return self.METACV
+    
+    def get_MetaCV_DB(self):
+        return self.METACV_DB
+    
+    def get_Blastn(self):
+        return self.BLASTN
+    
+    def get_Blastn_DB(self):
+        return self.BLAST_DB
+    
+    def get_Converter(self):
+        return self.CONVERTER
+    
+    def get_Parser(self):
+        return self.PARSER
+    
+    def get_Annotate(self):
+        return self.ANNOTATE
+    
+    def get_Subset(self):
+        return self.SUBSET
+    
+    def get_Krona_Blast(self):
+        return self.KRONA_BLAST
+    
+    def get_Krona_Text(self):
+        return self.KRONA_TEXT  
 
 class FileSettings:
     
@@ -146,10 +188,9 @@ class FileSettings:
     annotated_output = []
     subseted_output = []
     
-    def __init__(self, raw = None, output = None):
+    def __init__(self, raw = None, output = None, parameter_file = None):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
-        
+        conf.read(parameter_file)
         self.raw = raw
         self.input = raw
         self.output = output + os.sep
@@ -273,9 +314,9 @@ class FastQC_Parameter:
     # dict with the arguments string
     arguments = {'nogroup' : '--nogroup ', 'contaminants': '-c ', 'kmers': '-k '}
     
-    def __init__(self):
+    def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
+        conf.read(parameter_file)
         self.nogroup = conf.getboolean('FastQC', 'nogroup')
         self.kmers = conf.get('FastQC', 'kmers')
         self.contaminants = conf.get('FastQC', 'contaminants')
@@ -300,9 +341,9 @@ class TrimGalore_Parameter:
                  'error_rate':'-e ', 'length':'--length ', 'paired':'--paired', 'retain_unpaired':'--retain_unpaired',
                  'length1':'-r1 ', 'length2':'-r2 ', 'trim':'-t '}
     
-    def __init__(self):
+    def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
+        conf.read(parameter_file)
         self.quality = conf.get('TrimGalore', 'quality')
         self.phred = conf.get('TrimGalore', 'phred')
         self.adapter = conf.get('TrimGalore', 'adapter')
@@ -330,9 +371,9 @@ class FLASH_Parameter:
                  'phred' : '-p ', 'readLength' : '-r ', 'fragmentLength' : '-f ', 
                  'fragmentLengthStddev' : '-s ', 'interleavedInput' : '--interleaved-input', 
                  'interleavedOutput' : '--interleaved-output'}
-    def __init__(self):
+    def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
+        conf.read(parameter_file)
         self.minOverlap = conf.get('FLASH','min-overlap')
         self.maxOverlap = conf.get('FLASH','max-overlap')
         self.maxMismatchDensity = conf.get('FLASH', 'max-mismatch-density')
@@ -345,7 +386,8 @@ class FLASH_Parameter:
         
 # Parameter for velveth
 class Velveth_Parameter:
-
+    
+    kmer = 85
     file_layout = ''
     read_type = ''
     strand_specific = False
@@ -356,15 +398,20 @@ class Velveth_Parameter:
     arguments = {'file_layout' : '-', 'read_type' : '-', 'strand_specific':'-strand_specific',
 				'reuse_Sequences':'-reuse_Sequences', 'noHash':'-noHash', 'create_binary':'-createBinary'}
     
-    def __init__(self):
+    def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
+        conf.read(parameter_file)
         self.file_layout = conf.get('Velvet', 'file_layout')
         self.read_type = conf.get('Velvet', 'read_type')
         self.strand_specific = conf.getboolean('Velvet', 'strand_specific')
         self.reuse_Sequences = conf.getboolean('Velvet', 'reuse_Sequences')
         self.noHash = conf.getboolean('Velvet', 'noHash')
         self.create_binary = conf.getboolean('Velvet', 'create_binary')
+        
+    def get_kmer(self, parameter_file):
+        conf = ConfigParser.ConfigParser()
+        conf.read(parameter_file)
+        return conf.get('Velvet', 'kmer')
 
 # Parameter for velvetg
 class Velvetg_Parameter:
@@ -404,10 +451,10 @@ class Velvetg_Parameter:
                  'exportFiltered' : '-exportFiltered ','paired_exp_fraction' : '-paired_exp_fraction ', 
                  'shortMatePaired' : '-shortMatePaired ','conserveLong' : '-conserveLong '}  
     
-    def __init__(self):
+    def __init__(self, parameter_file):
         
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
+        conf.read(parameter_file)
         self.cov_cutoff = conf.get('Velvet', 'cov_cutoff')
         self.ins_length = conf.get('Velvet', 'ins_length')
         self.read_trkg = conf.getboolean('Velvet', 'read_trkg')
@@ -466,9 +513,9 @@ class MetaVelvet_Parameter:
 				'alignments_meta':'-alignments', 'exportFiltered_meta':'-exportFiltered',
 				'paired_exp_fraction_meta': '-paired_exp_fraction '}  
      
-    def __init__(self):
+    def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)   
+        conf.read(parameter_file)
         self.discard_chimera = conf.get('MetaVelvet', 'discard_chimera')
         self.max_chimera_rate = conf.get('MetaVelvet', 'max_chimera_rate')
         self.repeat_cov_sd = conf.get('MetaVelvet', 'repeat_cov_sd')
@@ -499,9 +546,9 @@ class MetaCV_Parameter:
     # dict with the arguments string
     arguments = {'seq':'--seq=', 'mode':'--mode=', 'orf':'--orf='}
 
-    def __init__(self):
+    def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)   
+        conf.read(parameter_file)
         self.seq = conf.get('MetaCV', 'seq')
         self.mode = conf.get('MetaCV', 'mode')
         self.orf = conf.get('MetaCV', 'orf')        
@@ -510,7 +557,6 @@ class MetaCV_Parameter:
 class Blastn_Parameter:
 
     import_search_strategy = ''
-    db = ''
     dbsize = ''
     gilist = ''
     seqidlist = ''
@@ -559,11 +605,11 @@ class Blastn_Parameter:
     num_alignments = ''
     html = False
     max_target_seqs = ''
-    arguments = {'import_search_strategy' : '-import_search_strategy ', 'db' : '-db ',
-                 'dbsize' : '-dbsize ', 'gilist' : '-gilist ', 'seqidlist' : '-seqidlist ',
-                  'negative_gilist' : '-negative_gilist ', 'entrez_query' : '-entrez_query ',
-                  'db_soft_mask' : '-db_soft_mask ', 'db_hard_mask' : '-db_hard_mask ', 'subject' : '-subject ',
-                  'subject_loc' : '-subject_loc ', 'evalue' : '-evalue ', 'word_size' : '-word_size ',
+    arguments = {'import_search_strategy' : '-import_search_strategy ', 'dbsize' : '-dbsize ', 
+                 'gilist' : '-gilist ', 'seqidlist' : '-seqidlist ','negative_gilist' : '-negative_gilist ', 
+                 'entrez_query' : '-entrez_query ','db_soft_mask' : '-db_soft_mask ', 
+                 'db_hard_mask' : '-db_hard_mask ', 'subject' : '-subject ','subject_loc' : '-subject_loc ',
+                  'evalue' : '-evalue ', 'word_size' : '-word_size ',
                   'gapopen' :  '-gapopen ', 'gapextend' : '-gapextend ', 'perc_identity' : '-perc_identity ',
                   'xdrop_ungap' : '-xdrop_ungap ', 'xdrop_gap' : '-xdrop_gap ', 'xdrop_gap_final' : '-xdrop_gap_final ',
                   'searchsp' : '-searchsp ', 'max_hsps_per_subject' : '-max_hsps_per_subject ',
@@ -579,11 +625,10 @@ class Blastn_Parameter:
                   'outfmt' : '-outfmt ', 'show_gis' : '-show_gis ', 'num_descriptions' : '-num_descriptions ',
                   'num_alignments' : '-num_alignments ', 'html' : '-html ', 'max_target_seqs' : '-max_target_seqs ' }
 
-    def __init__(self):
+    def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
+        conf.read(parameter_file)
         self.import_search_strategy = conf.get('blastn', 'import_search_strategy')
-        self.db = conf.get('blastn', 'db')
         self.dbsize = conf.get('blastn', 'dbsize')
         self.gilist = conf.get('blastn', 'gilist')
         self.seqidlist = conf.get('blastn', 'seqidlist')
@@ -633,55 +678,49 @@ class Blastn_Parameter:
         self.html = conf.getboolean('blastn', 'html')
         self.max_target_seqs = conf.get('blastn', 'max_target_seqs')
 
-class blastParser():
+class blastParser:
     # Parser settings
     maxHit = 20
     maxHSP = 20
     reset_at = 1000
     arguments = {'maxHit' : '--max_hit ', 'maxHSP' : '--max_hsp ', 'reset_at' : '--reset_at '}
+    conf = ConfigParser.ConfigParser()
     
-    def __init__(self):
-        conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
-        self.maxHit = conf.get('blastParser', 'max_hit')
-        self.maxHSP = conf.get('blastParser', 'max_hsp')
-        self.reset_at = conf.get('blastParser', 'reset_at')
+    def __init__(self, parameter_file):
+        self.conf.read(parameter_file)
+        self.maxHit = self.conf.get('blastParser', 'max_hit')
+        self.maxHSP = self.conf.get('blastParser', 'max_hsp')
+        self.reset_at = self.conf.get('blastParser', 'reset_at')
     
     def get_name(self):
-        conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
-        return conf.get('blastParser', 'name')
+        return self.conf.get('blastParser', 'name')
     
 class Rannotate():
     # settings for annotation of the db with R
     coverage = 0.5
     bitscore = 0.98
     arguments = {'coverage' : ' --coverage ', 'bitscore' : '--bitscore '}
-       
-    def __init__(self): 
-        conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
-        self.coverage = conf.get('Taxonomical Annotation', 'coverage')
-        self.bitscore = conf.get('Taxonomical Annotation', 'bitscore')
+    conf = ConfigParser.ConfigParser()
+    
+    def __init__(self, parameter_file): 
+        self.conf.read(parameter_file)
+        self.coverage = self.conf.get('Taxonomical Annotation', 'coverage')
+        self.bitscore = self.conf.get('Taxonomical Annotation', 'bitscore')
         
     def get_name(self):
-        conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
-        return conf.get('Taxonomical Annotation', 'name')
+        return self.conf.get('Taxonomical Annotation', 'name')
     
     def get_taxon_db(self):
-        conf = ConfigParser.ConfigParser()
-        conf.read(RunSettings.param)
-        return conf.get('Taxonomical Annotation', 'path')
+        return os.path.normpath(self.conf.get('Taxonomical Annotation', 'taxon_db'))
         
 class subsetDB():
     classifier = ''
     bitscore = 0.98
     rank = ''
+    conf = ConfigParser.ConfigParser()
     
-    def __init__(self):
-        self.conf = ConfigParser.ConfigParser()
-        self.conf.read(RunSettings.param)
+    def __init__(self, parameter_file):
+        self.conf.read(parameter_file)
         
     def get_bitscore(self):
         return self.conf.get('Subsetting of Database', 'bitscore')
@@ -694,7 +733,7 @@ class subsetDB():
         return [x.strip(' ') for x in self.conf.get('Subsetting of Database', 'rank').split(',')]
     
     def get_taxon_db(self):
-        return self.conf.get('Subsetting of Database', 'path')
+        return os.path.normpath(self.conf.get('Subsetting of Database', 'taxon_db'))
     
 class Krona_Parameter():
     pass

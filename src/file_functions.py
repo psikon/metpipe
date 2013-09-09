@@ -14,17 +14,6 @@ def create_outputdir(path):
             # if dir exists and is dir go ahead
             if not os.path.isdir(path):
                 raise
-            
-# copy number of files from source to destination
-def move(src, dst, fileExtension):
-    
-    # generate list of files matching the file extension
-    listofFiles = [f for f in os.listdir(src) if f.endswith(fileExtension)]
-    for f in listofFiles:
-        # if path exists remove it and overwrite results
-        if os.path.exists(dst + os.sep + f):
-            os.remove(dst + os.sep + f)
-        shutil.move(src + f, dst)
 
 # make it sense?
 def is_paired(input):
@@ -58,12 +47,12 @@ def update_reads(directory, word, extension):
    return [(directory + os.sep +  f) for f in files]
 
 # test the executable - is it existing and callable?
-def is_executable(program_path, name):
+def is_executable(program_path):
     if os.path.isfile(program_path) and os.access(program_path, os.X_OK):
         return True
     else: 
         sys.stdout.write(os.linesep)
-        sys.stderr.write('Executable for ' + name + ' not found - Please reinstall\n')
+        sys.stderr.write('Executable for ' + program_path.split(os.sep)[-1] + ' not found - Please reinstall\n')
         sys.stdout.write(os.linesep)
         return False
 
@@ -74,10 +63,10 @@ def merge_files(input, output):
     merge.close()
     return update_reads(output,'merged','fasta')
     
-def convert_fastq(input, output):
+def convert_fastq(input, output, CONVERTER):
     
     for i in range(len(input)):
-        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (Executables().CONVERTER,
+        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (CONVERTER,
                                                                      input[i],
                                                                      output + os.sep + 
                                                                      'converted.' + str(i) + 
@@ -105,3 +94,23 @@ def is_xml(file):
         return True
     else:
         return False
+    
+# important function to get all used arguments from a settings object and convert it to an argument string
+def parse_parameter(instance):
+
+    args = ''
+    # get all used vars of the instance
+    var = vars(instance)
+    for name in var:
+        # if var is boolean and true only print the name of the var in dict
+        if getattr(instance, name):
+            if str(getattr(instance, name)).lower() in 'true':
+                args += ' ' + instance.arguments.get(str(name))
+            # if var is boolean and false discard it
+            elif str(getattr(instance, name)).lower() in 'false':
+                pass
+            # else var has a value - print var from dict + value
+            else: 
+                args += ' ' + instance.arguments.get(str(name)) + getattr(instance, name)
+    
+    return args
