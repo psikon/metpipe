@@ -21,8 +21,8 @@ class General:
     classify = 'both'
     
     
-    def __init__(self, threads = None, verbose = False, skip = None, 
-                 starting_time = None, trim = None, quality = None, use_contigs = None, assembler = None, 
+    def __init__(self, threads = None, verbose = False, skip = None, starting_time = None, 
+                 trim = None, quality = None, use_contigs = None, assembler = None, 
                  classify = None, step_number = None):
 
         self.threads = threads
@@ -95,6 +95,7 @@ class Executables:
     KRONA_TEXT = ''
     
     def __init__(self, parameter_file):
+        
         self.conf.read(parameter_file)
         self.FASTQC = os.path.normpath(self.conf.get('FastQC', 'path')) + os.sep + 'fastqc'
         self.TRIMGALORE = os.path.normpath(self.conf.get('TrimGalore', 'path')) + os.sep + 'trim_galore'
@@ -189,6 +190,7 @@ class FileSettings:
     subseted_output = []
     
     def __init__(self, raw = None, output = None, parameter_file = None):
+        
         conf = ConfigParser.ConfigParser()
         conf.read(parameter_file)
         self.raw = raw
@@ -315,6 +317,7 @@ class FastQC_Parameter:
     arguments = {'nogroup' : '--nogroup ', 'contaminants': '-c ', 'kmers': '-k '}
     
     def __init__(self, parameter_file):
+        
         conf = ConfigParser.ConfigParser()
         conf.read(parameter_file)
         self.nogroup = conf.getboolean('FastQC', 'nogroup')
@@ -342,6 +345,7 @@ class TrimGalore_Parameter:
                  'length1':'-r1 ', 'length2':'-r2 ', 'trim':'-t '}
     
     def __init__(self, parameter_file):
+        
         conf = ConfigParser.ConfigParser()
         conf.read(parameter_file)
         self.quality = conf.get('TrimGalore', 'quality')
@@ -358,6 +362,7 @@ class TrimGalore_Parameter:
         self.trim = conf.getboolean('TrimGalore', 'trim1')
 
 class FLASH_Parameter:
+    
     minOverlap = 10
     maxOverlap = ""
     maxMismatchDensity = ""
@@ -372,6 +377,7 @@ class FLASH_Parameter:
                  'fragmentLengthStddev' : '-s ', 'interleavedInput' : '--interleaved-input', 
                  'interleavedOutput' : '--interleaved-output'}
     def __init__(self, parameter_file):
+        
         conf = ConfigParser.ConfigParser()
         conf.read(parameter_file)
         self.minOverlap = conf.get('FLASH','min-overlap')
@@ -399,6 +405,7 @@ class Velveth_Parameter:
 				'reuse_Sequences':'-reuse_Sequences', 'noHash':'-noHash', 'create_binary':'-createBinary'}
     
     def __init__(self, parameter_file):
+        
         conf = ConfigParser.ConfigParser()
         conf.read(parameter_file)
         self.file_layout = conf.get('Velvet', 'file_layout')
