@@ -187,6 +187,17 @@ class Analysis:
                                self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
                                + '\n')
         self.log.newline
+       
+    def krona_report(self,input, output):
         
+        if input.endswith('.tab'):
+            print ' no parsing needed'
+            #p = subporcess.Popen('%s')
+        elif input.endswith('.xml'):
+            print 'R script für convert'
+            print ' dann der aufruf'
+        else:
+            'abfang muss tab oder xml sein'
+            
         
         

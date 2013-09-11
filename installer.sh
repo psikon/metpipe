@@ -663,6 +663,12 @@ install_krona() {
         printf "." 
         __cwd=$(pwd)
         cd ${__extdir}/krona
+	    # create a backup file
+	    cp updateTaxonomy.sh updateTaxonomy.sh.bak 
+	    # change the unzip command to leave the .gz files untouched for metaR taxonomy db
+	    sed -e 's/gunzip -f \$zipped/gunzip -c $zipped \> \$unzipped/g' updateTaxonomy.sh > updateTaxonomy.new
+	    # replace the original update file and make it accessable
+	    mv updateTaxonomy.new updateTaxonomy.sh && chmod 744 updateTaxonomy.sh
             ./install.pl --prefix ${__bindir%/bin*} --taxonomy ${__taxon_db} > /dev/null
             ## disable removing gi_taxid_nucl.dmp, gi_taxid_prot.dmp
             ## nodes.dmp, names.dmp so that we can reuse it for the ncbi pkg
@@ -775,10 +781,12 @@ install_velvet
 install_metavelvet
 install_blast
 install_metacv
-install_r_pkgs
-get_taxonomy_db_metaR
 install_krona
 get_taxonomy_db_krona "${__extdir}/krona"
+#install_r_pkgs not working
+get_taxonomy_db_metaR # change the input files for createTaxonDB to match krona tools
+
+
 
 exit 0
 
