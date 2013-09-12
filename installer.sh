@@ -56,7 +56,7 @@ usage() {
     # @USAGE: usage
     printf "\n%s\n\n" "Installation script for the metpipe pipeline."
     printf "REQUIREMENTS:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\n" \
-            "boost" \
+            "boost >= 4.8" \
             "python >= 2.6" \
             "gcc >= 4.8" \
             "git" \
@@ -576,6 +576,7 @@ get_metacv_db() {
                 break
             fi
         done
+		set_param_in_conf "MetaCV" "db" ${__metacv_db}
         cd ${cwd}
     fi
     echo ""
@@ -595,15 +596,15 @@ download_is_incomplete() {
 
 install_r_pkgs() {
     # @REQUIRES $__pkgdir
-
+	
     ## Bioconductor dependencies & devtools
     local bioc_pkgs="'BiocGenerics','IRanges','GenomicRanges','Biostrings','XVector','devtools'"
     local rmisc= rentrez= biofiles= blastr= ncbi=
-    eval rmisc={ ${__pkgdir}/rmisc*gz }
-    eval rentrez={ ${__pkgdir}/Rentrez*gz }
-    eval biofiles={ ${__pkgdir}/biofiles*gz } 
-    eval blastr={ ${__pkgdir}/blastr*gz }
-    eval ncbi={ ${__pkgdir}/ncbi*gz }
+    eval rmisc=( ${__pkgdir}/rmisc*gz ) 
+    eval rentrez=( ${__pkgdir}/Rentrez*gz )
+    eval biofiles=( ${__pkgdir}/biofiles*gz ) 
+    eval blastr=( ${__pkgdir}/blastr*gz )
+    eval ncbi=( ${__pkgdir}/ncbi*gz )
     
     R --quiet --no-save > /dev/null <<-RDOC
     is.installed <- function(pkg) is.element(pkg, .packages(TRUE))
@@ -663,12 +664,12 @@ install_krona() {
         printf "." 
         __cwd=$(pwd)
         cd ${__extdir}/krona
-	    # create a backup file
-	    cp updateTaxonomy.sh updateTaxonomy.sh.bak 
-	    # change the unzip command to leave the .gz files untouched for metaR taxonomy db
-	    sed -e 's/gunzip -f \$zipped/gunzip -c $zipped \> \$unzipped/g' updateTaxonomy.sh > updateTaxonomy.new
-	    # replace the original update file and make it accessable
-	    mv updateTaxonomy.new updateTaxonomy.sh && chmod 744 updateTaxonomy.sh
+	    	# create a backup file
+	    	cp updateTaxonomy.sh updateTaxonomy.sh.bak 
+	    	# change the unzip command to leave the .gz files untouched for metaR taxonomy db
+	    	sed -e 's/gunzip -f \$zipped/gunzip -c $zipped \> \$unzipped/g' updateTaxonomy.sh > updateTaxonomy.new
+	    	# replace the original update file and make it accessable
+	    	mv updateTaxonomy.new updateTaxonomy.sh && chmod 744 updateTaxonomy.sh
             ./install.pl --prefix ${__bindir%/bin*} --taxonomy ${__taxon_db} > /dev/null
             ## disable removing gi_taxid_nucl.dmp, gi_taxid_prot.dmp
             ## nodes.dmp, names.dmp so that we can reuse it for the ncbi pkg
@@ -689,7 +690,7 @@ get_taxonomy_db_metaR() {
 
     local __taxon_db=${__db_dir}/taxonomy
     [ -e "${__taxon_db}" ] || mkdir -p ${__taxon_db}
-
+	
     echo ""
     echo "**** metpipe requires the NCBI taxonomy files. ****"
     echo ""
@@ -706,11 +707,15 @@ get_taxonomy_db_metaR() {
     else
         echo ""
         R --quiet --no-save > /dev/null <<-RDOC
+		suppressPackageStartupMessages(require(rmisc))
         suppressPackageStartupMessages(require(ncbi))
         createTaxonDB('${__taxon_db}')
         createGeneidDB('${__taxon_db}')
 RDOC
+	set_param_in_conf "Taxonomical Annotation" "taxon_db" ${__taxon_db}
+	set_param_in_conf "Subsetting of Database" "taxon_db" ${__taxon_db}
     fi
+	
 }
 
 get_taxonomy_db_krona() {
@@ -772,19 +777,19 @@ while getopts h opt; do
 done
 
 create_metpipe_dir
-install_fastqc
-install_fastx
-install_trimgalore
-install_flash
-install_blastparser
-install_velvet
-install_metavelvet
-install_blast
-install_metacv
-install_krona
-get_taxonomy_db_krona "${__extdir}/krona"
-#install_r_pkgs not working
-get_taxonomy_db_metaR # change the input files for createTaxonDB to match krona tools
+#install_fastqc
+#install_fastx
+#install_trimgalore
+#install_flash
+#install_blastparser
+#install_velvet
+#install_metavelvet
+#install_blast
+#install_metacv
+#install_krona
+#get_taxonomy_db_krona "${__extdir}/krona"
+install_r_pkgs
+get_taxonomy_db_metaR 
 
 
 

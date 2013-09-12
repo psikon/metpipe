@@ -5,7 +5,7 @@ import sys, os
 import shutil
 import time
 # imports of own functions and classes
-from src.settings import Executables, blastParser, Rannotate, subsetDB
+from src.settings import Executables, blastParser, Rannotate, subsetDB, Krona_Parameter
 from src.file_functions import create_outputdir, str_input, update_reads, is_xml, remove_file, parse_parameter
 from src.log_functions import Logging
 
@@ -21,9 +21,10 @@ class Analysis:
     annotated_db_out = ''
     subseted_db_out = ''
     logdir = ''
+    # misc
     parameter_file = ''
     krona = False
-   
+    exitcode = ''
     
     def __init__(self, files_instance, settings_instance, parameter_file, krona):
         # init all important variables and classes
@@ -39,20 +40,33 @@ class Analysis:
         self.parsed_db_out = self.files.get_parsed_db_dir()
         self.annotated_db_out = self.files.get_annotated_db_dir()
         self.subseted_db_out = self.files.get_subseted_db_dir()
+        self.krona_report_out = self.files.get_krona_report_dir()
         # get the input 
         self.blast_output = self.files.get_blastn_output()
         self.metacv_output = self.files.get_metacv_output()
-        
-        
-        if is_xml(str_input(self.files.get_blastn_output())):
+    
+    
+        if is_xml(str_input(self.blast_output)):
             self.parse_to_db(self.blast_output, self.parsed_db_out)
-            self.files.set_parser_output(update_reads(self.parsed_db_out, blastParser(self.parameter_file).get_name(), 'db'))
-            self.annotate_db(self.files.get_parser_output(), self.annotated_db_out)
-            self.files.set_annotated_output(update_reads(self.annotated_db_out, Rannotate(self.parameter_file).get_name(), 'db'))
-            self.subset_db(self.files.get_annotated_output(), self.subseted_db_out)
+            # test the exitcode, because next script need the output for input
+            if self.exitcode is 0:
+                self.files.set_parser_output(update_reads(self.parsed_db_out, blastParser(self.parameter_file).get_name(), 'db'))
+                self.annotate_db(self.files.get_parser_output(), self.annotated_db_out)
+                # test the exitcode, because next script need the output for input
+                if self.exitcode is 0:
+                    self.files.set_annotated_output(update_reads(self.annotated_db_out, Rannotate(self.parameter_file).get_name(), 'db'))
+                    self.subset_db(self.files.get_annotated_output(), self.subseted_db_out)
+                else:
+                    self.log.print_verbose("ERROR: Annotated Database could not be subseted correctly")       
+            else: 
+                self.log.print_verbose("ERROR: XML file could not be parsed")
+                
+            
         
         if krona:
-            print "generate Krona report"
+            self.krona_report(self.blast_output, self.krona_report_out)
+        else:
+            pass
         
         
     
@@ -87,6 +101,7 @@ class Analysis:
                 self.log.print_compact(p.stdout.readline().rstrip('\n'))
         # wait until process is complete        
         p.wait()
+        self.exitcode = p.returncode
         
         # print summary of the process after completion
         self.log.print_verbose('Parsing of blast XML File complete \n')
@@ -101,6 +116,7 @@ class Analysis:
         create_outputdir(output)
         # generate filename for db
         outfile = output + os.sep + Rannotate(self.parameter_file).get_name() + '.db'
+        # open a logfile for annotation process
         logfile = self.log.open_logfile(self.logdir + 'annotation_of_db.log')
         
         # remove old databases with same name
@@ -111,7 +127,6 @@ class Analysis:
         self.log.print_step(self.settings.get_step_number(), 'Analysis', 
                             'Annotate taxonomical data to blast database',
                             parse_parameter(Rannotate(self.parameter_file)))
-        
         # start the parser and wait until completion
         p = subprocess.Popen(shlex.split('%s -i %s -o %s %s --taxon %s' 
                                          % (self.exe.ANNOTATE, 
@@ -129,6 +144,7 @@ class Analysis:
                 logfile.write(p.stdout.readline())
         # wait until process is complete
         p.wait()
+        self.exitcode = p.returncode
         
         # print summary of the process after completion
         self.log.print_verbose('Taxonomical annotation of blast database complete \n')
@@ -138,7 +154,7 @@ class Analysis:
         self.log.newline
         
     def subset_db(self, input, output):
-                    
+        
         # create a dir for output
         create_outputdir(output)
         # create a subset Object to access the classifier and rank lists
@@ -188,16 +204,59 @@ class Analysis:
                                + '\n')
         self.log.newline
        
-    def krona_report(self,input, output):
+    def krona_report(self, input, output):
         
-        if input.endswith('.tab'):
-            print ' no parsing needed'
-            #p = subporcess.Popen('%s')
-        elif input.endswith('.xml'):
-            print 'R script für convert'
-            print ' dann der aufruf'
+        create_outputdir(output)
+        
+        outfile = output + os.sep + Krona_Parameter(self.parameter_file).get_name() + '.html'
+        
+        logfile = self.log.open_logfile(self.logdir + 'krona.log')
+        
+        if str_input(input).endswith('.tab'):
+            self.log.print_step(self.settings.get_step_number(), 
+                                'Analysis', 
+                                'Create Overview from tabular output',
+                                parse_parameter(Krona_Parameter(self.parameter_file)))
+            
+            p = subprocess.Popen(shlex.split('%s -o %s %s %s' % (self.exe.KRONA_BLAST,
+                                                                 outfile,
+                                                                 parse_parameter(Krona_Parameter(self.parameter_file)),
+                                                                 str_input(input))),
+                                 stdout = subprocess.PIPE,
+                                 stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
+           
+            while p.poll() is None:
+                if self.settings.get_verbose():
+                   self.log.print_verbose(p.stdout.readline())
+                   logfile.write(p.stdout.readline())
+                else:
+                    logfile.write(p.stdout.readline())
+            
+            p.wait()
+            
+        elif str_input(input).endswith('db'):
+            
+            outfile = output + os.sep + Krona_Parameter(self.parameter_file).get_name() + '.html'
+            
+            p = subprocess.Popen(shlex.split('%s -i %s -o %s') % (self.exe.KRONA_CONVERTER,
+                                                                  str_input(input),
+                                                                  output + os.sep + 'converted.txt'))
+            p.wait()
+            
+            p = subprocess.Popen(shlex.split('%s -o %s -q %s' % (self.exe.KRONA_TEXT,
+                                                                 outfile,
+                                                                 str_input(input))),
+                                 stdout = subprocess.PIPE,
+                                 stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
         else:
-            'abfang muss tab oder xml sein'
+            errorlog = self.log.open_logfile(self.logdir + "krona.err.log")
+            if not str_input(input).endswith('tab') or not str_input(input).endswith('db'):
+                self.log.print_verbose('Input must be in Blast table or xml format \n' + 
+                                       'change Blast Parameter "outfmt" to 5 or 6')
+                errorlog.write('Input must be in Blast table or xml format \n' + 
+                               'change Blast Parameter "outfmt" to 5 or 6')
+            else:
+                self.log.print_verbose('Krona Report could not be generated, because of unknown reasons')
             
         
         

@@ -109,11 +109,11 @@ class Executables:
         self.BLAST_DB = os.path.normpath(self.conf.get('blastn', 'db')) + os.sep + 'nt'
         self.CONVERTER = os.path.normpath(self.conf.get('FastX', 'path')) + os.sep + 'fastq_to_fasta'
         self.PARSER = os.path.normpath(self.conf.get('blastParser', 'path')) + os.sep + 'bigBlastParser'
-        self.ANNOTATE = os.path.normpath(self.conf.get('Taxonomical Annotation', 'path')) + os.sep + 'annotate.R'
-        self.SUBSET = os.path.normpath(self.conf.get('Subsetting of Database', 'path')) + os.sep + 'subsetDB.R'
-        self.KRONA_BLAST = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep 
-        self.KRONA_TEXT = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep 
-        
+        self.ANNOTATE = sys.path[0] + os.sep + 'src' + os.sep + 'annotate.R'
+        self.SUBSET = sys.path[0] + os.sep + 'src' + os.sep + 'subsetDB.R'
+        self.KRONA_BLAST = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep + 'ktImportBLAST'
+        self.KRONA_TEXT = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep + 'ktImportText'
+        self.KRONA_CONVERTER = sys.path[0] + os.sep + 'src' + os.sep + 'convert_for_krona.R'
     def get_FastQC(self):
         return self.FASTQC
     
@@ -205,6 +205,7 @@ class FileSettings:
         self.parsed_db_dir = conf.get('General', 'parsed_db_dir')
         self.annotated_db_dir = conf.get('General', 'annotated_db_dir')
         self.subseted_db_dir = conf.get('General', 'subseted_db_dir')
+        self.krona_report_dir = conf.get('General','krona_report')
         self.logdir = conf.get('General', 'log_dir')
 
     
@@ -240,6 +241,9 @@ class FileSettings:
         
     def get_subseted_db_dir(self):
         return self.output + self.subseted_db_dir
+    
+    def get_krona_report_dir(self):
+        return self.output + self.krona_report_dir
         
     def get_raw(self):
         return self.raw
@@ -743,4 +747,44 @@ class subsetDB():
         return os.path.normpath(self.conf.get('Subsetting of Database', 'taxon_db'))
     
 class Krona_Parameter():
-    pass
+    
+    highest_level = 'root'
+    no_hits_wedge = ''
+    best_hit_random = False
+    use_perc_ident = False
+    use_bitscore = False
+    max_depth = ''
+    allow_no_rank = False
+    bad_scores = 0
+    good_scores = 120
+    local = False
+    krona_res = ''
+    query_url = ''
+    e_value = ''
+    conf = ConfigParser.ConfigParser()
+    arguments = {'highest_level' : '-n ', 'no_hits_wedge': ' -i ', 'best_hit_random' : '-r', 
+                 'use_perc_ident' : '-p', 'use_bitscore' : '-b', 'max_depth' : '-d ', 
+                 'allow_no_rank' : '-k', 'bad_scores' : '-x ', 'good_scores' : '-y ', 
+                 'local' : '-l', 'krona_res' : '-u ', 'query_url' : '-qp ', 'e_value' : '-e '}
+    
+    def __init__(self, parameter_file):
+        self.conf.read(parameter_file)
+        self.highest_level = self.conf.get('Krona Tools', 'highest_level')
+        self.no_hits_wedge = self.conf.get('Krona Tools', 'no_hits_wedge')
+        self.best_hit_random = self.conf.getboolean('Krona Tools', 'best_hit_random')
+        self.use_perc_ident = self.conf.getboolean('Krona Tools', 'use_perc_ident')
+        self.use_bitscore = self.conf.getboolean('Krona Tools', 'use_bitscore')
+        self.max_depth = self.conf.get('Krona Tools', 'max_depth')
+        self.allow_no_rank = self.conf.getboolean('Krona Tools', 'allow_no_rank')
+        self.bad_scores = self.conf.get('Krona Tools', 'bad_scores')
+        self.good_scores = self.conf.get('Krona Tools', 'good_scores')
+        self.local = self.conf.getboolean('Krona Tools', 'local')
+        self.krona_res = self.conf.get('Krona Tools', 'krona_res')
+        self.query_url = self.conf.get('Krona Tools', 'query_url')
+        self.e_value = self.conf.get('Krona Tools', 'e_value')
+        
+    def get_name(self):
+        return self.conf.get('Krona Tools', 'filename')
+        
+        
+    
