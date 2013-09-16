@@ -569,7 +569,7 @@ get_metacv_db() {
                     curl -o ${__part__} -# ${__url__}
                 fi
             done
-            cat db.part* | tar xvzp -
+			cat db.part* | tar xvfzp -
             $(( counter++ ))
             if [ -e cvk6_2059.cnt ]; then
                 rm db.part*
@@ -785,11 +785,11 @@ create_metpipe_dir
 #install_velvet
 #install_metavelvet
 #install_blast
-#install_metacv
+install_metacv
 #install_krona
 #get_taxonomy_db_krona "${__extdir}/krona"
-install_r_pkgs
-get_taxonomy_db_metaR 
+#install_r_pkgs
+#get_taxonomy_db_metaR 
 
 
 

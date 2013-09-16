@@ -99,11 +99,11 @@ files = FileSettings(args.input, os.path.normpath(args.output), parameter_file)
 log = Logging()
 
 # Testaufrufe
-#preprocess = Preprocess(files, settings, parameter_file)
-#assembly = Assembly(files, settings, parameter_file, settings.assembler)
-#annotate = Annotation(files, settings, parameter_file, settings.classify)
-files.set_blastn_output(update_reads(files.get_blastn_dir(),"blast",'xml'))
-analysis = Analysis(files, settings, parameter_file, True)
+preprocess = Preprocess(files, settings, parameter_file)
+assembly = Assembly(files, settings, parameter_file, settings.assembler)
+annotate = Annotation(files, settings, parameter_file, settings.classify)
+#files.set_blastn_output(update_reads(files.get_blastn_dir(),"blast",'xml'))
+#analysis = Analysis(files, settings, parameter_file, False)
 
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 sys.stdout.write('processed in ' + log.getDHMS(time.time() - settings.get_actual_time())+'\n')

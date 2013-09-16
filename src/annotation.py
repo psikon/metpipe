@@ -26,7 +26,6 @@ class Annotation:
         self.exe = Executables(self.parameter_file)
         self.files = files_instance
         self.input = self.files.get_input()
-        self.raw = self.files.get_raw()
         self.logdir = self.files.get_logdir()
         self.blast_out = self.files.get_blastn_dir()
         self.metacv_out = self.files.get_metacv_dir()
@@ -112,37 +111,51 @@ class Annotation:
                                + '\n')
         self.log.newline
         
-    def metacv(self,outputdir):
+    def metacv(self, outputdir):
         
         # create a dir for output
         create_outputdir(outputdir)
         
-        #if RunSettings.use_contigs:
-        #    self.raw = str_input(self.input)
-        #else:
-        #    pass
+        # select the input for metacv 
+        if self.settings.get_use_contigs() is True:
+            input = self.files.get_input() 
+        else:
+            input = self.files.get_raw()
+            
         # print actual informations about the step on stdout
-        self.log.print_step(RunSettings.step_number, 'Annotation', 'annotate bacterial reads with MetaCV',
-                            ParamFileArguments(MetaCV_Parameter()))
+        self.log.print_step(self.settings.get_step_number(), 'Annotation', 'annotate bacterial reads with MetaCV',
+                            parse_parameter(MetaCV_Parameter(self.parameter_file)))
+        try:
+            p = subprocess.Popen(shlex.split('%s classify %s %s %s %s' % 
+                                             (self.exe.get_MetaCV(),
+                                              self.exe.get_MetaCV_DB(),
+                                              str_input(input),
+                                              'metpipe',
+                                              parse_parameter(MetaCV_Parameter(self.parameter_file)))))
+                                              #stderr = self.log.open_logfile(self.logdir + 'metacv.err.log'), 
+                                              #stdout = subprocess.PIPE)
+            while p.poll() is None:
+                if self.settings.get_verbose():
+                    self.log.print_verbose(p.stdout.readline())
+                else:
+                    self.log.print_compact(p.stdout.readline().rstrip('\n'))
+        except:
+            pass
         
-        print shlex.split('%s classify %s %s %s ' % (self.exe.get_MetaCV(),
-                                                     self.exe.get_MetaCV_DB(),
-                                                     ' '.join(str(i)for i in self.raw),
-                                                     'metpipe'))
-        p = subprocess.Popen(shlex.split('%s -h' % (self.exe.METACV)))
-#        p = subprocess.Popen(shlex.split('%s classify %s %s %s ' % 
-#                                        (self.exe.METACV,
-#                                         RunSettings.metacv_db,
-#                                         str_input(self.raw),
-#                                         'metpipe')),
-#                                         #ParamFileArguments(MetaCV_Parameter()))),
+#        p = subprocess.Popen(shlex.split('%s res2table %s %s %s %s' % 
+#                                        (self.exe.get_MetaCV(),
+#                                         self.exe.get_MetaCV_DB(),
+#                                         str_input(input),
+#                                         'metpipe',
+#                                         parse_parameter(MetaCV_Parameter(self.parameter_file)))),
 #                                 stderr = self.log.open_logfile('metacv.err.log'), 
 #                                 stdout = subprocess.PIPE)
-        while p.poll() is None:
-            if RunSettings.verbose:
-                self.log.print_verbose(p.stdout.readline())
-            else:
-                self.log.print_compact(p.stdout.readline().rstrip('\n'))
+#        while p.poll() is None:
+#            if self.settings.get_verbose():
+#                self.log.print_verbose(p.stdout.readline())
+#            else:
+#                self.log.print_compact(p.stdout.readline().rstrip('\n'))
+
         # wait until process is finished        
         p.wait()
         

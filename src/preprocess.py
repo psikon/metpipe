@@ -62,23 +62,26 @@ class Preprocess:
         self.log.newline()
         
         # run FastQC with the given parameter, in seperate threads and extract the output
-        p = subprocess.Popen(shlex.split('%s -t %s -o %s --extract %s %s' 
-                                         % (self.exe.get_FastQC(),
-                                            self.settings.get_threads(),
-                                            self.quality_dir, 
-                                            parse_parameter(FastQC_Parameter(self.parameter_file)),
-                                            self.input)),
-                             stdout = subprocess.PIPE,
-                             stderr = subprocess.PIPE)
+        try:
+            p = subprocess.Popen(shlex.split('%s -t %s -o %s --extract %s %s' 
+                                             % (self.exe.get_FastQC(),
+                                                self.settings.get_threads(),
+                                                self.quality_dir, 
+                                                parse_parameter(FastQC_Parameter(self.parameter_file)),
+                                                self.input)),
+                                 stdout = subprocess.PIPE,
+                                 stderr = subprocess.PIPE)
         # during processing pipe the output and print it on screen
         # no logfile needed, because FastQC is a log function
-        while p.poll() is None:
-            if self.settings.get_verbose():
-                self.log.print_verbose(p.stderr.readline())
-            else:
-                self.log.print_compact(p.stderr.readline().rstrip('\n'))
-        # wait until process is finished
-        p.wait()
+            while p.poll() is None:
+                if self.settings.get_verbose():
+                    self.log.print_verbose(p.stderr.readline())
+                else:
+                    self.log.print_compact(p.stderr.readline().rstrip('\n'))
+            # wait until process is finished
+            p.wait()
+        except:
+            pass
         # print summary of the process after completion
         self.log.print_verbose('Quality check complete for %s\n' % (self.input))
         self.log.print_verbose('processed in: ' + 
