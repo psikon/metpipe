@@ -72,7 +72,6 @@ class Preprocess:
                                  stdout = subprocess.PIPE,
                                  stderr = subprocess.PIPE)
         # during processing pipe the output and print it on screen
-        # no logfile needed, because FastQC is a log function
             while p.poll() is None:
                 if self.settings.get_verbose():
                     self.log.print_verbose(p.stderr.readline())

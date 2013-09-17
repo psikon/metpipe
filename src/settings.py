@@ -115,6 +115,7 @@ class Executables:
         self.KRONA_BLAST = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep + 'ktImportBLAST' if self.conf.has_option('Krona Tools', 'path') else ''
         self.KRONA_TEXT = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep + 'ktImportText' if self.conf.has_option('Krona Tools', 'path') else ''
         self.KRONA_CONVERTER = sys.path[0] + os.sep + 'src' + os.sep + 'convert_for_krona.R' 
+        
     def get_FastQC(self):
         return self.FASTQC
     
@@ -552,19 +553,40 @@ class MetaVelvet_Parameter:
 # Parameter for metacv
 class MetaCV_Parameter:
 
-    seq = ''
-    mode = ''
-    orf = ''
-    # dict with the arguments string
-    arguments = {'seq':'--seq=', 'mode':'--mode=', 'orf':'--orf='}
-
+    seq = 'dna'
+    mode = 'upgma'
+    orf = 'optimal'
+    total_reads = '100000'
+    min_qual = '20'
+    taxon = 'lca'
+    name = 'metpipe'
+    conf = ConfigParser.SafeConfigParser()
+    
     def __init__(self, parameter_file):
-        conf = ConfigParser.SafeConfigParser()
-        conf.read(parameter_file)
-        self.seq = conf.get('MetaCV', 'seq') if conf.has_option('MetaCV', 'seq') else ''
-        self.mode = conf.get('MetaCV', 'mode') if conf.has_option('MetaCV', 'mode') else ''
-        self.orf = conf.get('MetaCV', 'orf') if conf.has_option('MetaCV', 'orf') else ''       
-            
+        self.conf.read(parameter_file)
+    
+    def get_seq(self):
+        return '--seq=' + self.conf.get('MetaCV', 'seq') if self.conf.has_option('MetaCV', 'seq') else ''
+    
+    def get_mode(self):
+        return '--mode=' + self.conf.get('MetaCV', 'mode') if self.conf.has_option('MetaCV', 'mode') else ''
+
+        
+    def get_orf(self):
+        return '--orf=' + self.conf.get('MetaCV', 'orf')  if self.conf.has_option('MetaCV', 'orf') else ''
+    
+    def get_total_reads(self):
+        return '--total_reads=' + self.conf.get('MetaCV', 'total_reads') if self.conf.has_option('MetaCV', 'total_reads') else ''
+        
+    def get_min_qual(self):
+        return '--min_qual=' + self.conf.get('MetaCV', 'min_qual') if self.conf.has_option('MetaCV', 'min_qual') else ''
+    
+    def get_taxon(self):
+        return '--taxon=' + self.conf.get('MetaCV', 'taxon') if self.conf.has_option('MetaCV', 'taxon') else ''
+    
+    def get_name(self):
+        return self.conf.get('MetaCV','name') if self.conf.has_option('MetaCV', 'name') else ''
+        
 # Parameter for blastn        
 class Blastn_Parameter:
 
@@ -712,7 +734,7 @@ class Rannotate():
     coverage = 0.5
     bitscore = 0.98
     arguments = {'coverage' : ' --coverage ', 'bitscore' : '--bitscore '}
-    conf = ConfigParser.ConfigParser()
+    conf = ConfigParser.SafeConfigParser()
     
     def __init__(self, parameter_file): 
         self.conf.read(parameter_file)
@@ -729,7 +751,7 @@ class subsetDB():
     classifier = ''
     bitscore = 0.98
     rank = ''
-    conf = ConfigParser.ConfigParser()
+    conf = ConfigParser.SafeConfigParser()
     
     def __init__(self, parameter_file):
         self.conf.read(parameter_file)

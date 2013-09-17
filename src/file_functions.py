@@ -29,7 +29,10 @@ def str_input(input):
     if len(input) > 1:
         return str(' '.join(str(i)for i in input))
     else:
-        return str(input[0])
+        try:
+            return str(input[0])
+        except IndesxError:
+            return None
 
 # test the input for fastq-fileextensions
 def is_fastq(test_file):
@@ -57,27 +60,44 @@ def is_executable(program_path):
         return False
 
 def merge_files(input, output):
-    merge = open(output + os.sep + 'merged.fasta','w')
-    for i in range(len(input)):
-        shutil.copyfileobj(open(input[i],'rb'),merge)
-    merge.close()
-    return update_reads(output,'merged','fasta')
-    
+    try:
+        # open file for merging
+        merge = open(output + os.sep + 'merged.fasta','w')
+        # copy all mergeable files in the file connection
+        for i in range(len(input)):
+            shutil.copyfileobj(open(input[i],'rb'),merge)
+        # close the file stream
+        merge.close()
+        return update_reads(output,'merged','fasta')
+   
+    except IOError:
+        print 'Error: '+ e.message
+        
 def convert_fastq(input, output, CONVERTER):
     
     for i in range(len(input)):
-        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % (CONVERTER,
-                                                                     input[i],
-                                                                     output + os.sep + 
-                                                                     'converted.' + str(i) + 
-                                                                     '.fasta')))
-        p.wait()
+        try:
+            p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % 
+                                             (CONVERTER,
+                                              input[i],
+                                              output + os.sep + 
+                                              'converted.' + str(i) + 
+                                              '.fasta')))
+            p.wait()
+        except IOError: 
+            print 'Error: '+ e.message
+        except RuntimeError:
+            print 'Error: Could not convert file to fasta'
+            
     return update_reads(output,'converted','fasta')
 
 def remove_file(path, word, extension):
     files = glob.glob1(path, '*%s*.%s'%(word,extension))
     for i in range(len(files)):
-        os.remove(path + files[i])
+        try: 
+            os.remove(path + files[i])
+        except IOError:
+            print 'Error' + e.message
     
 def blast_output(value):
     

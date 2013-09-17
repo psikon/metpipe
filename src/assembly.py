@@ -214,7 +214,6 @@ class Assembly:
         self.log.remove_empty_logfile(self.logdir + 'metavelvet.err.log')
         
         # print summary of the process after completion
-        self.log.newline()
         self.log.print_verbose('Assembly complete \n')
         self.log.print_verbose('processed in: ' + 
                                self.log.getDHMS(time.time() - self.settings.get_actual_time()) 

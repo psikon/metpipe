@@ -2,7 +2,6 @@
 import subprocess
 import shlex
 import sys, os
-import shutil
 import time
 # imports of own functions and classes
 from src.settings import Executables, Blastn_Parameter, MetaCV_Parameter
@@ -36,8 +35,9 @@ class Annotation:
             if is_executable(self.exe.get_Blastn()):
                 # start annotation with blastn
                 self.blastn(self.blast_out)
-                # verbessern
+                # set the output file for further steps
                 self.files.set_blastn_output(update_reads(self.blast_out,'blastn','xml'))
+                # raise step_number
                 self.settings.set_step_number()
             else:
                 pass
@@ -46,6 +46,11 @@ class Annotation:
             if is_executable(self.exe.get_MetaCV()):
                 # start annotation with metacv
                 self.metacv(self.metacv_out)
+                # set the output file for further steps
+                self.files.set_metacv_output(update_reads(self.metacv_out,
+                                                          MetaCV_Parameter(self.parameter_file).get_name(),
+                                                          'res'))
+                # raise step_number
                 self.settings.set_step_number()
             else:
                 pass
@@ -54,7 +59,12 @@ class Annotation:
             if is_executable(self.exe.get_Blastn()) and is_executable(self.exe.get_MetaCV()):
                 # start annotation with both tools 
                 self.blastn(self.blast_out)
+                self.files.set_blastn_output(update_reads(self.blast_out,'blastn','xml'))
                 self.metacv(self.metacv_out)
+                self.files.set_metacv_output(update_reads(self.metacv_out,
+                                                          MetaCV_Parameter(self.parameter_file).get_name(),
+                                                          'res'))
+                # raise step_number
                 self.settings.set_step_number()
             else:
                 pass
@@ -68,7 +78,7 @@ class Annotation:
         # create a dir for output
         create_outputdir(outputdir)
         
-        # blastn can only run with dfasta files, so input has to be converted
+        # blastn can only run with fasta files, so input has to be converted
         if all(is_fastq(i) for i in self.input):
             # print actual informations about the step on stdout
             self.log.print_step(self.settings.get_step_number(), 'Annotation', 'convert fastq files',
@@ -88,7 +98,7 @@ class Annotation:
         # print actual informations about the step on stdout
         self.log.print_step(self.settings.get_step_number(), 'Annotation', 'blast sequences against nt database',
                             parse_parameter(Blastn_Parameter(self.parameter_file)))
-        
+        self.log.newline()
         # start blastn and wait until completion
         # logfile is not requiered, because blastn has no log function and no output to stdout
         p = subprocess.Popen(shlex.split('%s -db %s -query %s -out %s -num_threads %s %s ' % 
@@ -116,46 +126,119 @@ class Annotation:
         # create a dir for output
         create_outputdir(outputdir)
         
-        # select the input for metacv 
+        # create a parameter object for further processing
+        parameter = MetaCV_Parameter(self.parameter_file)
+        
+        # select the input for metacv and convert it in an usable format
         if self.settings.get_use_contigs() is True:
-            input = self.files.get_input() 
+            input = str_input([sys.path[0] + os.sep + i for i in self.files.get_input()])
         else:
-            input = self.files.get_raw()
+            input = str_input([sys.path[0] + os.sep + i for i in self.files.get_raw()])
             
         # print actual informations about the step on stdout
-        self.log.print_step(self.settings.get_step_number(), 'Annotation', 'annotate bacterial reads with MetaCV',
-                            parse_parameter(MetaCV_Parameter(self.parameter_file)))
+        self.log.print_step(self.settings.get_step_number(), 
+                            'Annotation', 
+                            'Annotate bacterial reads with MetaCV',
+                            '%s %s %s' % (parameter.get_seq(), 
+                                          parameter.get_mode(), 
+                                          parameter.get_orf()))
+        self.log.newline()
+        
         try:
-            p = subprocess.Popen(shlex.split('%s classify %s %s %s %s' % 
+            # start MetaCV function and wait until completion
+            p = subprocess.Popen(shlex.split('%s classify %s %s %s %s %s %s --threads=%s' % 
                                              (self.exe.get_MetaCV(),
                                               self.exe.get_MetaCV_DB(),
-                                              str_input(input),
-                                              'metpipe',
-                                              parse_parameter(MetaCV_Parameter(self.parameter_file)))))
-                                              #stderr = self.log.open_logfile(self.logdir + 'metacv.err.log'), 
-                                              #stdout = subprocess.PIPE)
+                                              input,
+                                              parameter.get_name(),
+                                              parameter.get_seq(), 
+                                              parameter.get_mode(), 
+                                              parameter.get_orf(),
+                                              self.settings.get_threads())),
+                                stderr = self.log.open_logfile(self.logdir + 'metacv.err.log'), 
+                                stdout = subprocess.PIPE,
+                                cwd = outputdir + os.sep)
+            # during processing pipe the output and print it on screen
             while p.poll() is None:
                 if self.settings.get_verbose():
                     self.log.print_verbose(p.stdout.readline())
                 else:
                     self.log.print_compact(p.stdout.readline().rstrip('\n'))
+            # wait until process is finished        
+            p.wait()
         except:
             pass
         
-#        p = subprocess.Popen(shlex.split('%s res2table %s %s %s %s' % 
-#                                        (self.exe.get_MetaCV(),
-#                                         self.exe.get_MetaCV_DB(),
-#                                         str_input(input),
-#                                         'metpipe',
-#                                         parse_parameter(MetaCV_Parameter(self.parameter_file)))),
-#                                 stderr = self.log.open_logfile('metacv.err.log'), 
-#                                 stdout = subprocess.PIPE)
-#        while p.poll() is None:
-#            if self.settings.get_verbose():
-#                self.log.print_verbose(p.stdout.readline())
-#            else:
-#                self.log.print_compact(p.stdout.readline().rstrip('\n'))
-
-        # wait until process is finished        
-        p.wait()
+        # print actual informations about the step on stdout
+        self.log.print_step(self.settings.get_step_number(), 
+                            'Annotation', 
+                            'Analyse the results of MetaCV',
+                            '%s %s %s' % (parameter.get_total_reads(), 
+                                          parameter.get_min_qual(), 
+                                          parameter.get_taxon()))
+        self.log.newline() 
+        
+        try:
+            # start MetaCV's res2table function and wait until completion
+            p = subprocess.Popen(shlex.split('%s res2table %s %s %s %s %s %s --threads=%s' % 
+                                            (self.exe.get_MetaCV(),
+                                             self.exe.get_MetaCV_DB(),
+                                             str_input(update_reads(outputdir,'metpipe','res')),
+                                             parameter.get_name() + '.res2table',
+                                             parameter.get_total_reads(), 
+                                             parameter.get_min_qual(), 
+                                             parameter.get_taxon().
+                                             self.settings.get_threads())),
+                                 stderr = self.log.open_logfile('metacv.res2table.err.log'), 
+                                 stdout = subprocess.PIPE,
+                                 cwd = outputdir + os.sep)
+            # during processing pipe the output and print it on screen
+            while p.poll() is None:
+                if self.settings.get_verbose():
+                    self.log.print_verbose(p.stdout.readline())
+                else:
+                   self.log.print_compact(p.stdout.readline().rstrip('\n'))
+            # wait until process is finished
+            p.wait()
+        except:
+            pass
+        
+        # print actual informations about the step on stdout
+        self.log.print_step(self.settings.get_step_number(), 
+                            'Annotation', 
+                            'Summarize the results of MetaCV',
+                            parameter.get_min_qual())
+        self.log.newline()
+        
+        try:
+            # start MetaCV's res2sum function and wait until completion
+            # the workingdir must be specified to maintain the correct 
+            # order of output files
+            p = subprocess.Popen(shlex.split('%s res2sum %s %s %s %s' %
+                                            (self.exe.get_MetaCV(),
+                                             self.exe.get_MetaCV_DB(),
+                                             str_input(update_reads(outputdir,'metpipe','res')),
+                                             parameter.get_name() + '.res2sum',
+                                             parameter.get_min_qual())),
+                                 stderr = self.log.open_logfile('metacv_res2sum.err.log'), 
+                                 stdout = subprocess.PIPE,
+                                 cwd = outputdir + os.sep)
+            # during processing pipe the output and print it on screen
+            while p.poll() is None:
+                if self.settings.get_verbose():
+                    self.log.print_verbose(p.stdout.readline())
+                else:
+                    self.log.print_compact(p.stdout.readline().rstrip('\n'))
+            # wait until process is finished
+            p.wait()
+        except:
+            pass
+        
+        self.log.print_verbose('Annotation with MetaCV complete \n')
+        self.log.print_verbose('processed in: ' + 
+                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
+                               + '\n')
+        self.log.newline
+                
+        
         
