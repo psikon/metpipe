@@ -3,7 +3,8 @@ import shlex
 import sys, os, time
 from src.settings import FastQC_Parameter, TrimGalore_Parameter, Executables, FileSettings
 from src.log_functions import Logging
-from src.file_functions import create_outputdir, str_input, is_executable, update_reads, parse_parameter
+from src.file_functions import create_outputdir, update_reads, parse_parameter
+from src.utils import is_executable, to_string
 
 class Preprocess:
     
@@ -21,7 +22,7 @@ class Preprocess:
         self.exe = Executables(self.parameter_file)
         self.log = Logging()
         self.files = files_instance
-        self.input = str_input(self.files.get_input())
+        self.input = to_string(self.files.get_input())
         # define the dirs for log and processing
         self.quality_dir = self.files.get_quality_dir()
         self.trim_dir = self.files.get_trim_dir()

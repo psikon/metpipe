@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 
-# First imports
-import os, sys
-
+import os, sys, time
+from src.settings import General, FileSettings
 # Setting up the paths
 RESULT_DIR = '%s%sresult' % (sys.path[0], os.sep)
 
 # hardcode defaults
 PARAM_FILE = '%s%sparameter.conf' % (sys.path[0], os.sep)
-DEFAULT_KMER = 85
 STEPS = {'preprocessing', 'annotate', 'assembly'}
 
 # rest of imports
@@ -17,12 +15,12 @@ import argparse
 import multiprocessing
 from socket import errno
 # import own functions and classes 
-from src.settings import General, FileSettings
 from src.preprocess import *
 from src.assembly import *
 from src.annotation import *
 from src.analysis import *
-from src.file_functions import update_reads
+from src.file_functions import update_reads, extract_tabular, create_outputdir
+from src.utils import blast_output
 from src.log_functions import Logging
 
 # Get the starting time
@@ -72,12 +70,9 @@ for fname in args.input:
         sys.exit()
         
 # check if output dir exists and create it if not
-try:
-    os.makedirs(args.output)
-except OSError as exception:
-    if exception.errno != errno.EEXIST:
-        raise
-
+# 
+create_outputdir(RESULT_DIR)
+# anpassen
 # create the log folder
 try:
     os.makedirs(args.output + os.sep + 'log')
@@ -92,18 +87,18 @@ if not os.path.isfile(args.param):
 
 parameter_file = args.param
 # create the global settings object
-settings = General(args.threads, args.verbose, args.skip, starting_time, 
-                   args.trim, args.quality, args.use_contigs, args.assembler, args.classify, 1)
+settings = General(args.threads, args.verbose, args.skip, starting_time, args.trim, 
+                   args.quality, args.use_contigs, args.assembler, args.classify, 1)
 
 files = FileSettings(args.input, os.path.normpath(args.output), parameter_file)
 log = Logging()
 
-# Testaufrufe
-preprocess = Preprocess(files, settings, parameter_file)
-assembly = Assembly(files, settings, parameter_file, settings.assembler)
-annotate = Annotation(files, settings, parameter_file, settings.classify)
-#files.set_blastn_output(update_reads(files.get_blastn_dir(),"blast",'xml'))
-#analysis = Analysis(files, settings, parameter_file, False)
+
+print settings.get_skip()
+Preprocess(files, settings, parameter_file)
+Assembly(files, settings, parameter_file, settings.assembler)
+Annotation(files, settings, parameter_file, settings.classify)
+Analysis(files, settings, parameter_file, True)
 
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
 sys.stdout.write('processed in ' + log.getDHMS(time.time() - settings.get_actual_time())+'\n')

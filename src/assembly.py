@@ -5,8 +5,9 @@ import sys, os
 import time
 # imports of own functions and classes
 from src.settings import Executables, FLASH_Parameter, Velveth_Parameter, Velvetg_Parameter, MetaVelvet_Parameter
-from src.file_functions import create_outputdir, str_input, is_paired, is_fastq, update_reads, is_executable, parse_parameter
+from src.file_functions import create_outputdir, update_reads, parse_parameter
 from src.log_functions import Logging
+from src.utils import to_string, is_fastq, is_paired, is_executable
 
 
 
@@ -31,7 +32,7 @@ class Assembly:
         self.logdir = self.files.get_logdir()
         self.concat_out = self.files.get_concat_dir()
         self.assembly_out = self.files.get_assembly_dir()
-        self.input = str_input(self.files.get_input())
+        self.input = to_string(self.files.get_input())
         
         # run the assembling functions when the module is initialized
         if mode.lower() == 'flash':

@@ -1,168 +1,75 @@
 import os, sys
-import shutil
-from collections import deque
-from datetime import date
-from src.settings import TrimGalore_Parameter, Blastn_Parameter, General
+# utils.py contains various functions for simple testing purposes or conversion of 
+# objects written here to clean up the code
+# 
+#@author:Philipp Sehnert
+#@contact: philipp.sehnert[a]gmail.com
 
-# function to fill the working queue with tasks based on the cli commands
-def createTasks(settings_instance, program_instance):
-	queue = deque()
+# convert the input to a string
+def to_string(input):
+    
+    if len(input) > 1:
+        return str(' '.join(str(i)for i in input))
+    else:
+        try:
+            return str(input[0])
+        except IndexError:
+            return None
+
+# test the input for fastq file extensions
+def is_fastq(test_file):
+    
+    if  test_file.endswith(".fq") or test_file.endswith(".fastq"):
+        return True
+    else:
+        return False
+
+# make it sense?
+def is_paired(input):
+    
+    if len(input) == 1:
+        return False
+    else:
+        return True
+       
+# test the executable - is it existing and callable?
+def is_executable(program_path):
+    if os.path.isfile(program_path) and os.access(program_path, os.X_OK):
+        return True
+    else: 
+        sys.stdout.write(os.linesep)
+        sys.stderr.write('Executable for ' + program_path.split(os.sep)[-1] + ' not found - Please reinstall\n')
+        sys.stdout.write(os.linesep)
+        return False
+
+def is_xml(file):
+    
+    if to_string(file).endswith('.xml'):
+        return True
+    else:
+        return False
+
+def is_tabular(file):
+    
+    if to_string(file).endswith('.tab') or to_string(file).endswith('.tabular'):
+        return True
+    else:
+        return False
+    
+def is_db(file):
+    
+    if to_string(file).endswith('.db'):
+        return True
+    else:
+        return False
 	
-	# create Preprocessing steps
-	if settings_instance.quality:
-		queue.append(Task(settings_instance, program_instance.fastqc, 'RAW'))
-	if settings_instance.trim:
-		queue.append(Task(settings_instance, program_instance.trimming, 'trimmed'))
-		if settings_instance.quality:
-			queue.append(Task(settings_instance, program_instance.fastqc, 'trimmed'))
-	# Assembly tasks
-	if settings_instance.skip.lower() == 'assembly':
-		pass
-	else:
-		if settings_instance.assembler.lower() == 'concat':	
-			queue.append(Task(settings_instance, program_instance.concat, 'concat'))
-		elif settings_instance.assembler.lower() == 'flash':
-			queue.append(Task(settings_instance, program_instance.flash, 'flash'))
-		elif settings_instance.assembler.lower() == 'flash+metavelvet':
-			queue.append(Task(settings_instance,program_instance.assembly_with_Preprocessing,'assembly_with_Preprocessing'))
-		else:
-			queue.append(Task(settings_instance, program_instance.assembly, 'assembly'))
-	# Annotation
-	if settings_instance.skip.lower() == 'annotation':
-		pass
-	else:
-		if settings_instance.classify.lower() == 'both':
-			queue.append(Task(settings_instance, program_instance.blastn, 'blastn'))
-			queue.append(Task(settings_instance, program_instance.metaCV, 'metacv'))
-		elif settings_instance.classify.lower() == 'metacv':
-			queue.append(Task(settings_instance, program_instance.metaCV, 'metacv'))
-		else:
-			queue.append(Task(settings_instance, program_instance.blastn, 'blastn'))
-	if settings_instance.skip.lower() == 'summary':
-		pass
-	else:
-		queue.append(Task(settings_instance, program_instance.summary,'analysis'))
-	return queue
+def blast_output(value):
 
-# before start the first run - print all important settings on the cmd
-def consoleSummary(settings):
-	logging('\nmetpipe - run on %s\n\n'%(date.today()))
-	if settings.verbose:
-		logging('Verbose Output: ' + 'yes' + '\n')
-	else:
-		logging('Verbose Output: ' + 'no' + '\n')
-	if settings.quality:
-		logging('Quality Report: ' + 'yes' + '\n')
-	else:
-		logging('Quality Report: ' + 'no' + '\n')
-	if settings.trim:
-		logging('Read Trimming : ' + 'yes' + '\n')
-		trim = TrimGalore_Parameter()
-		logging(' - trim down to : ' + trim.length + 'bp' + '\n')
-		logging(' - min quality  : ' + trim.quality + '\n')
-		logging(' - paired reads : ' + str(trim.paired) + '\n')
-	else:
-		logging('Read Trimming : ' + 'no' + '\n')
-	if  settings.skip.lower() == 'assembly':
-		logging('Assembly      : skipped \n')
-	else:
-		logging('Assembly      : ' + settings.assembler + '\n')
-	if  settings.skip.lower() == 'annotation':
-		logging('Classify      : skipped \n')
-	else:
-		if settings.classify.lower() == 'blastn':
-			logging('Classify      : ' + settings.classify + '\n')
-			blastn = Blastn_Parameter()
-			if blastn.db == '':
-				logging(' - blastn db: nt \n')
-			else:
-				logging(' - blastn db: ' + blastn.db + '\n')
-			if blastn.outfmt == 6:
-				logging(' - outfmt   : table \n')
-			elif blastn.outfmt == 5:
-				logging(' - outfmt   : xml \n')
-			else:
-				logging(' - outfmt   : ' + blastn.outfmt + '\n') 
-			if blastn.evalue:
-				logging(' - evalue   : ' + blastn.evalue + '\n')
-			if blastn.perc_identity:
-				logging(' - perc id  : ' + blastn.perc_identity + '\n')	
-		elif settings.classify.lower() == 'metacv':
-			logging('Classify      : ' + settings.classify + '\n')
-			if settings.use_contigs == True:
-				logging(' - input: contigs \n')
-			else:
-				logging(' - input: RAW \n')
-		else: 
-			logging('Classify      : ' + settings.classify + '\n')
-			blastn = Blastn_Parameter()
-			logging('Blastn Parameter: \n')
-			if blastn.db == '':
-				logging(' - blastn db: nt \n')
-			else:
-				logging(' - blastn db: ' + blastn.db + '\n')
-			if blastn.outfmt == 6:
-				logging(' - outfmt   : table \n')
-			elif blastn.outfmt == 5:
-				logging(' - outfmt   : xml \n')
-			else:
-				logging(' - outfmt   : ' + blastn.outfmt + '\n') 
-			if blastn.evalue:
-				logging(' - evalue   : ' + blastn.evalue + '\n')
-			if blastn.perc_identity:
-				logging(' - perc id  : ' + blastn.perc_identity + '\n')	
-			logging('MetaCV Parameter:\n ')
-			if settings.use_contigs == True:
-				logging(' - input: contigs \n')
-			else:
-				logging(' - input: RAW \n')
-				
-	if settings.summary:
-		logging('Summary       : yes \n')
-	else:
-		logging('Summary       : no \n')
-		
-	# only continue when keyboard command comes
-	if settings.automatic:
-		return True
-	else:
-		return raw_input('\nContinue?\n')
-
-
-
-
-			
-# class for manage the attributes of the tasks in the workingQueue
-class Task:
-	
-	def __init__(self, parameter, task, outputDir):
-		self.parameter = parameter
-		self.task = task
-		self.outputDir = outputDir
-		
-	def __del__(self):
-		pass
-	
-	def getParameter(self):
-		return self.parameter
-
-	def setParameter(self, parameter):
-		self.parameter = parameter
-		
-		
-	def getTask(self):
-		return self.task
-		
-	def setTask(self, task):
-		self.task = task
-		
-	def getOutputDir(self):
-		return self.outputDir
-	
-	def setOutputDir(self, outputDir):
-		self.outputDir = outputDir
-
-	
-
+    if int(value) == 5:
+        return 'blastn.xml'
+    elif int(value) == 6 or int(value) == 7:
+        return 'blastn.tab'
+    else:
+        return 'blastn.blast'
 	
 

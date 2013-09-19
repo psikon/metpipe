@@ -3,7 +3,14 @@ import glob
 import shutil
 import subprocess
 import shlex
+import sqlite3 as db
 from src.settings import Executables
+
+# file_functions.py contains all important file manipulation functions, needed 
+# during the processing of the pipeline.
+# 
+#@author: Philipp Sehnert
+#@contact: philipp.sehnert[a]gmail.com
 
 # function to create a dir for the results of processing
 def create_outputdir(path):
@@ -15,51 +22,18 @@ def create_outputdir(path):
             if not os.path.isdir(path):
                 raise
 
-# make it sense?
-def is_paired(input):
-    
-    if len(input) == 1:
-        return False
-    else:
-        return True
-    
-# convert the input to a string
-def str_input(input):
-    
-    if len(input) > 1:
-        return str(' '.join(str(i)for i in input))
-    else:
-        try:
-            return str(input[0])
-        except IndesxError:
-            return None
-
-# test the input for fastq-fileextensions
-def is_fastq(test_file):
-    
-    if  test_file.endswith(".fq") or test_file.endswith(".fastq"):
-        return True
-    else:
-        return False
-
 # traverse through the given directory and filter out the new input 
-#for given parameters
+# for given parameters
 def update_reads(directory, word, extension): 
-   
+    
+   # find all files that fit in the given command
    files = glob.glob1(directory, '*%s*.%s' % (word, extension))
+   # and return the files as list
    return [(directory + os.sep +  f) for f in files]
 
-# test the executable - is it existing and callable?
-def is_executable(program_path):
-    if os.path.isfile(program_path) and os.access(program_path, os.X_OK):
-        return True
-    else: 
-        sys.stdout.write(os.linesep)
-        sys.stderr.write('Executable for ' + program_path.split(os.sep)[-1] + ' not found - Please reinstall\n')
-        sys.stdout.write(os.linesep)
-        return False
-
+# combine the content many files in one file
 def merge_files(input, output):
+    
     try:
         # open file for merging
         merge = open(output + os.sep + 'merged.fasta','w')
@@ -72,7 +46,8 @@ def merge_files(input, output):
    
     except IOError:
         print 'Error: '+ e.message
-        
+
+# convert fastq files to fasta
 def convert_fastq(input, output, CONVERTER):
     
     for i in range(len(input)):
@@ -91,30 +66,18 @@ def convert_fastq(input, output, CONVERTER):
             
     return update_reads(output,'converted','fasta')
 
+# simply delete file 
 def remove_file(path, word, extension):
+    
+    # create a list of files fitting in the given command
     files = glob.glob1(path, '*%s*.%s'%(word,extension))
+    # delete them all in a loop
     for i in range(len(files)):
         try: 
             os.remove(path + files[i])
         except IOError:
             print 'Error' + e.message
-    
-def blast_output(value):
-    
-    if value is str(5):
-        return 'blastn.xml'
-    elif value is str(6) or str(7):
-        return 'blastn.tab'
-    else:
-        return 'blastn.blast'
-
-def is_xml(file):
-    
-    if file.endswith('.xml'):
-        return True
-    else:
-        return False
-    
+  
 # important function to get all used arguments from a settings object and convert it to an argument string
 def parse_parameter(instance):
 
@@ -134,3 +97,59 @@ def parse_parameter(instance):
                 args += ' ' + instance.arguments.get(str(name)) + getattr(instance, name)
     
     return args
+
+# create from the parsed blast database a file in blast tabular output to use the 
+# krona import script for these type of file
+def extract_tabular(location_of_db, destination):
+    
+    # open a file for writting
+    output = open(destination + os.sep + 'extracted_from_DB.tab','w')
+    # establish connection to the database
+    con = db.connect(location_of_db)
+    
+    with con:
+        # set the dictionary cursor for access the database tables by name
+        con.row_factory = db.Row
+        # create three cursors for the tables (q = query, h = hit and c = hsp)
+        c = con.cursor()
+        q = con.cursor()
+        h = con.cursor()
+        # get the whole content of the hsp table
+        c.execute('Select * from hsp')
+        # fetch all rows
+        rows = c.fetchall()
+        # iterate through the rows
+        for row in rows:
+            # get the missing values from the query table
+            q.execute('Select query_def from query where query_id = ?', [row['query_id']])
+            query_id = q.fetchone()[0].split(' ')[0]
+            # get the missing values from the hit table
+            h.execute('Select gene_id, accession from hit where hit_id = ?', [row['hit_id']])
+            tmp = h.fetchone()
+            subject_id= 'gi|%s|gb|%s|'% (tmp[0],tmp[1])
+            # calculate the new values for tabular output
+            perc = round((float(row['identity'])/float(row['align_len'])*100),2)
+            mismatch = row['align_len'] - row['identity']
+            # write line by line in the output file
+            # 12 values tab seperated
+            output.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s \n'% (query_id,
+                                                          subject_id,
+                                                          perc,
+                                                          row['align_len'],
+                                                          mismatch,
+                                                          row['gaps'],
+                                                          row['query_from'],
+                                                          row['query_to'],
+                                                          row['hit_from'],
+                                                          row['hit_to'],
+                                                          row['evalue'],
+                                                          row['bit_score']))
+            
+        # after the last line close the db connections
+        c.close()
+        q.close()
+        h.close()
+        # close the file connection
+        output.close()
+            
+           

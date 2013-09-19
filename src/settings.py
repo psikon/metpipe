@@ -65,6 +65,8 @@ class General:
     def get_classify(self):
         return self.classify
     
+    def get_skip(self):
+        return self.skip.split(',')
     def get_use_contigs(self):
         return self.use_contigs
     
@@ -598,8 +600,6 @@ class Blastn_Parameter:
     entrez_query = ''
     db_soft_mask = ''
     db_hard_mask = ''
-    subject = ''
-    subject_loc = ''
     evalue = ''
     word_size = ''
     gapopen = ''
@@ -614,8 +614,6 @@ class Blastn_Parameter:
     reward = ''
     no_greedy = False
     min_raw_gapped_score = ''
-    template_type = ''
-    template_length = ''
     dust = ''
     filtering_db = ''
     window_masker_taxid = ''
@@ -627,8 +625,6 @@ class Blastn_Parameter:
     best_hit_score_edge = ''
     window_size = ''
     off_diagonal_range = ''
-    use_index = False
-    index_name = ''
     lcase_masking = False
     query_loc = ''
     strand = ''
@@ -639,25 +635,28 @@ class Blastn_Parameter:
     num_alignments = ''
     html = False
     max_target_seqs = ''
-    arguments = {'import_search_strategy' : '-import_search_strategy ', 'dbsize' : '-dbsize ',
-                 'gilist' : '-gilist ', 'seqidlist' : '-seqidlist ', 'negative_gilist' : '-negative_gilist ',
-                 'entrez_query' : '-entrez_query ', 'db_soft_mask' : '-db_soft_mask ',
-                 'db_hard_mask' : '-db_hard_mask ', 'subject' : '-subject ', 'subject_loc' : '-subject_loc ',
-                  'evalue' : '-evalue ', 'word_size' : '-word_size ',
-                  'gapopen' :  '-gapopen ', 'gapextend' : '-gapextend ', 'perc_identity' : '-perc_identity ',
-                  'xdrop_ungap' : '-xdrop_ungap ', 'xdrop_gap' : '-xdrop_gap ', 'xdrop_gap_final' : '-xdrop_gap_final ',
-                  'searchsp' : '-searchsp ', 'max_hsps_per_subject' : '-max_hsps_per_subject ',
-                  'penalty' : '-penalty ', 'reward' : '-reward ', 'no_greedy' : '-no_greedy ',
-                  'min_raw_gapped_score' : '-min_raw_gapped_score ', 'template_type' : '-template_type ',
-                  'template_length' : '-template_length ', 'dust' : '-dust ', 'filtering_db' : '-filtering_db ',
-                  'window_masker_taxid' : '-window_masker_taxid ', 'window_masker_db' :  '-window_masker_db ',
-                  'soft_masking' : '-soft_masking ', 'ungapped' : '-ungapped ', 'culling_limit' : '-culling_limit ',
-                  'best_hit_overhang' : '-best_hit_overhang ', 'best_hit_score_edge' : '-best_hit_score_edge ',
-                  'window_size' : '-window_size ', 'off_diagonal_range' : '-off_diagonal_range ',
-                  'use_index' : '-use_index ', 'index_name' : '-index_name ', 'lcase_masking' : '-lcase_masking ',
-                  'query_loc' : '-query_loc ', 'strand' : '-strand ', 'parse_deflines' : '-parse_deflines ',
-                  'outfmt' : '-outfmt ', 'show_gis' : '-show_gis ', 'num_descriptions' : '-num_descriptions ',
-                  'num_alignments' : '-num_alignments ', 'html' : '-html ', 'max_target_seqs' : '-max_target_seqs ' }
+    arguments = {'import_search_strategy' : '-import_search_strategy ', 
+                 'dbsize' : '-dbsize ','gilist' : '-gilist ', 
+                 'seqidlist' : '-seqidlist ', 'negative_gilist' : '-negative_gilist ',
+                 'entrez_query' : '-entrez_query ', 'db_soft_mask' : '-db_soft_mask ', 
+                 'evalue' : '-evalue ', 'db_hard_mask' : '-db_hard_mask ',  
+                 'word_size' : '-word_size ','gapopen' :  '-gapopen ', 
+                 'gapextend' : '-gapextend ', 'perc_identity' : '-perc_identity ', 
+                 'xdrop_gap' : '-xdrop_gap ', 'xdrop_ungap' : '-xdrop_ungap ',  
+                 'xdrop_gap_final' : '-xdrop_gap_final ', 'penalty' : '-penalty ',
+                 'searchsp' : '-searchsp ', 'max_hsps_per_subject' : '-max_hsps_per_subject ', 
+                 'reward' : '-reward ', 'no_greedy' : '-no_greedy ',
+                 'min_raw_gapped_score' : '-min_raw_gapped_score ', 'dust' : '-dust ', 
+                 'filtering_db' : '-filtering_db ','window_masker_taxid' : '-window_masker_taxid ', 
+                 'window_masker_db' :  '-window_masker_db ','soft_masking' : '-soft_masking ', 
+                 'ungapped' : '-ungapped ', 'culling_limit' : '-culling_limit ',
+                 'best_hit_overhang' : '-best_hit_overhang ', 'best_hit_score_edge' : '-best_hit_score_edge ',
+                 'window_size' : '-window_size ', 'off_diagonal_range' : '-off_diagonal_range ',
+                 'lcase_masking' : '-lcase_masking ', 'query_loc' : '-query_loc ', 
+                 'strand' : '-strand ', 'parse_deflines' : '-parse_deflines ', 
+                 'outfmt' : '-outfmt ', 'show_gis' : '-show_gis ', 
+                 'num_descriptions' : '-num_descriptions ', 'num_alignments' : '-num_alignments ', 
+                 'html' : '-html ', 'max_target_seqs' : '-max_target_seqs ' }
 
     def __init__(self, parameter_file):
         conf = ConfigParser.ConfigParser()
@@ -670,8 +669,6 @@ class Blastn_Parameter:
         self.entrez_query = conf.get('blastn', 'entrez_query') if conf.has_option('blastn', 'entrez_query') else ''
         self.db_soft_mask = conf.get('blastn', 'db_soft_mask') if conf.has_option('blastn', 'db_soft_mask') else ''
         self.db_hard_mask = conf.get('blastn', 'db_hard_mask') if conf.has_option('blastn', 'db_hard_mask') else ''
-        self.subject = conf.get('blastn', 'subject') if conf.has_option('blastn', 'subject') else ''
-        self.subject_loc = conf.get('blastn', 'subject_loc') if conf.has_option('blastn', 'subject_loc') else ''
         self.evalue = conf.get('blastn', 'evalue') if conf.has_option('blastn', 'evalue') else ''
         self.word_size = conf.get('blastn', 'word_size') if conf.has_option('blastn', 'word_size') else ''
         self.gapopen = conf.get('blastn', 'gapopen') if conf.has_option('blastn', 'gapopen') else ''
@@ -686,8 +683,6 @@ class Blastn_Parameter:
         self.reward = conf.get('blastn', 'reward') if conf.has_option('blastn', 'reward') else ''
         self.no_greedy = conf.getboolean('blastn', 'no_greedy')if conf.has_option('blastn', 'no_greedy') else ''
         self.min_raw_gapped_score = conf.get('blastn', 'min_raw_gapped_score') if conf.has_option('blastn', 'min_raw_gapped_score') else ''
-        self.template_type = conf.get('blastn', 'template_type') if conf.has_option('blastn', 'template_type') else ''
-        self.template_length = conf.get('blastn', 'template_length') if conf.has_option('blastn', 'template_length') else ''
         self.dust = conf.get('blastn', 'dust') if conf.has_option('blastn', 'dust') else ''
         self.filtering_db = conf.get('blastn', 'filtering_db') if conf.has_option('blastn', 'filtering_db') else ''
         self.window_masker_taxid = conf.get('blastn', 'window_masker_taxid') if conf.has_option('blastn', 'window_masker_taxid') else ''
@@ -699,8 +694,6 @@ class Blastn_Parameter:
         self.best_hit_score_edge = conf.get('blastn', 'best_hit_score_edge') if conf.has_option('blastn', 'best_hit_score_edge') else ''
         self.window_size = conf.get('blastn', 'window_size') if conf.has_option('blastn', 'window_size') else ''
         self.off_diagonal_range = conf.get('blastn', 'off_diagonal_range') if conf.has_option('blastn', 'off_diagonal_range') else ''
-        self.use_index = conf.getboolean('blastn', 'use_index')  if conf.has_option('blastn', 'use_index') else ''
-        self.index_name = conf.get('blastn', 'index_name')  if conf.has_option('blastn', 'index_name') else ''
         self.lcase_maskingm = conf.getboolean('blastn', 'lcase_maskingm')  if conf.has_option('blastn', 'lcase_maskingm') else ''
         self.query_loc = conf.get('blastn', 'query_loc')  if conf.has_option('blastn', 'query_loc') else ''
         self.strand = conf.get('blastn', 'strand')  if conf.has_option('blastn', 'strand') else ''
@@ -807,7 +800,7 @@ class Krona_Parameter():
         self.e_value = self.conf.get('Krona Tools', 'e_value') if self.conf.has_option('Krona Tools', 'e_value') else ''
         
     def get_name(self):
-        return self.conf.get('Krona Tools', 'filename') if conf.has_option('Krona Tools', 'filename') else ''
+        return self.conf.get('Krona Tools', 'filename') if self.conf.has_option('Krona Tools', 'filename') else ''
         
         
     
