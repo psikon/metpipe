@@ -83,6 +83,7 @@ class Assembly:
         # print actual informations about the step on stdout
         self.log.print_step(self.settings.get_step_number(), 'Assembly', 'Concatinate Reads',
                             parse_parameter(FLASH_Parameter(self.parameter_file)))
+        self.log.newline()
         
         # open the logfile
         logfile = self.log.open_logfile(self.logdir + 'concatination.log')
@@ -111,12 +112,8 @@ class Assembly:
         self.log.remove_empty_logfile(self.logdir + 'flash.err.log')
         
         # print summary of the process after completion
-        self.log.newline()
         self.log.print_verbose('Concatination complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
-        self.log.newline()
+        self.log.print_running_time(self.settings.get_actual_time())
         
     def assemble_reads(self, outputdir):
         
@@ -216,9 +213,7 @@ class Assembly:
         
         # print summary of the process after completion
         self.log.print_verbose('Assembly complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
+        self.log.print_running_time(self.settings.get_actual_time())
         self.log.newline()
 
         

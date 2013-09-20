@@ -84,9 +84,7 @@ class Preprocess:
             pass
         # print summary of the process after completion
         self.log.print_verbose('Quality check complete for %s\n' % (self.input))
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
+        self.log.print_running_time(self.settings.get_actual_time())
         self.log.newline
     
     def trim_and_filter(self):
@@ -123,9 +121,7 @@ class Preprocess:
 
         # print summary of the process after completion
         self.log.print_verbose('Trimming and filtering complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
+        self.log.print_running_time(self.settings.get_actual_time())
         self.log.newline
         
         

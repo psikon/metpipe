@@ -46,42 +46,46 @@ class Analysis:
         self.blast_output = self.files.get_blastn_output()
         self.metacv_output = self.files.get_metacv_output()
         
-        # test for blastrun with outfmt 5 mode
-        if is_xml(self.blast_output):
+       
+        if self.settings.get_classify() in 'metacv':
+            self.log.print_verbose("For a detailed analysis blastn with XML output is needed")
+        else:
+            # test for blastrun with outfmt 5 mode
+            if is_xml(self.blast_output):
             
-            # create a SQLite DB from the xml file
-            self.parse_to_db(self.blast_output, self.parsed_db_out)
-            # test the exit code, because next script need the output as input
-            if self.exitcode is 0:
-                # update input 
-                self.files.set_parser_output(update_reads(self.parsed_db_out, blastParser(self.parameter_file).get_name(), 'db'))
-                # raise step_number
-                self.settings.set_step_number()
-                # create a new database with taxonomical annotations
-                self.annotate_db(self.files.get_parser_output(), self.annotated_db_out)
+                # create a SQLite DB from the xml file
+                self.parse_to_db(self.blast_output, self.parsed_db_out)
                 # test the exit code, because next script need the output as input
                 if self.exitcode is 0:
-                    # update input
-                    self.files.set_annotated_output(update_reads(self.annotated_db_out, Rannotate(self.parameter_file).get_name(), 'db'))
+                    # update input 
+                    self.files.set_parser_output(update_reads(self.parsed_db_out, blastParser(self.parameter_file).get_name(), 'db'))
                     # raise step_number
                     self.settings.set_step_number()
-                    # subset the taxonomical database for a better and 
-                    # faster analysis after the pipline has finished
-                    self.subset_db(self.files.get_annotated_output(), self.subseted_db_out)
-                    # raise step_number
-                    self.settings.set_step_number()
-                else:
-                    self.log.print_verbose("ERROR: Annotated Database could not be subseted correctly") 
-                # create a pie chart of the blast data with Krona Webtools 
-                if krona:
-                    self.krona_report(self.blast_output, self.krona_report_out)     
-            else: 
-                self.log.print_verbose("ERROR: XML file could not be parsed")
-        # test for blast tabular output
-        elif is_tabular(self.blast_output) and krona is True:
-            self.krona_report(self.blast_output, self.krona_report_out)
-        else:
-            self.log.print_verbose("ERROR: Blast output file is not in xml or tabular format.\n",
+                    # create a new database with taxonomical annotations
+                    self.annotate_db(self.files.get_parser_output(), self.annotated_db_out)
+                    # test the exit code, because next script need the output as input
+                    if self.exitcode is 0:
+                        # update input
+                        self.files.set_annotated_output(update_reads(self.annotated_db_out, Rannotate(self.parameter_file).get_name(), 'db'))
+                        # raise step_number
+                        self.settings.set_step_number()
+                        # subset the taxonomical database for a better and 
+                        # faster analysis after the pipline has finished
+                        self.subset_db(self.files.get_annotated_output(), self.subseted_db_out)
+                        # raise step_number
+                        self.settings.set_step_number()
+                    else:
+                        self.log.print_verbose("ERROR: Annotated Database could not be subseted correctly") 
+                    # create a pie chart of the blast data with Krona Webtools 
+                    if krona:
+                        self.krona_report(self.blast_output, self.krona_report_out)     
+                else: 
+                    self.log.print_verbose("ERROR: XML file could not be parsed")
+            # test for blast tabular output
+            elif is_tabular(self.blast_output) and krona is True:
+                self.krona_report(self.blast_output, self.krona_report_out)
+            else:
+                self.log.print_verbose("ERROR: Blast output file is not in xml or tabular format.\n",
                                    "Please use outfmt 5 or 6 for Blast run")
     
     def __del__(self):
@@ -100,6 +104,7 @@ class Analysis:
         self.log.print_step(self.settings.get_step_number(), 'Analysis', 
                             'Parse database from blast results',
                             parse_parameter(blastParser(self.parameter_file)))
+        self.log.newline()
         # start the parser and wait until completion
         p = subprocess.Popen(shlex.split('%s -o %s %s %s' % (self.exe.PARSER,
                                                              outfile,
@@ -121,10 +126,8 @@ class Analysis:
         
         # print summary of the process after completion
         self.log.print_verbose('Parsing of blast XML File complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
-        self.log.newline
+        self.log.print_running_time(self.settings.get_actual_time())
+        self.log.newline()
         
     def annotate_db(self, input, output):
 
@@ -143,6 +146,7 @@ class Analysis:
         self.log.print_step(self.settings.get_step_number(), 'Analysis', 
                             'Annotate taxonomical data to blast database',
                             parse_parameter(Rannotate(self.parameter_file)))
+        self.log.newline()
         # start the parser and wait until completion
         p = subprocess.Popen(shlex.split('%s -i %s -o %s %s --taxon %s' 
                                          % (self.exe.ANNOTATE, 
@@ -166,10 +170,8 @@ class Analysis:
         
         # print summary of the process after completion
         self.log.print_verbose('Taxonomical annotation of blast database complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
-        self.log.newline
+        self.log.print_running_time(self.settings.get_actual_time())
+        self.log.newline()
         
     def subset_db(self, input, output):
         
@@ -187,7 +189,7 @@ class Analysis:
                                 'Subset the database for %s' % (subsetting.get_classifier()[i]),
                                 '--bitscore %s --rank %s' % (subsetting.get_bitscore(),
                                                              subsetting.get_rank()[i]))
-            
+            self.log.newline()
             # generate name for database file
             outfile = '%s%s%s%s' % (output, os.sep, subsetting.get_classifier()[i], '.db') 
             logfile = self.log.open_logfile(self.logdir + subsetting.get_classifier()[i] + '.log')
@@ -217,15 +219,11 @@ class Analysis:
                     logfile.write(p.stdout.readline())
             # wait until process is complete
             p.wait()
-            
-            self.log.newline
-            
+
         # print summary of the process after completion
         self.log.print_verbose('Subsetting of annotated Blast database complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
-        self.log.newline
+        self.log.print_running_time(self.settings.get_actual_time())
+        self.log.newline()
        
     def krona_report(self, input, output):
         
@@ -241,6 +239,7 @@ class Analysis:
                                 'Analysis', 
                                 'Create Overview from tabular output',
                                 parse_parameter(Krona_Parameter(self.parameter_file)))
+            self.log.newline()
             
             # start the Krona import script for Blast tabular output
             # pipe all output for stdout in a logfile
@@ -252,6 +251,11 @@ class Analysis:
                                  stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
             # wait until process is complete
             p.wait()
+            
+            # print summary of the process after completion
+            self.log.print_verbose('Creation of Krona Pie Chart complete \n')
+            self.log.print_running_time(self.settings.get_actual_time())
+            self.log.newline()
             
         elif is_xml(input) and is_db(self.files.get_parser_output()):
             self.log.print_step(self.settings.get_step_number(), 
@@ -272,13 +276,20 @@ class Analysis:
                                  stdout = self.log.open_logfile(self.logdir + 'krona.log'),
                                  stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
             
+            # print summary of the process after completion
+            self.log.print_verbose('Creation of Krona Pie Chart complete \n')
+            self.log.print_running_time(self.settings.get_actual_time())
+            self.log.newline()
+            
         elif not is_tabular(input) or not is_xml(input):
             self.log.print_verbose('Input must be in Blast table or xml format \n' + 
                                    'change Blast Parameter "outfmt" to 5 or 6')
+            self.log.newline()
             errorlog.write('Input must be in Blast table or xml format \n' + 
                                'change Blast Parameter "outfmt" to 5 or 6')
         else:
             self.log.print_verbose('Krona Report could not be generated, because of unknown reasons')
+            
             
         
         

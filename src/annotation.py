@@ -87,6 +87,7 @@ class Annotation:
             # print actual informations about the step on stdout
             self.log.print_step(self.settings.get_step_number(), 'Annotation', 'convert fastq files',
                                 self.log.cut_path(self.input))
+            self.log.newline()
             self.input = convert_fastq(self.input, self.blast_out, self.exe.get_Converter())
         
         # blastn can only annotated one file, so input has to be merged to one file
@@ -94,6 +95,7 @@ class Annotation:
             # print actual informations about the step on stdout
             self.log.print_step(self.settings.get_step_number(), 'Annotation', 'merging reads to on file',
                                 self.log.cut_path(self.input))
+            self.log.newline()
             self.input = merge_files(self.input, self.blast_out)
         
         # define the outputformat for the blastn results
@@ -120,9 +122,7 @@ class Annotation:
         remove_file(outputdir + os.sep, 'merged', 'fasta')
         # print summary of the process after completion
         self.log.print_verbose('Annotation with blastn complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
+        self.log.print_running_time(self.settings.get_actual_time())
         self.log.newline
         
     def metacv(self, outputdir):
@@ -158,15 +158,15 @@ class Annotation:
                                          parameter.get_mode(), 
                                          parameter.get_orf(),
                                          self.settings.get_threads())),
-                            #stderr = self.log.open_logfile(self.logdir + 'metacv.err.log'), 
-                            #stdout = subprocess.PIPE,
+                            stderr = self.log.open_logfile(self.logdir + 'metacv.err.log'), 
+                            stdout = subprocess.PIPE,
                             cwd = outputdir + os.sep)
         # during processing pipe the output and print it on screen
-#        while p.poll() is None:
-#            if self.settings.get_verbose():
-#                self.log.print_verbose(p.stdout.readline())
-#            else:
-#                self.log.print_compact(p.stdout.readline().rstrip('\n'))
+        while p.poll() is None:
+            if self.settings.get_verbose():
+                self.log.print_verbose(p.stdout.readline())
+            else:
+                self.log.print_compact(p.stdout.readline().rstrip('\n'))
         # wait until process is finished        
         p.wait()
 
@@ -189,15 +189,15 @@ class Annotation:
                                          parameter.get_min_qual(), 
                                          parameter.get_taxon(),
                                          self.settings.get_threads())),
-                            #stderr = self.log.open_logfile('metacv.res2table.err.log'), 
-                            #stdout = subprocess.PIPE,
+                            stderr = self.log.open_logfile('metacv.res2table.err.log'), 
+                            stdout = subprocess.PIPE,
                             cwd = outputdir + os.sep)
         # during processing pipe the output and print it on screen
-#        while p.poll() is None:
-#            if self.settings.get_verbose():
-#                self.log.print_verbose(p.stdout.readline())
-#            else:
-#                self.log.print_compact(p.stdout.readline().rstrip('\n'))
+        while p.poll() is None:
+            if self.settings.get_verbose():
+                self.log.print_verbose(p.stdout.readline())
+            else:
+                self.log.print_compact(p.stdout.readline().rstrip('\n'))
         # wait until process is finished
         p.wait()
         
@@ -230,9 +230,7 @@ class Annotation:
         p.wait()
         
         self.log.print_verbose('Annotation with MetaCV complete \n')
-        self.log.print_verbose('processed in: ' + 
-                               self.log.getDHMS(time.time() - self.settings.get_actual_time()) 
-                               + '\n')
+        self.log.print_running_time(self.settings.get_actual_time())
         self.log.newline
                 
         

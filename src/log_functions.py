@@ -55,4 +55,11 @@ class Logging:
             tmp.append(b)
         return ', '.join(tmp)
     
+    def print_running_time(self, actual_time):
+        sys.stdout.write('processed in ' + self.getDHMS(time.time() - actual_time)+'\n')
+        self.newline()
+    
+    def skip_msg(self, skipped_step):
+        sys.stdout.write('Skipping Step: %s \n' % (skipped_step.upper()))
+        self.newline()
     

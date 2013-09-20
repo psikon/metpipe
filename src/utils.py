@@ -71,5 +71,14 @@ def blast_output(value):
         return 'blastn.tab'
     else:
         return 'blastn.blast'
-	
+    
+def file_exists(file):
+    
+    if not os.path.isfile(file):
+        
+        sys.stdout.write("ERROR: %s could not be found" % (file))
+        sys.exit()
+
+        
+        	
 

@@ -1,27 +1,25 @@
 #!/usr/bin/env python
 
-import os, sys, time
+#@author: Philipp Sehnert
+#@contact: philipp.sehnert[a]gmail.com
+
+# import of standard modules
+import os, sys, time, multiprocessing
+import argparse
+# Import of pipeline modules
+from src.preprocess import Preprocess
+from src.assembly import Assembly
+from src.annotation import Annotation
+from src.analysis import Analysis
 from src.settings import General, FileSettings
-# Setting up the paths
-RESULT_DIR = '%s%sresult' % (sys.path[0], os.sep)
+from src.utils import file_exists, to_string
+from src.log_functions import Logging
+from src.file_functions import create_outputdir
 
 # hardcode defaults
+RESULT_DIR = '%s%sresult' % (sys.path[0], os.sep)
 PARAM_FILE = '%s%sparameter.conf' % (sys.path[0], os.sep)
-STEPS = {'preprocessing', 'annotate', 'assembly'}
-
-# rest of imports
-import time
-import argparse
-import multiprocessing
-from socket import errno
-# import own functions and classes 
-from src.preprocess import *
-from src.assembly import *
-from src.annotation import *
-from src.analysis import *
-from src.file_functions import update_reads, extract_tabular, create_outputdir
-from src.utils import blast_output
-from src.log_functions import Logging
+STEPS = ['preprocessing', 'annotate', 'assembly']
 
 # Get the starting time
 starting_time = time.time()
@@ -41,7 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', dest = 'param', action = 'store', default = PARAM_FILE,
                         help = 'use alternative config file (default = parameter.conf)')
     parser.add_argument('-s', dest = 'skip', action = 'store', default = '', 
-                        choices = ['Preprocessing', 'Assembly', 'Annotation'],
+                        choices = ['preprocessing', 'assembly', 'annotation','analysis'],
                         help = 'skip steps in the pipeline (default = None)')
     parser.add_argument('-o', dest = 'output', action = 'store', default = RESULT_DIR,
                         help = 'use alternative output folder')
@@ -62,43 +60,57 @@ if __name__ == '__main__':
 # create the cli interface
 args = parser.parse_args()
 
+# init the Pipeline
+
+PARAM_FILE = args.param if args.param else PARAM_FILE
+RESULT_DIR = args.output if args.output else RESULT_DIR
 
 # check if input exists
 for fname in args.input:
-    if not os.path.isfile(fname):
-        print ('File:  %s not exists' % (fname))
-        sys.exit()
-        
-# check if output dir exists and create it if not
-# 
-create_outputdir(RESULT_DIR)
-# anpassen
-# create the log folder
-try:
-    os.makedirs(args.output + os.sep + 'log')
-except OSError as exception:
-    if exception.errno != errno.EEXIST:
-        raise
-    
-# check if param File exists Objekt orientiert entwickelt 
-if not os.path.isfile(args.param):
-    print ('param file %s is not readable' % (args.param))
-    sys.exit()
+   file_exists(fname)
 
-parameter_file = args.param
+# check if param File exists
+file_exists(PARAM_FILE)
+     
+# create outputdir and log folder
+create_outputdir(RESULT_DIR)
+create_outputdir(RESULT_DIR + os.sep +'log')
+
 # create the global settings object
 settings = General(args.threads, args.verbose, args.skip, starting_time, args.trim, 
                    args.quality, args.use_contigs, args.assembler, args.classify, 1)
 
-files = FileSettings(args.input, os.path.normpath(args.output), parameter_file)
+# setup the input, outputs and important files
+files = FileSettings(args.input, os.path.normpath(RESULT_DIR), PARAM_FILE)
+
+# create the Logger interface
 log = Logging()
 
+# get the all skipped steps
+skip = to_string(settings.get_skip())
 
-print settings.get_skip()
-Preprocess(files, settings, parameter_file)
-Assembly(files, settings, parameter_file, settings.assembler)
-Annotation(files, settings, parameter_file, settings.classify)
-Analysis(files, settings, parameter_file, True)
+# START the modules of Pipeline and wait until completion
+if skip in 'preprocessing' and skip:
+   log.skip_msg(skip)
+else:   
+    Preprocess(files, settings, PARAM_FILE)
 
+if skip in 'assembly' and skip:
+     log.skip_msg(skip)
+else:
+    Assembly(files, settings, PARAM_FILE, settings.assembler)
+     
+if skip in 'annotation'and skip:
+     log.skip_msg(skip)
+else:
+    Annotation(files, settings, PARAM_FILE, settings.classify)
+     
+if skip in 'analysis' and skip:
+     log.skip_msg(skip)
+else:
+    Analysis(files, settings, PARAM_FILE, True)
+
+# print ending message
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
-sys.stdout.write('processed in ' + log.getDHMS(time.time() - settings.get_actual_time())+'\n')
+log.print_running_time(settings.get_actual_time())
+
