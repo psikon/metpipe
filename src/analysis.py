@@ -1,9 +1,8 @@
 # standard imports
 import subprocess
 import shlex
-import sys, os
+import sys, os, time
 import shutil
-import time
 # imports of own functions and classes
 from src.settings import Executables, blastParser, Rannotate, subsetDB, Krona_Parameter
 from src.file_functions import create_outputdir, update_reads, remove_file, parse_parameter, extract_tabular
@@ -243,10 +242,11 @@ class Analysis:
             
             # start the Krona import script for Blast tabular output
             # pipe all output for stdout in a logfile
-            p = subprocess.Popen(shlex.split('%s -o %s %s %s' % (self.exe.KRONA_BLAST,
-                                                                 outfile,
-                                                                 parse_parameter(Krona_Parameter(self.parameter_file)),
-                                                                 to_string(input))),
+            p = subprocess.Popen(shlex.split('%s -o %s %s %s' 
+                                             % (self.exe.KRONA_BLAST,
+                                                outfile,
+                                                parse_parameter(Krona_Parameter(self.parameter_file)),
+                                                to_string(input))),
                                  stdout = self.log.open_logfile(self.logdir + 'krona.log'),
                                  stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
             # wait until process is complete
@@ -263,16 +263,17 @@ class Analysis:
                                 'Create Overview from XML output',
                                 parse_parameter(Krona_Parameter(self.parameter_file)))
             # convert the values from database to tabular format
-            extract_tabular(to_string(self.files.get_parser_output()),output)
+            extract_tabular(to_string(self.files.get_parser_output()), output)
             # set the new input
-            input = update_reads(output,'extracted_from_DB','tab')
+            input = update_reads(output, 'extracted_from_DB','tab')
             
             # start the Krona import script for Blast tabular output
             # pipe all output for stdout in a logfile
-            p = subprocess.Popen(shlex.split('%s -o %s %s %s' % (self.exe.KRONA_BLAST,
-                                                                 outfile,
-                                                                 parse_parameter(Krona_Parameter(self.parameter_file)),
-                                                                 to_string(input))),
+            p = subprocess.Popen(shlex.split('%s -o %s %s %s' 
+                                             % (self.exe.KRONA_BLAST,
+                                                outfile,
+                                                parse_parameter(Krona_Parameter(self.parameter_file)),
+                                                to_string(input))),
                                  stdout = self.log.open_logfile(self.logdir + 'krona.log'),
                                  stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
             
