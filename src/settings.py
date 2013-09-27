@@ -22,9 +22,9 @@ class General:
     classify = 'both'
     
     
-    def __init__(self, threads=None, verbose=False, skip=None, starting_time=None,
-                 trim=None, quality=None, use_contigs=None, assembler=None,
-                 classify=None, step_number=None):
+    def __init__(self, threads = None, verbose = False, skip = None, starting_time = None,
+                 trim = None, quality = None, use_contigs = None, assembler = None,
+                 classify = None, step_number = None):
 
         self.threads = threads
         self.verbose = verbose
@@ -67,6 +67,7 @@ class General:
     
     def get_skip(self):
         return self.skip.split(',')
+    
     def get_use_contigs(self):
         return self.use_contigs
     
@@ -171,6 +172,7 @@ class FileSettings:
     # important dirs for the pipeline
     output = ''
     logdir = ''
+    paramfile = ''
     quality_dir = ''
     trim_dir = ''
     concat_dir = ''
@@ -193,10 +195,11 @@ class FileSettings:
     annotated_output = []
     subseted_output = []
     
-    def __init__(self, raw=None, output=None, parameter_file=None):
+    def __init__(self, raw = None, output = None, parameter_file = None):
         
+        self.paramfile = parameter_file
         conf = ConfigParser.SafeConfigParser()
-        conf.read(parameter_file)
+        conf.read(self.paramfile)
         self.raw = raw
         self.input = raw
         self.output = output + os.sep
@@ -213,6 +216,9 @@ class FileSettings:
         self.logdir = conf.get('General', 'log_dir') if conf.has_option('General', 'quality_dir') else ''
 
     
+    def get_parameter_file(self):
+        return self.paramfile
+        
     def get_output(self):
         return self.output
     

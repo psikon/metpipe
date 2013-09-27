@@ -1,4 +1,5 @@
 import os, sys
+from src.exceptions import NoExecutable 
 # utils.py contains various functions for simple testing purposes or conversion of 
 # objects written here to clean up the code
 # 
@@ -34,13 +35,11 @@ def is_paired(input):
        
 # test the executable - is it existing and callable?
 def is_executable(program_path):
-    if os.path.isfile(program_path) and os.access(program_path, os.X_OK):
-        return True
-    else: 
-        sys.stdout.write(os.linesep)
-        sys.stderr.write('Executable for ' + program_path.split(os.sep)[-1] + ' not found - Please reinstall\n')
-        sys.stdout.write(os.linesep)
-        return False
+        if os.path.isfile(program_path) and os.access(program_path, os.X_OK):
+            return True
+        else:
+            raise NoExecutable(program_path)
+       
 
 def is_xml(file):
     

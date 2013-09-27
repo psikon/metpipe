@@ -95,20 +95,20 @@ if skip in 'preprocessing' and skip:
 else:   
     Preprocess(files, settings, PARAM_FILE)
 
-if skip in 'assembly' and skip:
-     log.skip_msg(skip)
-else:
-    Assembly(files, settings, PARAM_FILE, settings.assembler)
-     
-if skip in 'annotation'and skip:
-     log.skip_msg(skip)
-else:
-    Annotation(files, settings, PARAM_FILE, settings.classify)
-     
-if skip in 'analysis' and skip:
-     log.skip_msg(skip)
-else:
-    Analysis(files, settings, PARAM_FILE, True)
+# if skip in 'assembly' and skip:
+#      log.skip_msg(skip)
+# else:
+#     Assembly(files, settings, PARAM_FILE, settings.assembler)
+#      
+# if skip in 'annotation'and skip:
+#      log.skip_msg(skip)
+# else:
+#     Annotation(files, settings, PARAM_FILE, settings.classify)
+#      
+# if skip in 'analysis' and skip:
+#      log.skip_msg(skip)
+# else:
+#     Analysis(files, settings, PARAM_FILE, True)
 
 # print ending message
 sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
