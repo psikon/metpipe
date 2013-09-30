@@ -6,7 +6,7 @@ import shutil
 # imports of own functions and classes
 from src.settings import Executables, blastParser, Rannotate, subsetDB, Krona_Parameter
 from src.file_functions import create_outputdir, update_reads, remove_file, parse_parameter, extract_tabular
-from src.log_functions import Logging
+from src.log_functions import print_step, newline, print_compact, print_verbose, open_logfile, print_running_time, remove_empty_logfile, cut_path
 from src.utils import to_string, is_xml, is_tabular, is_db, is_executable
 
 class Analysis:
@@ -30,7 +30,6 @@ class Analysis:
         # init all important variables and classes
         self.settings = settings_instance
         self.parameter_file = parameter_file
-        self.log = Logging()
         self.exe = Executables(self.parameter_file)
         self.files = files_instance
         self.logdir = self.files.get_logdir()
@@ -47,7 +46,7 @@ class Analysis:
         
        
         if self.settings.get_classify() in 'metacv':
-            self.log.print_verbose("For a detailed analysis blastn with XML output is needed")
+            print_verbose("For a detailed analysis blastn with XML output is needed")
         else:
             # test for blastrun with outfmt 5 mode
             if is_xml(self.blast_output):
@@ -74,18 +73,18 @@ class Analysis:
                         # raise step_number
                         self.settings.set_step_number()
                     else:
-                        self.log.print_verbose("ERROR: Annotated Database could not be subseted correctly") 
+                        print_verbose("ERROR: Annotated Database could not be subseted correctly") 
                     # create a pie chart of the blast data with Krona Webtools 
                     if krona:
                         self.krona_report(self.blast_output, self.krona_report_out)     
                 else: 
-                    self.log.print_verbose("ERROR: XML file could not be parsed")
+                    print_verbose("ERROR: XML file could not be parsed")
             # test for blast tabular output
             elif is_tabular(self.blast_output) and krona is True:
                 self.krona_report(self.blast_output, self.krona_report_out)
             else:
-                self.log.print_verbose("ERROR: Blast output file is not in xml or tabular format.\n",
-                                   "Please use outfmt 5 or 6 for Blast run")
+                print_verbose("ERROR: Blast output file is not in xml or tabular format.\n",
+                              "Please use outfmt 5 or 6 for Blast run")
     
     def __del__(self):
         pass
@@ -100,33 +99,33 @@ class Analysis:
         if os.path.exists(outfile):
             os.remove(outfile)
         # print actual informations about the step on stdout
-        self.log.print_step(self.settings.get_step_number(), 'Analysis', 
-                            'Parse database from blast results',
-                            parse_parameter(blastParser(self.parameter_file)))
-        self.log.newline()
+        print_step(self.settings.get_step_number(), 'Analysis', 
+                   'Parse database from blast results',
+                   parse_parameter(blastParser(self.parameter_file)))
+        newline()
         # start the parser and wait until completion
         p = subprocess.Popen(shlex.split('%s -o %s %s %s' % (self.exe.PARSER,
                                                              outfile,
                                                              parse_parameter(blastParser(self.parameter_file)),
                                                              to_string(input))),
                               stdout = subprocess.PIPE,
-                              stderr = self.log.open_logfile(self.logdir + 'parser.err.log'))
+                              stderr = open_logfile(self.logdir + 'parser.err.log'))
         
         # print information about the status
         while p.poll() is None:
             if self.settings.get_verbose():
-                self.log.print_verbose(p.stdout.readline())
+                print_verbose(p.stdout.readline())
             else:
-                self.log.print_compact(p.stdout.readline().rstrip('\n'))
+                print_compact(p.stdout.readline().rstrip('\n'))
         # wait until process is complete        
         p.wait()
         # save the exit code for later function calls 
         self.exitcode = p.returncode
         
         # print summary of the process after completion
-        self.log.print_verbose('Parsing of blast XML File complete \n')
-        self.log.print_running_time(self.settings.get_actual_time())
-        self.log.newline()
+        print_verbose('Parsing of blast XML File complete \n')
+        print_running_time(self.settings.get_actual_time())
+        newline()
         
     def annotate_db(self, input, output):
 
@@ -135,17 +134,17 @@ class Analysis:
         # generate filename for db
         outfile = output + os.sep + Rannotate(self.parameter_file).get_name() + '.db'
         # open a logfile for annotation process
-        logfile = self.log.open_logfile(self.logdir + 'annotation_of_db.log')
+        logfile = open_logfile(self.logdir + 'annotation_of_db.log')
         
         # remove old databases with same name
         if os.path.exists(outfile):
             os.remove(outfile)
         
         # print actual informations about the step on stdout    
-        self.log.print_step(self.settings.get_step_number(), 'Analysis', 
-                            'Annotate taxonomical data to blast database',
-                            parse_parameter(Rannotate(self.parameter_file)))
-        self.log.newline()
+        print_step(self.settings.get_step_number(), 'Analysis', 
+                   'Annotate taxonomical data to blast database',
+                   parse_parameter(Rannotate(self.parameter_file)))
+        newline()
         # start the parser and wait until completion
         p = subprocess.Popen(shlex.split('%s -i %s -o %s %s --taxon %s' 
                                          % (self.exe.ANNOTATE, 
@@ -158,7 +157,7 @@ class Analysis:
         # print information about the status
         while p.poll() is None:
             if self.settings.get_verbose():
-                self.log.print_verbose(p.stdout.readline())
+                print_verbose(p.stdout.readline())
                 logfile.write(p.stdout.readline())
             else:
                 logfile.write(p.stdout.readline())
@@ -168,9 +167,9 @@ class Analysis:
         self.exitcode = p.returncode
         
         # print summary of the process after completion
-        self.log.print_verbose('Taxonomical annotation of blast database complete \n')
-        self.log.print_running_time(self.settings.get_actual_time())
-        self.log.newline()
+        print_verbose('Taxonomical annotation of blast database complete \n')
+        print_running_time(self.settings.get_actual_time())
+        newline()
         
     def subset_db(self, input, output):
         
@@ -183,15 +182,15 @@ class Analysis:
         # so that every classifier can be processed
         for i in range(len(subsetting.get_classifier())):
             # print actual informations about the step on stdout    
-            self.log.print_step(self.settings.get_step_number(), 
-                                'Analysis', 
-                                'Subset the database for %s' % (subsetting.get_classifier()[i]),
-                                '--bitscore %s --rank %s' % (subsetting.get_bitscore(),
-                                                             subsetting.get_rank()[i]))
-            self.log.newline()
+            print_step(self.settings.get_step_number(), 
+                       'Analysis', 
+                       'Subset the database for %s' % (subsetting.get_classifier()[i]),
+                        '--bitscore %s --rank %s' % (subsetting.get_bitscore(),
+                                                     subsetting.get_rank()[i]))
+            newline()
             # generate name for database file
             outfile = '%s%s%s%s' % (output, os.sep, subsetting.get_classifier()[i], '.db') 
-            logfile = self.log.open_logfile(self.logdir + subsetting.get_classifier()[i] + '.log')
+            logfile = open_logfile(self.logdir + subsetting.get_classifier()[i] + '.log')
             
             # remove old databases with the same name
             if os.path.exists(outfile):
@@ -212,7 +211,7 @@ class Analysis:
             # during processing print output in verbose mode and update the logfile
             while p.poll() is None:
                 if self.settings.get_verbose():
-                    self.log.print_verbose(p.stdout.readline())
+                    print_verbose(p.stdout.readline())
                     logfile.write(p.stdout.readline())
                 else:
                     logfile.write(p.stdout.readline())
@@ -220,9 +219,9 @@ class Analysis:
             p.wait()
 
         # print summary of the process after completion
-        self.log.print_verbose('Subsetting of annotated Blast database complete \n')
-        self.log.print_running_time(self.settings.get_actual_time())
-        self.log.newline()
+        print_verbose('Subsetting of annotated Blast database complete \n')
+        print_running_time(self.settings.get_actual_time())
+        newline()
        
     def krona_report(self, input, output):
         
@@ -234,11 +233,11 @@ class Analysis:
         # test type of input file
         if is_tabular(input):
             # print actual informations about the step on stdout    
-            self.log.print_step(self.settings.get_step_number(), 
-                                'Analysis', 
-                                'Create Overview from tabular output',
-                                parse_parameter(Krona_Parameter(self.parameter_file)))
-            self.log.newline()
+            print_step(self.settings.get_step_number(), 
+                       'Analysis', 
+                       'Create Overview from tabular output',
+                       parse_parameter(Krona_Parameter(self.parameter_file)))
+            newline()
             
             # start the Krona import script for Blast tabular output
             # pipe all output for stdout in a logfile
@@ -247,21 +246,21 @@ class Analysis:
                                                 outfile,
                                                 parse_parameter(Krona_Parameter(self.parameter_file)),
                                                 to_string(input))),
-                                 stdout = self.log.open_logfile(self.logdir + 'krona.log'),
-                                 stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
+                                 stdout = open_logfile(self.logdir + 'krona.log'),
+                                 stderr = open_logfile(self.logdir + 'krona.err.log'))
             # wait until process is complete
             p.wait()
             
             # print summary of the process after completion
-            self.log.print_verbose('Creation of Krona Pie Chart complete \n')
-            self.log.print_running_time(self.settings.get_actual_time())
-            self.log.newline()
+            print_verbose('Creation of Krona Pie Chart complete \n')
+            print_running_time(self.settings.get_actual_time())
+            newline()
             
         elif is_xml(input) and is_db(self.files.get_parser_output()):
-            self.log.print_step(self.settings.get_step_number(), 
-                                'Analysis', 
-                                'Create Overview from XML output',
-                                parse_parameter(Krona_Parameter(self.parameter_file)))
+            print_step(self.settings.get_step_number(), 
+                       'Analysis', 
+                       'Create Overview from XML output',
+                       parse_parameter(Krona_Parameter(self.parameter_file)))
             # convert the values from database to tabular format
             extract_tabular(to_string(self.files.get_parser_output()), output)
             # set the new input
@@ -274,22 +273,22 @@ class Analysis:
                                                 outfile,
                                                 parse_parameter(Krona_Parameter(self.parameter_file)),
                                                 to_string(input))),
-                                 stdout = self.log.open_logfile(self.logdir + 'krona.log'),
-                                 stderr = self.log.open_logfile(self.logdir + 'krona.err.log'))
+                                 stdout = open_logfile(self.logdir + 'krona.log'),
+                                 stderr = open_logfile(self.logdir + 'krona.err.log'))
             
             # print summary of the process after completion
-            self.log.print_verbose('Creation of Krona Pie Chart complete \n')
-            self.log.print_running_time(self.settings.get_actual_time())
-            self.log.newline()
+            print_verbose('Creation of Krona Pie Chart complete \n')
+            print_running_time(self.settings.get_actual_time())
+            newline()
             
         elif not is_tabular(input) or not is_xml(input):
-            self.log.print_verbose('Input must be in Blast table or xml format \n' + 
-                                   'change Blast Parameter "outfmt" to 5 or 6')
-            self.log.newline()
+            print_verbose('Input must be in Blast table or xml format \n' + 
+                          'change Blast Parameter "outfmt" to 5 or 6')
+            newline()
             errorlog.write('Input must be in Blast table or xml format \n' + 
-                               'change Blast Parameter "outfmt" to 5 or 6')
+                           'change Blast Parameter "outfmt" to 5 or 6')
         else:
-            self.log.print_verbose('Krona Report could not be generated, because of unknown reasons')
+            print_verbose('Krona Report could not be generated, because of unknown reasons')
             
             
         

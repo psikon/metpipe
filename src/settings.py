@@ -24,7 +24,7 @@ class General:
     
     def __init__(self, threads = None, verbose = False, skip = None, starting_time = None,
                  trim = None, quality = None, use_contigs = None, assembler = None,
-                 classify = None, step_number = None):
+                 annotation = None, step_number = None):
 
         self.threads = threads
         self.verbose = verbose
@@ -35,7 +35,7 @@ class General:
         self.quality = quality 
         self.use_contigs = use_contigs
         self.assembler = assembler.lower()
-        self.classify = classify.lower() 
+        self.annotation = annotation.lower() 
         self.step_number = step_number
 
     def get_threads(self):
@@ -62,8 +62,8 @@ class General:
     def get_assembler(self):
         return self.assembler
     
-    def get_classify(self):
-        return self.classify
+    def get_annotation(self):
+        return self.annotation
     
     def get_skip(self):
         return self.skip.split(',')
@@ -74,8 +74,8 @@ class General:
     def get_step_number(self):
         return self.step_number
     
-    def set_step_number(self):
-        self.step_number = self.step_number + 1
+    def set_step_number(self, value):
+        self.step_number = value
         
         
 class Executables:
@@ -578,8 +578,7 @@ class MetaCV_Parameter:
     
     def get_mode(self):
         return '--mode=' + self.conf.get('MetaCV', 'mode') if self.conf.has_option('MetaCV', 'mode') else ''
-
-        
+    
     def get_orf(self):
         return '--orf=' + self.conf.get('MetaCV', 'orf')  if self.conf.has_option('MetaCV', 'orf') else ''
     

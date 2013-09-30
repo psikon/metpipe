@@ -6,15 +6,16 @@
 # import of standard modules
 import os, sys, time, multiprocessing
 import argparse
+import traceback
 # Import of pipeline modules
 from src.preprocess import Preprocess
 from src.assembly import Assembly
 from src.annotation import Annotation
 from src.analysis import Analysis
-from src.settings import General, FileSettings
+from src.settings import *
 from src.utils import file_exists, to_string
-from src.log_functions import Logging
-from src.file_functions import create_outputdir
+from src.log_functions import skip_msg, print_verbose, print_running_time
+from src.file_functions import create_outputdir, parse_parameter
 
 # hardcode defaults
 RESULT_DIR = '%s%sresult' % (sys.path[0], os.sep)
@@ -46,7 +47,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', dest = 'assembler', default = 'MetaVelvet', 
                         choices = ['metavelvet', 'flash','both'],
                         help = 'assembling program to use (default = MetaVelvet)')
-    parser.add_argument('-c', dest = 'classify', default = 'both',
+    parser.add_argument('-c', dest = 'annotation', default = 'both',
                         choices = ['metacv', 'blastn', 'both'],
                         help = 'classifier to use for annotation (default = both)')     
     parser.add_argument('--use_contigs', dest = 'use_contigs', action = 'store_true', 
@@ -78,39 +79,113 @@ create_outputdir(RESULT_DIR + os.sep +'log')
 
 # create the global settings object
 settings = General(args.threads, args.verbose, args.skip, starting_time, args.trim, 
-                   args.quality, args.use_contigs, args.assembler, args.classify, 1)
+                   args.quality, args.use_contigs, args.assembler, args.annotation, 1)
 
 # setup the input, outputs and important files
 files = FileSettings(args.input, os.path.normpath(RESULT_DIR), PARAM_FILE)
 
-# create the Logger interface
-log = Logging()
-
+exe = Executables(PARAM_FILE)
 # get the all skipped steps
 skip = to_string(settings.get_skip())
 
-# START the modules of Pipeline and wait until completion
-if skip in 'preprocessing' and skip:
-   log.skip_msg(skip)
-else:   
-    Preprocess(files, settings, PARAM_FILE)
+try:
+    # START the modules of Pipeline and wait until completion
+    if skip in 'preprocessing' and skip:
+        skip_msg(skip)
+    else:
+        # init the preprocessing module
+        pre = Preprocess(settings.get_threads(), 
+                         settings.get_step_number(),
+                         settings.get_verbose(),
+                         settings.get_actual_time(),
+                         files.get_input(),
+                         files.get_logdir(),
+                         exe.get_FastQC(),
+                         settings.get_quality,
+                         files.get_quality_dir(),
+                         parse_parameter(FastQC_Parameter(PARAM_FILE)),
+                         exe.get_TrimGalore(),
+                         settings.get_trim(),
+                         files.get_trim_dir(), 
+                         parse_parameter(TrimGalore_Parameter(PARAM_FILE)))
+        # run preprocessing functions
+        results = pre.manage_preprocessing()
+        # update pipeline variables with results
+        settings.set_step_number(results[0])
+        files.set_input(results[1])
+        files.set_preprocessed_output(results[1])
 
-# if skip in 'assembly' and skip:
-#      log.skip_msg(skip)
-# else:
-#     Assembly(files, settings, PARAM_FILE, settings.assembler)
+    if skip in 'assembly' and skip:
+        skip_msg(skip)
+    else:
+        # init the assembly module 
+        assembly = Assembly(settings.get_threads(), 
+                            settings.get_step_number(),
+                            settings.get_verbose(),
+                            settings.get_actual_time(),
+                            files.get_logdir(),
+                            files.get_input(),
+                            settings.get_assembler(),
+                            exe.get_Flash(),
+                            files.get_concat_dir(),
+                            parse_parameter(FLASH_Parameter(PARAM_FILE)),
+                            exe.get_Velveth(),
+                            exe.get_Velvetg(),
+                            exe.get_MetaVelvet(),
+                            files.get_assembly_dir(),
+                            Velveth_Parameter(PARAM_FILE).get_kmer(PARAM_FILE),
+                            parse_parameter(Velveth_Parameter(PARAM_FILE)),
+                            parse_parameter(Velvetg_Parameter(PARAM_FILE)),
+                            parse_parameter(MetaVelvet_Parameter(PARAM_FILE)))
+        # run assembly functions
+        results = assembly.manage_assembly()
+        # update pipeline variables with results
+        settings.set_step_number(results[0])
+        files.set_input(results[1])
+        files.set_concatinated_output(results[2])
+        files.set_assembled_output(results[3])
+  
+    if skip in 'annotation'and skip:
+        skip_msg(skip)
+    else:
+        # init the annotation module
+        anno = Annotation(settings.get_threads(), 
+                          settings.get_step_number(),
+                          settings.get_verbose(),
+                          settings.get_actual_time(),
+                          files.get_logdir(),
+                          files.get_input(),
+                          files.get_raw(),
+                          settings.get_annotation(),
+                          settings.get_use_contigs(),
+                          exe.get_Blastn(),
+                          exe.get_Blastn_DB(),
+                          exe.get_Converter(),
+                          files.get_blastn_dir(),
+                          Blastn_Parameter(PARAM_FILE).outfmt,
+                          parse_parameter(Blastn_Parameter(PARAM_FILE)),
+                          exe.get_MetaCV(),
+                          exe.get_MetaCV_DB(),
+                          files.get_metacv_dir(),
+                          MetaCV_Parameter(PARAM_FILE).get_name(),
+                          MetaCV_Parameter(PARAM_FILE))
+        # run the annotation functions
+        results = anno.manage_annotation()
+        settings.set_step_number(results[0])
+        files.set_blastn_output(results[1])
+        files.set_metacv_output(results[2])
+        print results
+        
 #      
-# if skip in 'annotation'and skip:
-#      log.skip_msg(skip)
-# else:
-#     Annotation(files, settings, PARAM_FILE, settings.classify)
-#      
-# if skip in 'analysis' and skip:
-#      log.skip_msg(skip)
-# else:
-#     Analysis(files, settings, PARAM_FILE, True)
+#if skip in 'analysis' and skip:
+#    skip_msg(skip)
+#else:
+#    Analysis(files, settings, PARAM_FILE, True)
+except KeyboardInterrupt:
+    sys.stdout.write('\nRuntimeError: Operation cancelled by User!\n')
+    sys.exit(1)
 
 # print ending message
-sys.stdout.write('\nPIPELINE COMPLETE!\n\n')
-log.print_running_time(settings.get_actual_time())
+print_verbose('\nPIPELINE COMPLETE!\n\n')
+print_running_time(settings.get_actual_time())
 

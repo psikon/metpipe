@@ -1,5 +1,5 @@
 import os, sys
-from src.exceptions import NoExecutable 
+from src.exceptions import NoExecutable, FastQException
 # utils.py contains various functions for simple testing purposes or conversion of 
 # objects written here to clean up the code
 # 
@@ -7,43 +7,44 @@ from src.exceptions import NoExecutable
 #@contact: philipp.sehnert[a]gmail.com
 
 # convert the input to a string
-def to_string(input):
+def to_string(value):
     
-    if len(input) > 1:
-        return str(' '.join(str(i)for i in input))
+    if len(value) > 1:
+        return str(' '.join(str(i)for i in value))
     else:
         try:
-            return str(input[0])
+            return str(value[0])
         except IndexError:
             return None
 
 # test the input for fastq file extensions
-def is_fastq(test_file):
+def is_fastq(file):
     
-    if  test_file.endswith(".fq") or test_file.endswith(".fastq"):
+    if all(i.endswith('.fastq') for i in file ):
         return True
     else:
-        return False
+        raise FastQException(file)
 
 # make it sense?
-def is_paired(input):
+def is_paired(file):
     
-    if len(input) == 1:
+    if len(file) == 1:
         return False
     else:
         return True
        
 # test the executable - is it existing and callable?
-def is_executable(program_path):
-        if os.path.isfile(program_path) and os.access(program_path, os.X_OK):
+def is_executable(path):
+    
+        if os.path.isfile(path) and os.access(path, os.X_OK):
             return True
         else:
-            raise NoExecutable(program_path)
+            raise NoExecutable(path)
        
 
 def is_xml(file):
     
-    if to_string(file).endswith('.xml'):
+    if to_string(file).endswith('.xml') or to_string(file).endswith('.XML'):
         return True
     else:
         return False
@@ -57,7 +58,7 @@ def is_tabular(file):
     
 def is_db(file):
     
-    if to_string(file).endswith('.db'):
+    if to_string(file).endswith('.db') or to_string(file).endswith('.sql'):
         return True
     else:
         return False
@@ -74,10 +75,9 @@ def blast_output(value):
 def file_exists(file):
     
     if not os.path.isfile(file):
-        
         sys.stdout.write("ERROR: %s could not be found" % (file))
         sys.exit()
 
-        
+      
         	
 
