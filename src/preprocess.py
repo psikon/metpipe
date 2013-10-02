@@ -4,7 +4,7 @@ import sys, os, time
 from src.log_functions import print_step, newline, print_compact, print_verbose, open_logfile, print_running_time
 from src.file_functions import create_outputdir, update_reads, parse_parameter
 from src.utils import is_executable, to_string, is_fastq
-from src.exceptions import FastQException
+from src.exceptions import FastQException, FastQCException, TrimGaloreException
 class Preprocess:
      
     def __init__(self, threads, step_number, verbose, time, input , logdir,
@@ -82,6 +82,7 @@ class Preprocess:
                                             to_string(self.input))),
                              stdout = subprocess.PIPE,
                              stderr = subprocess.PIPE)
+        
         # during processing pipe the output and print it on screen
         while p.poll() is None:
             if self.verbose:
@@ -90,11 +91,14 @@ class Preprocess:
                 print_compact(p.stderr.readline().rstrip('\n'))
         # wait until process is finished
         p.wait()
-
-        # print summary of the process after completion
-        print_verbose('Quality check complete for %s\n' % (self.input))
-        print_running_time(self.time)
-        newline
+        
+        if p.returncode:
+            raise FastQCException()
+        else:
+            # print summary of the process after completion
+            print_verbose('Quality check complete for %s\n' % (self.input))
+            print_running_time(self.time)
+            newline()
     
     def trim_and_filter(self):
         
@@ -129,11 +133,13 @@ class Preprocess:
                 self.logfile.write(line)
             else:
                 self.logfile.write(line)
-
-        # print summary of the process after completion
-        print_verbose('Trimming and filtering complete \n')
-        print_running_time(self.time)
-        newline
+        if p.returncode:
+            raise TrimGaloreException(self.logfile.name)
+        else:
+            # print summary of the process after completion
+            print_verbose('Trimming and filtering complete \n')
+            print_running_time(self.time)
+            newline()
         
         
         

@@ -5,6 +5,7 @@ import subprocess
 import shlex
 import sqlite3 as db
 from src.settings import Executables
+from src.exceptions import FastQConvertException
 
 # file_functions.py contains all important file manipulation functions, needed 
 # during the processing of the pipeline.
@@ -51,18 +52,14 @@ def merge_files(input, output):
 def convert_fastq(input, output, CONVERTER):
     
     for i in range(len(input)):
-        try:
-            p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % 
-                                             (CONVERTER,
-                                              input[i],
-                                              output + os.sep + 
-                                              'converted.' + str(i) + 
-                                              '.fasta')))
-            p.wait()
-        except IOError: 
-            print 'Error: '+ e.message
-        except RuntimeError:
-            print 'Error: Could not convert file to fasta'
+        p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % 
+                                        (CONVERTER,
+                                         input[i],
+                                         output + os.sep + 'converted.' 
+                                         + str(i) + '.fasta')))
+        p.wait()
+        if p.returncode:
+            raise FastQConvertException(input[i])
             
     return update_reads(output,'converted','fasta')
 

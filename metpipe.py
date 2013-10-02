@@ -16,6 +16,7 @@ from src.settings import *
 from src.utils import file_exists, to_string
 from src.log_functions import skip_msg, print_verbose, print_running_time
 from src.file_functions import create_outputdir, parse_parameter
+from src.exceptions import InputNotFound, ParamFileNotFound
 
 # hardcode defaults
 RESULT_DIR = '%s%sresult' % (sys.path[0], os.sep)
@@ -62,16 +63,22 @@ if __name__ == '__main__':
 args = parser.parse_args()
 
 # init the Pipeline
-
-PARAM_FILE = args.param if args.param else PARAM_FILE
 RESULT_DIR = args.output if args.output else RESULT_DIR
-
-# check if input exists
-for fname in args.input:
-   file_exists(fname)
-
 # check if param File exists
-file_exists(PARAM_FILE)
+if os.path.isfile(args.param):
+    PARAM_FILE = args.param
+else:
+    if os.path.isfile(PARAM_FILE):
+        sys.stderr.write('ERROR 3: Parameter File could not be found!\n')
+        sys.stderr.write('Use standard Parameter File:\n%s\n\n' % (PARAM_FILE))
+    else:
+        raise ParamFileNotFound(args.param)
+    
+# check if input exists
+if not all(os.path.isfile(file) for file in args.input):
+    raise InputNotFound(to_string(args.input))
+
+
      
 # create outputdir and log folder
 create_outputdir(RESULT_DIR)
@@ -182,7 +189,7 @@ try:
 #else:
 #    Analysis(files, settings, PARAM_FILE, True)
 except KeyboardInterrupt:
-    sys.stdout.write('\nRuntimeError: Operation cancelled by User!\n')
+    sys.stdout.write('\nERROR 1 : Operation cancelled by User!\n')
     sys.exit(1)
 
 # print ending message

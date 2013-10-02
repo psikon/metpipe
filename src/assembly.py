@@ -7,6 +7,7 @@ import time
 from src.file_functions import create_outputdir, update_reads, parse_parameter
 from src.log_functions import print_step, newline, print_compact, print_verbose, open_logfile, print_running_time, remove_empty_logfile
 from src.utils import to_string, is_fastq, is_paired, is_executable
+from src.exceptions import FlashException, VelvetHException, VelvetGException, MetaVelvetException
 
 
 
@@ -106,6 +107,7 @@ class Assembly:
                                                                    self.input)),
                             stdout = subprocess.PIPE, 
                             stderr = open_logfile(self.logdir + 'flash.err.log'))
+        
         # during processing print Flash output in verbose mode and update the logfile
         while p.poll() is None:
             if self.verbose:
@@ -117,12 +119,15 @@ class Assembly:
         # wait until process is finished        
         p.wait()
         
-        # remove empty error logs
-        remove_empty_logfile(self.logdir + 'flash.err.log')
+        if p.returncode:
+           raise FlashException(self.logdir + 'flash.err.log')
+        else:
+            # remove empty error logs
+            remove_empty_logfile(self.logdir + 'flash.err.log')
         
-        # print summary of the process after completion
-        print_verbose('Concatination complete \n')
-        print_running_time(self.time)
+            # print summary of the process after completion
+            print_verbose('Concatination complete \n')
+            print_running_time(self.time)
         
     def assemble_reads(self, outputdir):
         
@@ -142,11 +147,11 @@ class Assembly:
         # start the program velveth with parameter from the conf file and automatic detection
         # of the input file format
         # errors will be piped to extra error logfile
-        p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s ' % (self.velveth_exe, 
-                                                                       outputdir,
-                                                                       self.kmer, 
-                                                                       self.velveth_parameter,
-                                                                       self.input)),
+        p = subprocess.Popen(shlex.split('%s %s %s %s -fmtAuto %s' % (self.velveth_exe, 
+                                                                      outputdir,
+                                                                      self.kmer, 
+                                                                      self.velveth_parameter,
+                                                                      self.input)),
                             stdout = subprocess.PIPE, 
                             stderr = open_logfile(self.logdir + 'velveth.err.log')) 
         # during processing print velveth output in verbose mode and update the logfile
@@ -160,75 +165,84 @@ class Assembly:
         # wait until process is finished
         p.wait()
         
-        # remove empty error logs
-        remove_empty_logfile(self.logdir + 'velveth.err.log')
+        if p.returncode:
+           raise VelvetHException(self.logdir + 'velveth.err.log')
+        else:
+            # remove empty error logs
+            remove_empty_logfile(self.logdir + 'velveth.err.log')
         
-        # print actual informations about the step on stdout
-        print_step(self.step_number, 
-                   'Assembly', 
-                   'Creating Graph',
-                   self.velvetg_parameter)
-        newline()
+            # print actual informations about the step on stdout
+            print_step(self.step_number, 
+                       'Assembly', 
+                       'Creating Graph',
+                       self.velvetg_parameter)
+            newline()
         
-        # open the second logfile
-        velvetg_log = open_logfile(self.logdir + 'velvetg.log')
+            # open the second logfile
+            velvetg_log = open_logfile(self.logdir + 'velvetg.log')
         
-        # start the program velvetg in the dir of velveth, with the parameter of the conf file
-        # errors will be piped to extra error logfile
-        p = subprocess.Popen(shlex.split('%s %s %s' % (self.velvetg_exe, 
-                                                       outputdir,
-                                                       self.velvetg_parameter)),
-                             stdout = subprocess.PIPE,
-                             stderr = open_logfile(self.logdir + 'velvetg.err.log'))
-        # during processing print velveth output in verbose mode and update the logfile
-        while p.poll() is None:
-           if self.verbose:
-               print_verbose(p.stdout.readline())
-               velvetg_log.write(p.stdout.readline())
-           else:
-               #self.log.print_compact(p.stdout.readline())
-               velvetg_log.write(p.stdout.readline())
-        # wait until process is finished
-        p.wait()
+            # start the program velvetg in the dir of velveth, with the parameter of the conf file
+            # errors will be piped to extra error logfile
+            p = subprocess.Popen(shlex.split('%s %s %s' % (self.velvetg_exe, 
+                                                           outputdir,
+                                                           self.velvetg_parameter)),
+                                 stdout = subprocess.PIPE,
+                                 stderr = open_logfile(self.logdir + 'velvetg.err.log'))
+            # during processing print velveth output in verbose mode and update the logfile
+            while p.poll() is None:
+                if self.verbose:
+                    print_verbose(p.stdout.readline())
+                    velvetg_log.write(p.stdout.readline())
+                else:
+                    #self.log.print_compact(p.stdout.readline())
+                    velvetg_log.write(p.stdout.readline())
+            # wait until process is finished
+            p.wait()
         
-        # remove empty error logs
-        remove_empty_logfile(self.logdir + 'velvetg.err.log')
-        
-        # print actual informations about the step on stdout
-        print_step(self.step_number, 
-                   'Assembly', 
-                   'Metagenomic Assembly',
-                   self.metavelvet_parameter)
-        newline()
-        
-        # open the third logfile
-        meta_log = open_logfile(self.logdir + 'metavelvet.log')
-        
-        # start the program meta-velvetg in the dir of velveth and velvetg, 
-        # with the parameter of the conf file
-        # errors will be piped to extra error logfile
-        p = subprocess.Popen(shlex.split('%s %s %s' % (self.metavelvet_exe, 
-                                                       outputdir,
-                                                       self.metavelvet_parameter)),
-                                stdout = subprocess.PIPE, 
-                                stderr = open_logfile(self.logdir + 'metavelvet.err.log'))
-        # during processing print velveth output in verbose mode and update the logfile                         
-        while p.poll() is None:
-            if self.verbose:
-               print_verbose(p.stdout.readline())
-               meta_log.write(p.stdout.readline())
+            if p.returncode:
+                raise VelvetGException(self.logdir + 'velvetg.err.log')
             else:
-                #self.log.print_compact(p.stdout.readline())
-                meta_log.write(p.stdout.readline())
-        # wait until process is finished
-        p.wait()
+                # remove empty error logs
+                remove_empty_logfile(self.logdir + 'velvetg.err.log')
         
-        # remove empty error logs
-        remove_empty_logfile(self.logdir + 'metavelvet.err.log')
+                # print actual informations about the step on stdout
+                print_step(self.step_number, 
+                           'Assembly', 
+                           'Metagenomic Assembly',
+                           self.metavelvet_parameter)
+                newline()
+               
+                # open the third logfile
+                meta_log = open_logfile(self.logdir + 'metavelvet.log')
         
-        # print summary of the process after completion
-        print_verbose('Assembly complete \n')
-        print_running_time(self.time)
-        newline()
+                # start the program meta-velvetg in the dir of velveth and velvetg, 
+                # with the parameter of the conf file
+                # errors will be piped to extra error logfile
+                p = subprocess.Popen(shlex.split('%s %s %s' % (self.metavelvet_exe, 
+                                                               outputdir,
+                                                               self.metavelvet_parameter)),
+                                     stdout = subprocess.PIPE, 
+                                     stderr = open_logfile(self.logdir + 'metavelvet.err.log'))
+                # during processing print velveth output in verbose mode and update the logfile                         
+                while p.poll() is None:
+                    if self.verbose:
+                        print_verbose(p.stdout.readline())
+                        meta_log.write(p.stdout.readline())
+                    else:
+                        #self.log.print_compact(p.stdout.readline())
+                        meta_log.write(p.stdout.readline())
+                # wait until process is finished
+                p.wait()
+                
+                if p.returncode:
+                    raise MetaVelvetException(self.logdir + 'metavelvet.err.log')
+                else:
+                    # remove empty error logs
+                    remove_empty_logfile(self.logdir + 'metavelvet.err.log')
+        
+                    # print summary of the process after completion
+                    print_verbose('Assembly complete \n')
+                    print_running_time(self.time)
+                    newline()
 
         
