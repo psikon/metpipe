@@ -13,7 +13,8 @@ class Annotation:
       
     def __init__(self, threads, step_number, verbose, time, logdir, input, raw, mode, contigs,
                  blastn_exe, blastn_db, converter_exe, blast_dir, outfmt, blast_parameter,
-                 metacv_exe, metacv_db, metacv_dir, metacv_name, metacv_instance):
+                 metacv_exe, metacv_db, metacv_dir, metacv_seq, metacv_mode, metacv_orf, 
+                 metacv_total_reads, metacv_min_qual, metacv_taxon, metacv_name):
                  
         # init general variables
         self.threads = threads
@@ -38,8 +39,13 @@ class Annotation:
         self.metacv_exe = metacv_exe
         self.metacv_db = metacv_db
         self.metacv_dir = metacv_dir
+        self.metacv_seq = metacv_seq
+        self.metacv_mode = metacv_mode
+        self.metacv_orf = metacv_orf
+        self.metacv_total_reads = metacv_total_reads
+        self.metacv_min_qual = metacv_min_qual
+        self.metacv_taxon = metacv_taxon
         self.metacv_name = metacv_name
-        self.metacv_instance = metacv_instance
                 
     def __del__(self):
         pass   
@@ -154,7 +160,6 @@ class Annotation:
         # create a dir for output
         create_outputdir(outputdir)
         
-        parameter = self.metacv_instance
         # select the input for metacv and convert it in an usable format
         if self.contigs is True:
             input = to_string([sys.path[0] + os.sep + i for i in self.input])
@@ -165,20 +170,20 @@ class Annotation:
         print_step(self.step_number, 
                    'Annotation', 
                    'Annotate bacterial reads with MetaCV',
-                    '%s %s %s' % (parameter.get_seq(), 
-                                  parameter.get_mode(), 
-                                  parameter.get_orf()))
+                    '%s %s %s' % (self.metacv_seq,
+                                  self.metacv_mode,
+                                  self.metacv_orf))
         newline()
-        
+
         # start MetaCV function and wait until completion
         p = subprocess.Popen(shlex.split('%s classify %s %s %s %s %s %s --threads=%s' % 
                                         (self.metacv_exe,
                                          self.metacv_db,
                                          input,
-                                         parameter.get_name(),
-                                         parameter.get_seq(), 
-                                         parameter.get_mode(), 
-                                         parameter.get_orf(),
+                                         self.metacv_name,
+                                         self.metacv_seq, 
+                                         self.metacv_mode, 
+                                         self.metacv_orf,
                                          self.threads)),
                             stderr = open_logfile(self.logdir + 'metacv.err.log'), 
                             stdout = subprocess.PIPE,
@@ -199,9 +204,9 @@ class Annotation:
             print_step(self.step_number, 
                        'Annotation', 
                        'Analyse the results of MetaCV',
-                       '%s %s %s' % (parameter.get_total_reads(), 
-                                     parameter.get_min_qual(), 
-                                     parameter.get_taxon()))
+                       '%s %s %s' % (self.metacv_total_reads, 
+                                     self.metacv_min_qual, 
+                                     self.metacv_taxon))
             newline() 
             
             # start MetaCV's res2table function and wait until completion
@@ -209,10 +214,10 @@ class Annotation:
                                              (self.metacv_exe,
                                               self.metacv_db,
                                               to_string(update_reads(outputdir,'metpipe','res')),
-                                              parameter.get_name() + '.res2table',
-                                              parameter.get_total_reads(), 
-                                              parameter.get_min_qual(), 
-                                              parameter.get_taxon(),
+                                              self.metacv_name + '.res2table',
+                                              self.metacv_total_reads, 
+                                              self.metacv_min_qual, 
+                                              self.metacv_taxon,
                                               self.threads)),
                                  stderr = open_logfile(self.logdir + 'metacv.res2table.err.log'), 
                                  stdout = subprocess.PIPE,
@@ -233,7 +238,7 @@ class Annotation:
             print_step(self.step_number, 
                        'Annotation', 
                        'Summarize the results of MetaCV',
-                       parameter.get_min_qual())
+                       self.metacv_min_qual)
             newline()
         
             # start MetaCV's res2sum function and wait until completion
@@ -243,8 +248,8 @@ class Annotation:
                                              (self.metacv_exe,
                                               self.metacv_db,
                                               to_string(update_reads(outputdir,'metpipe','res')),
-                                              parameter.get_name() + '.res2sum',
-                                              parameter.get_min_qual())),
+                                              self.metacv_name + '.res2sum',
+                                              self.metacv_min_qual)),
                                  stderr = open_logfile(self.logdir + 'metacv_res2sum.err.log'), 
                                  stdout = subprocess.PIPE,
                                  cwd = outputdir + os.sep)

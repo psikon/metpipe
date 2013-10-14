@@ -58,6 +58,8 @@ if __name__ == '__main__':
                         help = 'trimm and filter input reads? (default = True)')
     parser.add_argument('--noquality', dest = 'quality', action = 'store_false', default = True,
                         help = 'create quality report (default = True)')
+    parser.add_argument('--noreport', dest = 'krona', action = 'store_false', default = True,
+                        help = 'create a pie chart with the annotated taxonomical data (default = True)')
     
 # create the cli interface
 args = parser.parse_args()
@@ -86,7 +88,8 @@ create_outputdir(RESULT_DIR + os.sep +'log')
 
 # create the global settings object
 settings = General(args.threads, args.verbose, args.skip, starting_time, args.trim, 
-                   args.quality, args.use_contigs, args.assembler, args.annotation, 1)
+                   args.quality, args.krona, args.use_contigs, args.assembler, 
+                   args.annotation, 1)
 
 # setup the input, outputs and important files
 files = FileSettings(args.input, os.path.normpath(RESULT_DIR), PARAM_FILE)
@@ -174,8 +177,13 @@ try:
                           exe.get_MetaCV(),
                           exe.get_MetaCV_DB(),
                           files.get_metacv_dir(),
-                          MetaCV_Parameter(PARAM_FILE).get_name(),
-                          MetaCV_Parameter(PARAM_FILE))
+                          MetaCV_Parameter(PARAM_FILE).get_seq(),
+                          MetaCV_Parameter(PARAM_FILE).get_mode(),
+                          MetaCV_Parameter(PARAM_FILE).get_orf(),
+                          MetaCV_Parameter(PARAM_FILE).get_total_reads(),
+                          MetaCV_Parameter(PARAM_FILE).get_min_qual(),
+                          MetaCV_Parameter(PARAM_FILE).get_taxon(),
+                          MetaCV_Parameter(PARAM_FILE).get_name())
         # run the annotation functions
         results = anno.manage_annotation()
         settings.set_step_number(results[0])
@@ -183,11 +191,45 @@ try:
         files.set_metacv_output(results[2])
         print results
         
-#      
-#if skip in 'analysis' and skip:
-#    skip_msg(skip)
-#else:
-#    Analysis(files, settings, PARAM_FILE, True)
+      
+    if skip in 'analysis' and skip:
+        skip_msg(skip)
+    else:
+        files.set_blastn_output('result/blasted/blastn.tab')
+        # init the analysis module
+        analysis = Analysis(settings.get_threads(),
+                            settings.get_step_number(),
+                            settings.get_verbose(),
+                            settings.get_actual_time(),
+                            files.get_logdir(),
+                            settings.get_annotation(),
+                            files.get_output(),
+                            files.get_parsed_db_dir(),
+                            files.get_annotated_db_dir(),
+                            files.get_subseted_db_dir(),
+                            files.get_krona_report_dir(),
+                            files.get_blastn_output(),
+                            files.get_metacv_output(),
+                            exe.get_Parser(), 
+                            parse_parameter(blastParser_Parameter(PARAM_FILE)),
+                            blastParser_Parameter(PARAM_FILE).get_name(),
+                            exe.get_Annotate(),
+                            parse_parameter(Rannotate_Parameter(PARAM_FILE)),
+                            Rannotate_Parameter(PARAM_FILE).get_name(),
+                            Rannotate_Parameter(PARAM_FILE).get_taxon_db(),
+                            exe.get_Subset(),
+                            subsetDB_Parameter(PARAM_FILE).get_bitscore(),
+                            subsetDB_Parameter(PARAM_FILE).get_classifier(),
+                            subsetDB_Parameter(PARAM_FILE).get_rank(),
+                            subsetDB_Parameter(PARAM_FILE).get_taxon_db(),
+                            exe.get_Krona_Blast(),
+                            parse_parameter(Krona_Parameter(PARAM_FILE)),
+                            Krona_Parameter(PARAM_FILE).get_name(),
+                            settings.get_krona())
+        # run the analysis function
+        results = analysis.manage_analysis()
+        
+        
 except KeyboardInterrupt:
     sys.stdout.write('\nERROR 1 : Operation cancelled by User!\n')
     sys.exit(1)

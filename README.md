@@ -27,9 +27,9 @@ The pipeline provide an automatic installer script in the main folder. To instal
 for the pipeline just start this skript in a unix shell by the following command.
 
 ```bash
-sh install.sh
+./installer.sh
 ```
-Folow the instructions on the screen and all necassary programs will be downloaded and make runable 
+Follow the instructions on the screen and all necassary programs will be downloaded and make runable 
 automatically.
 
 ### Usage:
@@ -55,7 +55,6 @@ optional arguments:
   -o OUTPUT             use alternative output folder
   -a {metavelvet,concat}
                         assembling program to use (default= MetaVelvet)
-  -k KMER               k-mer size to be used (default=85)
   -c {metacv,blastn,both}
                         classifier to use for annotation (default= both)
   --notrimming          trimm and filter input reads? (default=True)
@@ -82,10 +81,3 @@ All step specific settings can be found in the parameter.conf file in the root d
 - MetaCV (http://metacv.sourceforge.net/)
 		
 	 
-### Bugs/under Development
-
-- change parameter for metavelvet
-- no verbose mode at the moment
-- no log functions
-- analysis of the results under development
-

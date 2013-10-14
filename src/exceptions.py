@@ -28,7 +28,7 @@ class NoExecutable(Exception):
 class DBNotFound(Exception):
     
     def __init__(self, args):
-        sys.stderr.write('ERROR 5: Database for %s cold not be found!') 
+        sys.stderr.write('ERROR 6: Database for %s cold not be found!') 
         sys.stderr.write('Please check rerun the install-script or\n copy database files to db dir')
         sys.exit(1)
 

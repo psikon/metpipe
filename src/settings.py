@@ -23,7 +23,7 @@ class General:
     
     
     def __init__(self, threads = None, verbose = False, skip = None, starting_time = None,
-                 trim = None, quality = None, use_contigs = None, assembler = None,
+                 trim = None, quality = None, krona = None, use_contigs = None, assembler = None,
                  annotation = None, step_number = None):
 
         self.threads = threads
@@ -33,6 +33,7 @@ class General:
         self.actual_time = starting_time
         self.trim = trim
         self.quality = quality 
+        self.krona = krona
         self.use_contigs = use_contigs
         self.assembler = assembler.lower()
         self.annotation = annotation.lower() 
@@ -58,6 +59,9 @@ class General:
     
     def get_trim(self):
         return self.trim
+    
+    def get_krona(self):
+        return self.krona
     
     def get_assembler(self):
         return self.assembler
@@ -710,7 +714,7 @@ class Blastn_Parameter:
         self.html = conf.getboolean('blastn', 'html')  if conf.has_option('blastn', 'html') else ''
         self.max_target_seqs = conf.get('blastn', 'max_target_seqs')  if conf.has_option('blastn', 'max_target_seqs') else ''
 
-class blastParser:
+class blastParser_Parameter:
     # Parser settings
     maxHit = 20
     maxHSP = 20
@@ -727,7 +731,7 @@ class blastParser:
     def get_name(self):
         return self.conf.get('blastParser', 'name') if self.conf.has_option('blastParser', 'name') else ''
     
-class Rannotate():
+class Rannotate_Parameter:
     # settings for annotation of the db with R
     coverage = 0.5
     bitscore = 0.98
@@ -745,7 +749,7 @@ class Rannotate():
     def get_taxon_db(self):
         return os.path.normpath(self.conf.get('Taxonomical Annotation', 'taxon_db') if self.conf.has_option('Taxonomical Annotation', 'taxon_db') else '')
         
-class subsetDB():
+class subsetDB_Parameter:
     classifier = ''
     bitscore = 0.98
     rank = ''
@@ -759,7 +763,6 @@ class subsetDB():
     
     def get_classifier(self):
        return [x.strip(' ') for x in (self.conf.get('Subsetting of Database', 'classifier') if self.conf.has_option('Subsetting of Database', 'classifier') else '').split(',')]
-        
     
     def get_rank(self):
         return [x.strip(' ') for x in (self.conf.get('Subsetting of Database', 'rank') if self.conf.has_option('Subsetting of Database', 'rank') else '').split(',')]
@@ -767,7 +770,7 @@ class subsetDB():
     def get_taxon_db(self):
         return os.path.normpath(self.conf.get('Subsetting of Database', 'taxon_db') if self.conf.has_option('Subsetting of Database', 'taxon_db') else '')
     
-class Krona_Parameter():
+class Krona_Parameter:
     
     highest_level = 'root'
     no_hits_wedge = ''

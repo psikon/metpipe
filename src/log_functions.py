@@ -60,7 +60,7 @@ def print_running_time(actual_time):
     sys.stdout.write('processed in ' + getDHMS(time.time() - actual_time) + '\n')
     newline()
     
-def skip_msg(self, skipped_step):
+def skip_msg(skipped_step):
     
     sys.stdout.write('Skipping Step: %s \n' % (skipped_step.upper()))
     newline()
