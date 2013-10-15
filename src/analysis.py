@@ -7,6 +7,7 @@ import shutil
 from src.file_functions import create_outputdir, update_reads, remove_file, parse_parameter, extract_tabular
 from src.log_functions import print_step, newline, print_compact, print_verbose, open_logfile, print_running_time, remove_empty_logfile, cut_path
 from src.utils import to_string, is_xml, is_tabular, is_db, is_executable
+from src.exceptions import ParserException, AnnotateDBException, SubsetDBException, KronaException, KronaFormatException
 
 class Analysis:
     
@@ -78,14 +79,14 @@ class Analysis:
     
     def manage_analysis(self):
         
-        print self.blast_output
+       
         if self.annotation_mode in 'metacv':
             print_verbose("For a detailed analysis blastn with XML output is needed")
         else:
             # test for blastrun with outfmt 5 mode
             if is_xml(self.blast_output):
                 # create a SQLite DB from the xml file
-                self.parse_to_db(self.blast_output, self.parsed_db_out)
+                self.parse_to_db(to_string(self.blast_output), self.parsed_db_out)
                 # test the exit code, because next script need the output as input
                 if self.exitcode is 0:
                     # update input 
@@ -110,6 +111,7 @@ class Analysis:
                     # create a pie chart of the blast data with Krona Webtools 
                     if self.krona:
                         self.krona_report(self.blast_output, self.krona_report_out, parser_out)
+                        
                     return [parser_out, annotated_output]   
                 else: 
                     print_verbose("ERROR: XML file could not be parsed")
@@ -155,11 +157,16 @@ class Analysis:
         p.wait()
         # save the exit code for later function calls 
         self.exitcode = p.returncode
-        
-        # print summary of the process after completion
-        print_verbose('Parsing of blast XML File complete \n')
-        print_running_time(self.time)
-        newline()
+        # raise Exception when an error occurs during processing
+        if p.returncode:
+            raise ParserException(self.logdir + 'parser.err.log')
+        else:
+            # remove empty error logs
+            remove_empty_logfile(self.logdir + 'parser.err.log')
+            # print summary of the process after completion
+            print_verbose('Parsing of blast XML File complete \n')
+            print_running_time(self.time)
+            newline()
         
     def annotate_db(self, input, output):
 
@@ -200,10 +207,14 @@ class Analysis:
         # save the exit code for later function calls 
         self.exitcode = p.returncode
         
-        # print summary of the process after completion
-        print_verbose('Taxonomical annotation of blast database complete \n')
-        print_running_time(self.time)
-        newline()
+        # raise Exception when an error occurs during processing
+        if p.returncode:
+            raise AnnotateDBException(self.logdir + 'annotation_of_db.log')
+        else:
+            # print summary of the process after completion
+            print_verbose('Taxonomical annotation of blast database complete \n')
+            print_running_time(self.time)
+            newline()
         
     def subset_db(self, input, output, parser_out):
         
@@ -249,7 +260,9 @@ class Analysis:
                     logfile.write(p.stdout.readline())
             # wait until process is complete
             p.wait()
-
+            if p.returncode:
+                raise SubsetDBException(self.logdir + self.R_subset_classifier[i] + '.log')
+            
         # print summary of the process after completion
         print_verbose('Subsetting of annotated Blast database complete \n')
         print_running_time(self.time)
@@ -282,11 +295,15 @@ class Analysis:
                                  stderr = open_logfile(self.logdir + 'krona.err.log'))
             # wait until process is complete
             p.wait()
-            
-            # print summary of the process after completion
-            print_verbose('Creation of Krona Pie Chart complete \n')
-            print_running_time(self.time)
-            newline()
+            if p.returncode:
+                raise KronaException(self.logdir + 'krona.err.log')
+            else:
+                # remove unused error logs
+                remove_empty_logfile(self.logdir + 'krona.err.log')
+                # print summary of the process after completion
+                print_verbose('Creation of Krona Pie Chart complete \n')
+                print_running_time(self.time)
+                newline()
             
         elif is_xml(input) and is_db(parser_output):
             print_step(self.step_number, 
@@ -307,21 +324,23 @@ class Analysis:
                                                 to_string(input))),
                                  stdout = open_logfile(self.logdir + 'krona.log'),
                                  stderr = open_logfile(self.logdir + 'krona.err.log'))
-            
-            # print summary of the process after completion
-            print_verbose('Creation of Krona Pie Chart complete \n')
-            print_running_time(self.time)
-            newline()
+            # wait until process is complete
+            p.wait()
+            if p.returncode:
+                raise KronaException(self.logdir + 'krona.err.log')
+            else:
+                # remove unused error logs
+                remove_empty_logfile(self.logdir + 'krona.err.log')
+                # print summary of the process after completion
+                print_verbose('Creation of Krona Pie Chart complete \n')
+                print_running_time(self.time)
+                newline()
             
         elif not is_tabular(input) or not is_xml(input):
-            print_verbose('Input must be in Blast table or xml format \n' + 
-                          'change Blast Parameter "outfmt" to 5 or 6')
-            newline()
-            errorlog.write('Input must be in Blast table or xml format \n' + 
-                           'change Blast Parameter "outfmt" to 5 or 6')
+            raise KronaFormatException()
         else:
-            print_verbose('Krona Report could not be generated, because of unknown reasons')
-            
+            print_verbose('ERROR 24: Krona Report could not be generated, because of unknown reasons')
+            sys.exit(1)
             
         
         

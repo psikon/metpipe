@@ -149,6 +149,8 @@ class Annotation:
             # remove the temporary files: converted fastq files and the merged fasta files
             remove_file(outputdir + os.sep, 'converted', 'fasta')
             remove_file(outputdir + os.sep, 'merged', 'fasta')
+            # remove unused error logs
+            remove_empty_logfile(self.logdir + 'blastn.err.log')
         
             # print summary of the process after completion
             print_verbose('Annotation with blastn complete \n')
@@ -200,6 +202,9 @@ class Annotation:
         if p.returncode:
             raise MetaCVException(self.logdir + 'metacv.err.log')
         else:
+            # remove unused error logs
+            remove_empty_logfile(self.logdir + 'metacv.err.log')
+            
             # print actual informations about the step on stdout
             print_step(self.step_number, 
                        'Annotation', 
@@ -233,7 +238,9 @@ class Annotation:
         
             if p.returncode:
                 raise MetaCVSumException(self.logdir + 'metacv.res2table.err.log')
-        
+            else:
+                # remove unused error logs
+                remove_empty_logfile(self.logdir + 'metacv.res2table.err.log')
             # print actual informations about the step on stdout
             print_step(self.step_number, 
                        'Annotation', 
@@ -250,7 +257,7 @@ class Annotation:
                                               to_string(update_reads(outputdir,'metpipe','res')),
                                               self.metacv_name + '.res2sum',
                                               self.metacv_min_qual)),
-                                 stderr = open_logfile(self.logdir + 'metacv_res2sum.err.log'), 
+                                 stderr = open_logfile(self.logdir + 'metacv_.es2sum.err.log'), 
                                  stdout = subprocess.PIPE,
                                  cwd = outputdir + os.sep)
             # during processing pipe the output and print it on screen
@@ -263,7 +270,10 @@ class Annotation:
                     p.wait()
         
             if p.returncode:
-                raise MetaCVSumException(self.logdir + 'metacv_res2sum.err.log')
+                raise MetaCVSumException(self.logdir + 'metacv.res2sum.err.log')
+            else:
+                # remove unused error logs
+                remove_empty_logfile(self.logdir + 'metacv.res2sum.err.log')
         
             # print summary of the process after completion
             print_verbose('Annotation with MetaCV complete \n')

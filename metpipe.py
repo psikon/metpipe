@@ -21,7 +21,7 @@ from src.exceptions import InputNotFound, ParamFileNotFound
 # hardcode defaults
 RESULT_DIR = '%s%sresult' % (sys.path[0], os.sep)
 PARAM_FILE = '%s%sparameter.conf' % (sys.path[0], os.sep)
-STEPS = ['preprocessing', 'annotate', 'assembly']
+STEPS = ['preprocessing', 'annotate', 'assembly', 'analysis']
 
 # Get the starting time
 starting_time = time.time()
@@ -189,13 +189,10 @@ try:
         settings.set_step_number(results[0])
         files.set_blastn_output(results[1])
         files.set_metacv_output(results[2])
-        print results
-        
       
     if skip in 'analysis' and skip:
         skip_msg(skip)
     else:
-        files.set_blastn_output('result/blasted/blastn.tab')
         # init the analysis module
         analysis = Analysis(settings.get_threads(),
                             settings.get_step_number(),
@@ -228,7 +225,8 @@ try:
                             settings.get_krona())
         # run the analysis function
         results = analysis.manage_analysis()
-        
+        files.set_parser_output(results[0])
+        files.set_annotated_output(results[1])    
         
 except KeyboardInterrupt:
     sys.stdout.write('\nERROR 1 : Operation cancelled by User!\n')
@@ -237,4 +235,3 @@ except KeyboardInterrupt:
 # print ending message
 print_verbose('\nPIPELINE COMPLETE!\n\n')
 print_running_time(settings.get_actual_time())
-

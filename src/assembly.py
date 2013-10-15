@@ -124,7 +124,6 @@ class Assembly:
         else:
             # remove empty error logs
             remove_empty_logfile(self.logdir + 'flash.err.log')
-        
             # print summary of the process after completion
             print_verbose('Concatination complete \n')
             print_running_time(self.time)
@@ -170,7 +169,7 @@ class Assembly:
         else:
             # remove empty error logs
             remove_empty_logfile(self.logdir + 'velveth.err.log')
-        
+            
             # print actual informations about the step on stdout
             print_step(self.step_number, 
                        'Assembly', 

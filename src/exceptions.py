@@ -120,20 +120,35 @@ class MetaCVSumException(Exception):
 class ParserException(Exception):
     
     def __init__(self, args): 
-        sys.stderr.write('ERROR 13: Error during Trimming Process!\n')
+        sys.stderr.write('ERROR 20: Error during Parsing the Blast XML File!\n')
         sys.stderr.write('Please check error log:\n%s\n\n' % (args))
         sys.exit(1)     
         
 class AnnotateDBException(Exception):
     
     def __init__(self, args): 
-        sys.stderr.write('ERROR 13: Error during Trimming Process!\n')
+        sys.stderr.write('ERROR 21: Error during Annotation of the database!\n')
         sys.stderr.write('Please check error log:\n%s\n\n' % (args))
         sys.exit(1)     
         
 class SubsetDBException(Exception):
     
     def __init__(self, args): 
-        sys.stderr.write('ERROR 13: Error during Trimming Process!\n')
+        sys.stderr.write('ERROR 22: Error during Subsetting of the database!\n')
         sys.stderr.write('Please check error log:\n%s\n\n' % (args))
         sys.exit(1)     
+
+class KronaException(Exception):
+    
+    def __init__(self, args): 
+        sys.stderr.write('ERROR 22: Error during Creation of Pie chart with Krona Webtools!\n')
+        sys.stderr.write('Please check error log:\n%s\n\n' % (args))
+        sys.exit(1) 
+        
+class KronaFormatException(Exception):
+    
+    def __init__(self):
+        sys.stderr.write('ERROR 23: Input must be in Blast table or XML format! \n')                     
+        sys.stderr.write('change Blast Parameter "outfmt" to 5 or 6')
+        sys.exit(1)
+

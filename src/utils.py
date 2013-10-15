@@ -44,14 +44,14 @@ def is_executable(path):
 
 def is_xml(file):
     
-    if file.endswith('.xml') or file.endswith('.XML'):
+    if to_string(file).endswith('.xml') or to_string(file).endswith('.XML'):
         return True
     else:
         return False
 
 def is_tabular(file):
     
-    if file.endswith('.tab') or file.endswith('.tabular'):
+    if to_string(file).endswith('.tab') or to_string(file).endswith('.tabular'):
         return True
     else:
         return False
