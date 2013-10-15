@@ -777,19 +777,19 @@ while getopts h opt; do
 done
 
 create_metpipe_dir
-#install_fastqc
-#install_fastx
-#install_trimgalore
-#install_flash
-#install_blastparser
-#install_velvet
-#install_metavelvet
-#install_blast
+install_fastqc
+install_fastx
+install_trimgalore
+install_flash
+install_blastparser
+install_velvet
+install_metavelvet
+install_blast
 install_metacv
-#install_krona
-#get_taxonomy_db_krona "${__extdir}/krona"
-#install_r_pkgs
-#get_taxonomy_db_metaR 
+install_krona
+get_taxonomy_db_krona "${__extdir}/krona"
+install_r_pkgs
+get_taxonomy_db_metaR 
 
 
 
