@@ -339,7 +339,7 @@ class Analysis:
         elif not is_tabular(input) or not is_xml(input):
             raise KronaFormatException()
         else:
-            print_verbose('ERROR 24: Krona Report could not be generated, because of unknown reasons')
+            print_verbose('ERROR 25: Krona Report could not be generated, because of unknown reasons')
             sys.exit(1)
             
         
