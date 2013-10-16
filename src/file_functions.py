@@ -33,17 +33,17 @@ def update_reads(directory, word, extension):
    return [(directory + os.sep +  f) for f in files]
 
 # combine the content many files in one file
-def merge_files(input, output):
+def merge_files(input, output, name, extension):
     
     try:
         # open file for merging
-        merge = open(output + os.sep + 'merged.fasta','w')
+        merge = open(output + os.sep + name + '.' + extension, 'w')
         # copy all mergeable files in the file connection
         for i in range(len(input)):
-            shutil.copyfileobj(open(input[i],'rb'),merge)
+            shutil.copyfileobj(open(input[i], 'rb'), merge)
         # close the file stream
         merge.close()
-        return update_reads(output,'merged','fasta')
+        return update_reads(output, name, extension)
    
     except IOError:
         print 'Error: '+ e.message

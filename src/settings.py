@@ -23,8 +23,8 @@ class General:
     
     
     def __init__(self, threads = None, verbose = False, skip = None, starting_time = None,
-                 trim = None, quality = None, krona = None, use_contigs = None, assembler = None,
-                 annotation = None, step_number = None):
+                 trim = None, quality = None, krona = None, use_contigs = None, merge_uncombined = None,
+                 assembler = None,annotation = None, step_number = None):
 
         self.threads = threads
         self.verbose = verbose
@@ -35,6 +35,7 @@ class General:
         self.quality = quality 
         self.krona = krona
         self.use_contigs = use_contigs
+        self.merge_uncombined = merge_uncombined
         self.assembler = assembler.lower()
         self.annotation = annotation.lower() 
         self.step_number = step_number
@@ -74,6 +75,9 @@ class General:
     
     def get_use_contigs(self):
         return self.use_contigs
+    
+    def get_merge_uncombined(self):
+        return self.merge_uncombined
     
     def get_step_number(self):
         return self.step_number

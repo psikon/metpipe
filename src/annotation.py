@@ -119,7 +119,7 @@ class Annotation:
                        'merging reads to on file',
                        cut_path(self.input))
             newline()
-            self.input = merge_files(self.input, self.blast_dir)
+            self.input = merge_files(self.input, self.blast_dir, 'merged', 'fasta')
         
         # define the outputformat for the blastn results
         outfile = outputdir + os.sep + blast_output(self.outfmt)

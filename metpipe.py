@@ -55,11 +55,13 @@ if __name__ == '__main__':
                         default = 'False',
                         help = 'should MetaCV use assembled Reads or RAW Reads (default = RAW')                                    
     parser.add_argument('--notrimming', dest = 'trim', action = 'store_false', default = True,
-                        help = 'trimm and filter input reads? (default = True)')
+                        help = 'trim and filter input reads? (default = True)')
     parser.add_argument('--noquality', dest = 'quality', action = 'store_false', default = True,
-                        help = 'create quality report (default = True)')
+                        help = 'create no quality report (default = True)')
     parser.add_argument('--noreport', dest = 'krona', action = 'store_false', default = True,
-                        help = 'create a pie chart with the annotated taxonomical data (default = True)')
+                        help = 'create no pie chart with the annotated taxonomical data (default = True)')
+    parser.add_argument('--merge', dest = 'merge_uncombined', action = 'store_true', default = False,
+                        help = 'merge concatinated reads with not concatinated (default = False)')
     
 # create the cli interface
 args = parser.parse_args()
@@ -88,7 +90,7 @@ create_outputdir(RESULT_DIR + os.sep +'log')
 
 # create the global settings object
 settings = General(args.threads, args.verbose, args.skip, starting_time, args.trim, 
-                   args.quality, args.krona, args.use_contigs, args.assembler, 
+                   args.quality, args.krona, args.use_contigs, args.merge_uncombined, args.assembler, 
                    args.annotation, 1)
 
 # setup the input, outputs and important files
@@ -139,6 +141,7 @@ try:
                             exe.get_Flash(),
                             files.get_concat_dir(),
                             parse_parameter(FLASH_Parameter(PARAM_FILE)),
+                            settings.get_merge_uncombined(),
                             exe.get_Velveth(),
                             exe.get_Velvetg(),
                             exe.get_MetaVelvet(),

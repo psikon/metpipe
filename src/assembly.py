@@ -4,7 +4,7 @@ import shlex
 import sys, os
 import time
 # imports of own functions and classes
-from src.file_functions import create_outputdir, update_reads, parse_parameter
+from src.file_functions import create_outputdir, update_reads, parse_parameter, merge_files
 from src.log_functions import print_step, newline, print_compact, print_verbose, open_logfile, print_running_time, remove_empty_logfile
 from src.utils import to_string, is_fastq, is_paired, is_executable
 from src.exceptions import FlashException, VelvetHException, VelvetGException, MetaVelvetException
@@ -14,7 +14,7 @@ from src.exceptions import FlashException, VelvetHException, VelvetGException, M
 class Assembly:
     
     def __init__(self, threads, step_number, verbose, time, logdir, input, mode,
-                 flash_exe, concat_dir, concat_parameter, 
+                 flash_exe, concat_dir, concat_parameter, merge_uncombined, 
                  velveth_exe, velvetg_exe, metavelvet_exe, assembly_out, kmer, 
                  velveth_parameter, velvetg_parameter, metavelvet_parameter):
         
@@ -31,6 +31,7 @@ class Assembly:
         self.flash_exe = flash_exe
         self.concat_out = concat_dir 
         self.concat_parameter = concat_parameter
+        self.merge_uncombined = merge_uncombined
         
         # init metavelvet specific variables
         self.velveth_exe = velveth_exe
@@ -56,8 +57,16 @@ class Assembly:
                 # start concatination and update the input for next step
                 self.concatinate(self.concat_out)
                 self.step_number += 1
-                concatinated = update_reads(self.concat_out, 'extendedFrags', 'fastq')
-                self.input = concatinated
+                # merge the concatinated reads with non concatinated rest
+                if (self.merge_uncombined):
+                    self.input = merge_files([to_string(update_reads(self.concat_out, 'extendedFrags', 'fastq')),
+                                             to_string(update_reads(self.concat_out, 'out.notCombined', 'fastq'))],
+                                             self.concat_out,
+                                             'merged_concat','fastq')
+                else:
+                    concatinated = update_reads(self.concat_out, 'extendedFrags', 'fastq')
+                    self.input = concatinated
+                
 
         if self.mode.lower() == 'metavelvet':
             # is executable existing and runnable?
