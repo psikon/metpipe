@@ -16,7 +16,6 @@ class Analysis:
     metacv_output = ''
     
     # output
-    output = ''
     parsed_db_out = ''
     annotated_db_out = ''
     subseted_db_out = ''
@@ -27,7 +26,7 @@ class Analysis:
     exitcode = ''
     
     def __init__(self, threads, step_number, verbose, time, logdir, classify, output, 
-                 parsed_db_dir, annotated_db_dir, subseted_db_dir,krona_report_dir, 
+                 parsed_db_dir, annotated_db_dir, subseted_db_dir, krona_report_dir, 
                  blast_output, metacv_output,parser_exe, parser_parameter, parser_name,
                  annotate_exe, annotate_parameter, annotate_name, annotate_taxon_db, 
                  subset_exe, subset_bitscore, subset_classifier, subset_rank,
@@ -41,8 +40,7 @@ class Analysis:
         self.logdir = logdir
         self.annotation_mode = classify
         
-        # set the paths for the output
-        self.output = output
+
         self.parsed_db_out = parsed_db_dir
         self.annotated_db_out = annotated_db_dir
         self.subseted_db_out = subseted_db_dir
