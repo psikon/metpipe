@@ -88,7 +88,9 @@ class Analysis:
                 # test the exit code, because next script need the output as input
                 if self.exitcode is 0:
                     # update input 
-                    parser_out = update_reads(self.parsed_db_out, self.parser_name, 'db')
+                    parser_out = absolute_path(update_reads(self.parsed_db_out, 
+                                                            self.parser_name, 
+                                                            'db'))
                     # raise step_number
                     self.step_number += 1
                     # create a new database with taxonomical annotations
@@ -96,7 +98,9 @@ class Analysis:
                     # test the exit code, because next script need the output as input
                     if self.exitcode is 0:
                         # update input
-                        annotated_output = update_reads(self.annotated_db_out, self.R_annotate_name, 'db')
+                        annotated_output = absolute_path(update_reads(self.annotated_db_out, 
+                                                                      self.R_annotate_name, 
+                                                                      'db'))
                         # raise step_number
                         self.step_number += 1
                         # subset the taxonomical database for a better and 
