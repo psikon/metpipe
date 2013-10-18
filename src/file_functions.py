@@ -95,6 +95,13 @@ def parse_parameter(instance):
     
     return args
 
+def absolute_path(file):
+    tmp = []
+    for i in range(len(file)):
+        tmp.append(os.path.abspath(file[i]))
+    
+    return tmp
+         
 # create from the parsed blast database a file in blast tabular output to use the 
 # krona import script for these type of file
 def extract_tabular(location_of_db, destination):

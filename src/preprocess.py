@@ -2,7 +2,7 @@ import subprocess
 import shlex
 import sys, os, time
 from src.log_functions import print_step, newline, print_compact, print_verbose, open_logfile, print_running_time
-from src.file_functions import create_outputdir, update_reads, parse_parameter
+from src.file_functions import create_outputdir, update_reads, parse_parameter, absolute_path
 from src.utils import is_executable, to_string, is_fastq
 from src.exceptions import FastQException, FastQCException, TrimGaloreException
 class Preprocess:
@@ -17,7 +17,7 @@ class Preprocess:
         self.verbose = verbose
         self.time = time
         self.logdir = logdir
-        self.input = input
+        self.input = absolute_path(input)
         
         # define quality report variables
         self.fastqc_exe = fastqc_exe
@@ -30,6 +30,7 @@ class Preprocess:
         self.trim = trim
         self.trim_dir = trim_dir
         self.trim_parameter = trim_parameter
+        print self.input
                 
     def __del__(self):
         pass
@@ -53,10 +54,8 @@ class Preprocess:
         if self.trim:
             if is_executable(self.trim_exe):
                 self.trim_and_filter()
-                # update the input to the processed input
                 # raise the step number for cmd output
                 self.step_number += 1
-                
         return [self.step_number, update_reads(self.trim_dir, 'val', 'fq')]
         
         
@@ -102,6 +101,7 @@ class Preprocess:
     
     def trim_and_filter(self):
         
+        print self.input
         # create a dir for output
         create_outputdir(self.trim_dir)
         
