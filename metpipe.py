@@ -189,7 +189,7 @@ try:
                           MetaCV_Parameter(PARAM_FILE).get_name())
         # run the annotation functions
         results = anno.manage_annotation()
-        settings.set_step_number(absolute_path(results[0]))
+        settings.set_step_number(results[0])
         files.set_blastn_output(absolute_path(results[1]))
         files.set_metacv_output(absolute_path(results[2]))
       

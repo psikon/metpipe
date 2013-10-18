@@ -176,6 +176,13 @@ class Annotation:
                                   self.metacv_mode,
                                   self.metacv_orf))
         newline()
+        
+        # metacv has a maximum thread number of 64
+        # parameter has to be adjusted
+        if self.threads > 64:
+                threads = 64
+        else:
+                threads = self.threads
 
         # start MetaCV function and wait until completion
         p = subprocess.Popen(shlex.split('%s classify %s %s %s %s %s %s --threads=%s' % 
