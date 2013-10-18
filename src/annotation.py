@@ -60,7 +60,7 @@ class Annotation:
                 # start annotation with blastn
                 self.blastn(self.blast_dir)
                 # set the output file for further steps
-                blast_out = update_reads(self.blast_dir,
+                blastn_out = update_reads(self.blast_dir,
                                          'blastn',
                                          blast_output(self.outfmt).split('.')[1])
                 # raise step_number
@@ -84,7 +84,7 @@ class Annotation:
                 # start annotation with both tools 
                 self.blastn(self.blast_dir)
                 # test for ending and set the right blast output
-                blast_out = update_reads(self.blast_dir,
+                blastn_out = update_reads(self.blast_dir,
                                          'blastn',
                                          blast_output(self.outfmt).split('.')[1])
                 self.metacv(self.metacv_dir)
@@ -94,7 +94,7 @@ class Annotation:
                 # raise step_number
                 self.step_number += 1
         
-        return [self.step_number, blast_out, metacv_out]
+        return [self.step_number, blastn_out, metacv_out]
     
     def blastn(self, outputdir):
             
