@@ -30,7 +30,6 @@ class Preprocess:
         self.trim = trim
         self.trim_dir = trim_dir
         self.trim_parameter = trim_parameter
-        print self.input
                 
     def __del__(self):
         pass
@@ -56,7 +55,7 @@ class Preprocess:
                 self.trim_and_filter()
                 # raise the step number for cmd output
                 self.step_number += 1
-        return [self.step_number, update_reads(self.trim_dir, 'val', 'fq')]
+        return [self.step_number, absolute_path(update_reads(self.trim_dir, 'val', 'fq'))]
         
         
     def qualityCheck(self):
@@ -101,7 +100,6 @@ class Preprocess:
     
     def trim_and_filter(self):
         
-        print self.input
         # create a dir for output
         create_outputdir(self.trim_dir)
         
