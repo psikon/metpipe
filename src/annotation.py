@@ -193,7 +193,7 @@ class Annotation:
                                          self.metacv_seq, 
                                          self.metacv_mode, 
                                          self.metacv_orf,
-                                         self.threads)),
+                                         threads)),
                             stderr = open_logfile(self.logdir + 'metacv.err.log'), 
                             stdout = subprocess.PIPE,
                             cwd = outputdir + os.sep)
@@ -230,7 +230,7 @@ class Annotation:
                                               self.metacv_total_reads, 
                                               self.metacv_min_qual, 
                                               self.metacv_taxon,
-                                              self.threads)),
+                                              threads)),
                                  stderr = open_logfile(self.logdir + 'metacv.res2table.err.log'), 
                                  stdout = subprocess.PIPE,
                                  cwd = outputdir + os.sep)
