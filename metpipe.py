@@ -94,7 +94,7 @@ settings = General(args.threads, args.verbose, args.skip, starting_time, args.tr
                    args.annotation, 1)
 
 # setup the input, outputs and important files
-files = FileSettings(absolutepath(args.input), os.path.normpath(RESULT_DIR), PARAM_FILE)
+files = FileSettings(absolute_path(args.input), os.path.normpath(RESULT_DIR), PARAM_FILE)
 
 exe = Executables(PARAM_FILE)
 # get the all skipped steps
@@ -124,8 +124,8 @@ try:
         results = pre.manage_preprocessing()
         # update pipeline variables with results
         settings.set_step_number(results[0])
-        files.set_input(absolutepath(results[1]))
-        files.set_preprocessed_output(absolutepath(results[1]))
+        files.set_input(absolute_path(results[1]))
+        files.set_preprocessed_output(absolute_path(results[1]))
 
     if skip in 'assembly' and skip:
         skip_msg(skip)
@@ -154,9 +154,9 @@ try:
         results = assembly.manage_assembly()
         # update pipeline variables with results
         settings.set_step_number(results[0])
-        files.set_input(absolutepath(results[1]))
-        files.set_concatinated_output(absolutepath(results[2]))
-        files.set_assembled_output(absolutepath(results[3]))
+        files.set_input(absolute_path(results[1]))
+        files.set_concatinated_output(absolute_path(results[2]))
+        files.set_assembled_output(absolute_path(results[3]))
   
     if skip in 'annotation'and skip:
         skip_msg(skip)
@@ -189,9 +189,9 @@ try:
                           MetaCV_Parameter(PARAM_FILE).get_name())
         # run the annotation functions
         results = anno.manage_annotation()
-        settings.set_step_number(absolutepath(results[0]))
-        files.set_blastn_output(absolutepath(results[1]))
-        files.set_metacv_output(absolutepath(results[2]))
+        settings.set_step_number(absolute_path(results[0]))
+        files.set_blastn_output(absolute_path(results[1]))
+        files.set_metacv_output(absolute_path(results[2]))
       
     if skip in 'analysis' and skip:
         skip_msg(skip)
@@ -228,8 +228,8 @@ try:
                             settings.get_krona())
         # run the analysis function
         results = analysis.manage_analysis()
-        files.set_parser_output(absolutepath(results[0]))
-        files.set_annotated_output(absolutepath(results[1]))    
+        files.set_parser_output(absolute_path(results[0]))
+        files.set_annotated_output(absolute_path(results[1]))    
         
 except KeyboardInterrupt:
     sys.stdout.write('\nERROR 1 : Operation cancelled by User!\n')
