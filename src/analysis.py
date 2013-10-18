@@ -4,7 +4,7 @@ import shlex
 import sys, os, time
 import shutil
 # imports of own functions and classes
-from src.file_functions import create_outputdir, update_reads, remove_file, parse_parameter, extract_tabular
+from src.file_functions import create_outputdir, update_reads, remove_file, parse_parameter, extract_tabular, absolute_path
 from src.log_functions import print_step, newline, print_compact, print_verbose, open_logfile, print_running_time, remove_empty_logfile, cut_path
 from src.utils import to_string, is_xml, is_tabular, is_db, is_executable
 from src.exceptions import ParserException, AnnotateDBException, SubsetDBException, KronaException, KronaFormatException
