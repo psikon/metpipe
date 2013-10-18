@@ -164,9 +164,9 @@ class Annotation:
         
         # select the input for metacv and convert it in an usable format
         if self.contigs is True:
-            input = to_string([sys.path[0] + os.sep + i for i in self.input])
+            input = to_string(self.input)
         else:
-            input = to_string([sys.path[0] + os.sep + i for i in self.raw])
+            input = to_string(self.raw)
             
         # print actual informations about the step on stdout
         print_step(self.step_number, 
