@@ -113,7 +113,7 @@ try:
                          files.get_input(),
                          files.get_logdir(),
                          exe.get_FastQC(),
-                         settings.get_quality,
+                         settings.get_quality(),
                          files.get_quality_dir(),
                          parse_parameter(FastQC_Parameter(PARAM_FILE)),
                          exe.get_TrimGalore(),

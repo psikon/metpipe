@@ -183,7 +183,7 @@ class Annotation:
                 threads = 64
         else:
                 threads = self.threads
-
+        classify = open_logfile(self.logdir + 'metacv.classify.log')
         # start MetaCV function and wait until completion
         p = subprocess.Popen(shlex.split('%s classify %s %s %s %s %s %s --threads=%s' % 
                                         (self.metacv_exe,
@@ -194,23 +194,24 @@ class Annotation:
                                          self.metacv_mode, 
                                          self.metacv_orf,
                                          threads)),
-                            stderr = open_logfile(self.logdir + 'metacv.err.log'), 
+                            stderr = subprocess.PIPE, 
                             stdout = subprocess.PIPE,
                             cwd = outputdir + os.sep)
         # during processing pipe the output and print it on screen
         while p.poll() is None:
             if self.verbose:
-                print_verbose(p.stdout.readline())
+                print_verbose(p.stderr.readline())
+                classify.write(p.stderr.readline())
             else:
-                print_compact(p.stdout.readline().rstrip('\n'))
+                print_compact(p.stderr.readline().rstrip('\n'))
         # wait until process is finished        
         p.wait()
         
         if p.returncode:
-            raise MetaCVException(self.logdir + 'metacv.err.log')
+            raise MetaCVException(self.logdir + 'metacv.classify.log')
         else:
             # remove unused error logs
-            remove_empty_logfile(self.logdir + 'metacv.err.log')
+            remove_empty_logfile(self.logdir + 'metacv.classify.log')
             
             # print actual informations about the step on stdout
             print_step(self.step_number, 
@@ -220,7 +221,7 @@ class Annotation:
                                      self.metacv_min_qual, 
                                      self.metacv_taxon))
             newline() 
-            
+            res2table = open_logfile(self.logdir + 'metacv.res2table.log')
             # start MetaCV's res2table function and wait until completion
             p = subprocess.Popen(shlex.split('%s res2table %s %s %s %s %s %s --threads=%s' % 
                                              (self.metacv_exe,
@@ -231,15 +232,17 @@ class Annotation:
                                               self.metacv_min_qual, 
                                               self.metacv_taxon,
                                               threads)),
-                                 stderr = open_logfile(self.logdir + 'metacv.res2table.err.log'), 
+                                 stderr = subprocess.PIPE, 
                                  stdout = subprocess.PIPE,
                                  cwd = outputdir + os.sep)
             # during processing pipe the output and print it on screen
             while p.poll() is None:
                 if self.verbose:
-                    print_verbose(p.stdout.readline())
+                    print_verbose(p.stderr.readline())
+                    res2table.write(p.stderr.readline())
+                    
                 else:
-                    print_compact(p.stdout.readline().rstrip('\n'))
+                    print_compact(p.stderr.readline().rstrip('\n'))
             # wait until process is finished
             p.wait()
         
@@ -254,7 +257,8 @@ class Annotation:
                        'Summarize the results of MetaCV',
                        self.metacv_min_qual)
             newline()
-        
+            
+            res2sum = open_logfile(self.logdir + 'metacv.res2sum.log')
             # start MetaCV's res2sum function and wait until completion
             # the workingdir must be specified to maintain the correct 
             # order of output files
@@ -264,17 +268,18 @@ class Annotation:
                                               to_string(update_reads(outputdir,'metpipe','res')),
                                               self.metacv_name + '.res2sum',
                                               self.metacv_min_qual)),
-                                 stderr = open_logfile(self.logdir + 'metacv_.es2sum.err.log'), 
+                                 stderr = subprocess.PIPE, 
                                  stdout = subprocess.PIPE,
                                  cwd = outputdir + os.sep)
             # during processing pipe the output and print it on screen
             while p.poll() is None:
                 if self.verbose:
-                    print_verbose(p.stdout.readline())
+                    print_verbose(p.stderr.readline())
+                    res2sum.write(p.stderr.readline())
                 else:
-                    print_compact(p.stdout.readline().rstrip('\n'))
-                    # wait until process is finished
-                    p.wait()
+                    print_compact(p.stderr.readline().rstrip('\n'))
+            # wait until process is finished
+            p.wait()
         
             if p.returncode:
                 raise MetaCVSumException(self.logdir + 'metacv.res2sum.err.log')

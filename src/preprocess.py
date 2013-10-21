@@ -41,7 +41,7 @@ class Preprocess:
         except FastQException:
             self.quality = False
             self.trim = False
-        
+            
         if self.quality:
             # is executable existing and runnable?
             if is_executable(self.fastqc_exe):
