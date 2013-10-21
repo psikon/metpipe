@@ -24,13 +24,14 @@ opt <- parse_args(OptionParser(option_list=option_list))
 # load required packages for analysis
 suppressPackageStartupMessages(library('metaR'))
 suppressPackageStartupMessages(library('rmisc'))
+
 # load the input values
 input <- taxonomyReportDBConnect(opt$input)
 blastReport <- blastReportDBConnect(opt$blast)
 taxon_db <- connectTaxonDB(opt$taxon)
 
 sprintf("Subset %s from %d taxonomies ...",opt$classifier,db_count(input,'taxonomy'))
-classified <- selectByRank(x = input,
+classified <- selectByRank(input,
                            taxRank = opt$rank,
                            classifier = opt$classifier,
                            taxon_db = taxon_db)

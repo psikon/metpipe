@@ -32,7 +32,7 @@ annotate <- assignTaxon(query_id = 1:10000,
                                      "class", "phylum", "kingdom", "superkingdom"),
                         coverage_threshold = opt$coverage,
                         bitscore_tolerance = opt$bitscore,
-                        blast_db = blastReport,
+                        blastReportDB = blastReport,
                         taxon_db = taxon_db)
 # create the new database
 sprintf('Creating new Database ...')

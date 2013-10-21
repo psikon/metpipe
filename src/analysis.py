@@ -105,6 +105,7 @@ class Analysis:
                         self.step_number += 1
                         # subset the taxonomical database for a better and 
                         # faster analysis after the pipline has finished
+                        print to_string(annotated_output)
                         self.subset_db(annotated_output, self.subseted_db_out, parser_out)
                         # raise step_number
                         self.step_number += 1
