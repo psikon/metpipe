@@ -126,7 +126,12 @@ class Executables:
         self.KRONA_BLAST = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep + 'ktImportBLAST' if self.conf.has_option('Krona Tools', 'path') else ''
         self.KRONA_TEXT = os.path.normpath(self.conf.get('Krona Tools', 'path')) + os.sep + 'ktImportText' if self.conf.has_option('Krona Tools', 'path') else ''
         self.KRONA_CONVERTER = sys.path[0] + os.sep + 'src' + os.sep + 'convert_for_krona.R' 
-        
+        self.PERL_LIB = os.path.normpath(self.conf.get('Krona Tools', 'install_dir') 
+                                         if (self.conf.has_option('Krona Tools', 'install_dir') and 
+                                             self.conf.get('Krona Tools', 'install_dir') is not '' ) 
+                                         else 
+                                            sys.path[0] + os.sep + 'ext' + os.sep + 'krona')
+    
     def get_FastQC(self):
         return self.FASTQC
     
@@ -174,6 +179,9 @@ class Executables:
     
     def get_Krona_Text(self):
         return self.KRONA_TEXT  
+    
+    def get_Perl_lib(self):
+        return self.PERL_LIB
 
 class FileSettings:
     

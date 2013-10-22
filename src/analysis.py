@@ -30,7 +30,7 @@ class Analysis:
                  blast_output, metacv_output,parser_exe, parser_parameter, parser_name,
                  annotate_exe, annotate_parameter, annotate_name, annotate_taxon_db, 
                  subset_exe, subset_bitscore, subset_classifier, subset_rank,
-                 subset_taxon_db, krona_exe, krona_parameter, krona_name, krona):
+                 subset_taxon_db, krona_exe, krona_parameter, krona_name, krona, perl_lib):
         
         # init general variables
         self.threads = threads
@@ -70,6 +70,7 @@ class Analysis:
         self.krona_parameter = krona_parameter
         self.krona_name = krona_name
         self.krona = krona
+        self.perl_lib = perl_lib
         
         
     def __del__(self):
@@ -105,7 +106,6 @@ class Analysis:
                         self.step_number += 1
                         # subset the taxonomical database for a better and 
                         # faster analysis after the pipline has finished
-                        print to_string(annotated_output)
                         self.subset_db(annotated_output, self.subseted_db_out, parser_out)
                         # raise step_number
                         self.step_number += 1
@@ -144,9 +144,9 @@ class Analysis:
 
         # start the parser and wait until completion
         p = subprocess.Popen(shlex.split('%s -o %s %s %s' % (self.parser_exe,
-                                                             outfile,
-                                                             self.parser_parameter,
-                                                             input)),
+                                                            outfile,
+                                                            self.parser_parameter,
+                                                            input)),
                               stdout = subprocess.PIPE,
                               stderr = open_logfile(self.logdir + 'parser.err.log'))
         
@@ -289,8 +289,9 @@ class Analysis:
             
             # start the Krona import script for Blast tabular output
             # pipe all output for stdout in a logfile
-            p = subprocess.Popen(shlex.split('%s -o %s %s %s' 
-                                             % (self.krona_exe,
+            p = subprocess.Popen(shlex.split('perl -l %s %s -o %s %s %s' 
+                                             % (self.perl_lib,
+                                                self.krona_exe,
                                                 outfile,
                                                 self.krona_parameter,
                                                 to_string(input))),
@@ -320,8 +321,9 @@ class Analysis:
             
             # start the Krona import script for Blast tabular output
             # pipe all output for stdout in a logfile
-            p = subprocess.Popen(shlex.split('%s -o %s %s %s' 
-                                             % (self.krona_exe,
+            p = subprocess.Popen(shlex.split('perl -l %s %s -o %s %s %s' 
+                                             % (self.perl_lib,
+                                                self.krona_exe,
                                                 outfile,
                                                 self.krona_parameter,
                                                 to_string(input))),

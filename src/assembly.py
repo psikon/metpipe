@@ -134,6 +134,7 @@ class Assembly:
             # remove empty error logs
             remove_empty_logfile(self.logdir + 'flash.err.log')
             # print summary of the process after completion
+            newline()
             print_verbose('Concatination complete \n')
             print_running_time(self.time)
         
@@ -247,7 +248,7 @@ class Assembly:
                 else:
                     # remove empty error logs
                     remove_empty_logfile(self.logdir + 'metavelvet.err.log')
-        
+                    newline()
                     # print summary of the process after completion
                     print_verbose('Assembly complete \n')
                     print_running_time(self.time)

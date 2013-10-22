@@ -112,6 +112,7 @@ create_metpipe_dir() {
 
     cp ${__force} ./pkg/*.tar.gz ${__pkgdir}
     cp ${__force} ./src/*.py ${__srcdir}
+	cp ${__force} ./src/*.R ${__srcdir}
     cp ${__force} ./{*.py,*.txt,*.conf,*.md} ${__metdir} 
 
     echo ""
@@ -514,7 +515,8 @@ install_metacv() {
         cd ${__cwd} 
 
         cmdpath=${__bindir}/
-        ln -sf ${__extdir}/metacv/metacv ${cmdpath}        
+        ln -sf ${__extdir}/metacv/metacv ${cmdpath}  
+		ln -sf ${__extdir}/metacv/plot.R ${cmdpath}    
     fi
 
     printf "."
@@ -635,6 +637,7 @@ install_r_pkgs() {
     not.installed("biofiles") %&&% devtools::install_local("${biofiles}")
     not.installed("blastr") %&&% devtools::install_local("${blastr}")
     not.installed("ncbi") %&&% cpp11(devtools::install_local("${ncbi}"))
+	not.installed("metaR") %&&% devtools::install_github("metaR", "psikon")
 RDOC
 
 [ $? -eq 0 ] || die 1 "ERROR: Installation of requied R packages failed"

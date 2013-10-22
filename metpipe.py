@@ -225,7 +225,8 @@ try:
                             exe.get_Krona_Blast(),
                             parse_parameter(Krona_Parameter(PARAM_FILE)),
                             Krona_Parameter(PARAM_FILE).get_name(),
-                            settings.get_krona())
+                            settings.get_krona(),
+                            exe.get_Perl_lib())
         # run the analysis function
         results = analysis.manage_analysis()
         files.set_parser_output(absolute_path(results[0]))

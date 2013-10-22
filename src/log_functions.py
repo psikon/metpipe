@@ -21,7 +21,7 @@ def newline():
 def print_compact(message):
     
     # write line to stdout
-    sys.stdout.write(message)
+    sys.stdout.write(message + '\r')
     # jump back to te beginning of the line
     sys.stdout.write('\r')
     # clear the line

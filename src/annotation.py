@@ -204,6 +204,7 @@ class Annotation:
                 classify.write(p.stderr.readline())
             else:
                 print_compact(p.stderr.readline().rstrip('\n'))
+                classify.write(p.stderr.readline())
         # wait until process is finished        
         p.wait()
         
@@ -243,14 +244,15 @@ class Annotation:
                     
                 else:
                     print_compact(p.stderr.readline().rstrip('\n'))
+                    res2table.write(p.stderr.readline())
             # wait until process is finished
             p.wait()
         
             if p.returncode:
-                raise MetaCVSumException(self.logdir + 'metacv.res2table.err.log')
+                raise MetaCVSumException(self.logdir + 'metacv.res2table.log')
             else:
                 # remove unused error logs
-                remove_empty_logfile(self.logdir + 'metacv.res2table.err.log')
+                remove_empty_logfile(self.logdir + 'metacv.res2table.log')
             # print actual informations about the step on stdout
             print_step(self.step_number, 
                        'Annotation', 
@@ -278,14 +280,15 @@ class Annotation:
                     res2sum.write(p.stderr.readline())
                 else:
                     print_compact(p.stderr.readline().rstrip('\n'))
+                    res2sum.write(p.stderr.readline())
             # wait until process is finished
             p.wait()
         
             if p.returncode:
-                raise MetaCVSumException(self.logdir + 'metacv.res2sum.err.log')
+                raise MetaCVSumException(self.logdir + 'metacv.res2sum.log')
             else:
                 # remove unused error logs
-                remove_empty_logfile(self.logdir + 'metacv.res2sum.err.log')
+                remove_empty_logfile(self.logdir + 'metacv.res2sum.log')
         
             # print summary of the process after completion
             print_verbose('Annotation with MetaCV complete \n')
