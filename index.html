@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Metpipe by psikon</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Metpipe</h1>
+          <h2>A metagenomic pipeline from proprocessing to annotations and analysis for metagenomic Reads</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/psikon/metpipe/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/psikon/metpipe/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/psikon/metpipe" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a name="metpipe" class="anchor" href="#metpipe"><span class="octicon octicon-link"></span></a>metPipe</h1>
+
+<p>The metagenomic pipeline metPipe bundles a number of bioinformatical tools for analyising metagenomic short read datasets 
+from RAW data to complete taxonomically annotated data. </p>
+
+<h2>
+<a name="summary" class="anchor" href="#summary"><span class="octicon octicon-link"></span></a>Summary</h2>
+
+<pre><code>    A) Hardware Requirements
+    B) Software Requirements
+    C) Installation of metpipe
+    D) Usage
+    E) Quickstart
+    F) Contact
+    G) Citing
+</code></pre>
+
+<h2>
+<a name="a-hardware-requirements" class="anchor" href="#a-hardware-requirements"><span class="octicon octicon-link"></span></a>A) Hardware Requirements</h2>
+
+<p>The metPipe Pipeline was designed to run on s standard 64-bit Linux computer. For the analysis of short datasets and tutorial purposes (without a run of MetaCV) a minimum of 8 GB RAM is required. To analyse larger datasets and include a run of MetaCV 32 GB RAM and a multiple CPU-Cores are recommended. For the installation of the pipeline and the required databases a disk space 77 GB will be used. </p>
+
+<h2>
+<a name="b-software-requirements" class="anchor" href="#b-software-requirements"><span class="octicon octicon-link"></span></a>B) Software Requirements</h2>
+
+<p>The Pipeline was developed with Python 2.7 and R 2.15 for standard Linux 64-bit workstations.  Before running the install script please check the following dependencies:</p>
+
+<ul>
+<li>Python &gt;= 2.6</li>
+<li>R &gt;= 2.15  (for R &gt;= 3.0 useDevel() - Parameter for Bioconductor - biocLite must be assigned; see: <a href="http://www.bioconductor.org/developers/useDevel/">http://www.bioconductor.org/developers/useDevel/</a>)</li>
+<li>Java Runtime Environment (z.B. open-jre)</li>
+<li>gcc &gt;= 4.8.0</li>
+<li>git</li>
+<li>libboost-dev</li>
+<li>libboost-regex-dev</li>
+<li>libxerces-c-dev </li>
+<li>libsqlite3-dev</li>
+</ul><h3>
+<a name="c-installation" class="anchor" href="#c-installation"><span class="octicon octicon-link"></span></a>C) Installation</h3>
+
+<p>After downloading the software from <a href="https://github.com/psikon/metpipe">https://github.com/psikon/metpipe</a>, unpack the files and run the installation script with following command :</p>
+
+<div class="highlight highlight-bash"><pre>./installer.sh
+</pre></div>
+
+<p>All external dependencies will be downloaded and installed in a local folder. The installation process may take some minutes or hours, depending on the connection speed and the databases.</p>
+
+<h3>
+<a name="d-usage" class="anchor" href="#d-usage"><span class="octicon octicon-link"></span></a>D) Usage:</h3>
+
+<pre><code>usage: metpipe.py [-h] [--version] [-v] [-t THREADS] [-p PARAM]
+                  [-s {preprocessing,assembly,annotation,analysis}]
+                  [-o OUTPUT] [-a {metavelvet,flash,both}]
+                  [-c {metacv,blastn,both}] [--use_contigs] [--notrimming]
+                  [--noquality] [--noreport] [--merge]
+                  input [input ...]
+
+positional arguments:
+  input                 single or paired input files in &lt;fastq&gt; format
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -v                    more detailed output (default = False)
+  -t THREADS            number of threads to use (default = 7)
+  -p PARAM              use alternative config file (default = parameter.conf)
+  -s {preprocessing,assembly,annotation,analysis}
+                        skip steps in the pipeline (default = None)
+  -o OUTPUT             use alternative output folder
+  -a {metavelvet,flash,both}
+                        assembling program to use (default = MetaVelvet)
+  -c {metacv,blastn,both}
+                        classifier to use for annotation (default = both)
+  --use_contigs         should MetaCV use assembled Reads or RAW Reads
+                        (default = RAW
+  --notrimming          trim and filter input reads? (default = True)
+  --noquality           create no quality report (default = True)
+  --noreport            create no pie chart with the annotated taxonomical
+                        data (default = True)
+  --merge               merge concatinated reads with not concatinated
+                        (default = False)
+</code></pre>
+
+<p>All step specific settings can be found in the parameter.conf file in the root dir of this program.</p>
+
+<h3>
+<a name="e-quickstart" class="anchor" href="#e-quickstart"><span class="octicon octicon-link"></span></a>E) Quickstart</h3>
+
+<p>For testing/tutorial purporses a little test dataset is included in the root folder. This data include 15.000 paired-end MiSeq reads with a length of 250bp.</p>
+
+<p>run the pipeline with the following command:</p>
+
+<div class="highlight highlight-bash"><pre>./metpipe.sh -t 7 -p parameter.conf -o ../example -a flash -c both sequences/forward.fastq sequences/reverse/fastq
+</pre></div>
+
+<p>After processing you will get 5 files in the analysis folder:</p>
+
+<pre><code>- blastn.db       - blast XML results parsed in SQL Lite DB
+- annotated.db    - taxonomical annotated SQL Lite DB
+- bacteria.db     - seperated bacteria from SQL Lite DB
+- eukaryota.db    - seperated eukaryota from SQL Lite DB
+- metpipe.html    - interactic HTML5 piechart of taxonomies
+</code></pre>
+
+<h3>
+<a name="f-contact" class="anchor" href="#f-contact"><span class="octicon octicon-link"></span></a>F) Contact</h3>
+
+<p>If you encounter a problem/bug, please first check the wiki page:
+<a href="https://github.com/psikon/metpipe/wiki">https://github.com/psikon/metpipe/wiki</a>
+and the known issues pages:
+<a href="https://github.com/psikon/metpipe/issues">https://github.com/psikon/metpipe/issues</a>
+to see if it has already been documented.</p>
+
+<p>If not, please report the issue either using the contact information below or 
+by submitting a new issue online. Please include information on your run,
+and every log file produced by your run.</p>
+
+<p>Philipp Sehnert: <a href="mailto:philipp.sehnert@gmail.com">philipp.sehnert@gmail.com</a></p>
+
+<h3>
+<a name="g-citing" class="anchor" href="#g-citing"><span class="octicon octicon-link"></span></a>G) Citing</h3>
+        </section>
+
+        <footer>
+          Metpipe is maintained by <a href="https://github.com/psikon">psikon</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
