@@ -113,19 +113,38 @@ optional arguments:
 
 <p>For testing/tutorial purporses a little test dataset is included in the root folder. This data include 15.000 paired-end MiSeq reads with a length of 250bp.</p>
 
-<p>run the pipeline with the following command:</p>
+<p>start the pipeline with the following command:</p>
 
 <div class="highlight highlight-bash"><pre>./metpipe.sh -t 7 -p parameter.conf -o ../example -a flash -c both sequences/forward.fastq sequences/reverse/fastq
 </pre></div>
 
-<p>After processing you will get 5 files in the analysis folder:</p>
+<p>After processing you will get up to 5 files in the analysis folder:</p>
 
-<pre><code>- blastn.db       - blast XML results parsed in SQL Lite DB
-- annotated.db    - taxonomical annotated SQL Lite DB
-- bacteria.db     - seperated bacteria from SQL Lite DB
-- eukaryota.db    - seperated eukaryota from SQL Lite DB
-- metpipe.html    - interactic HTML5 piechart of taxonomies
-</code></pre>
+<ul>
+<li>blastn.db       - blast XML results parsed in SQL Lite DB</li>
+<li>annotated.db    - taxonomical annotated SQL Lite DB</li>
+<li>bacteria.db     - seperated bacteria from SQL Lite DB </li>
+<li>eukaryota.db    - seperated eukaryota from SQL Lite DB</li>
+<li>metpipe.html    - interactive HTML5 piechart of taxonomies</li>
+</ul><p>These database files can be processed by every <strong>programming language porviding a SQL-Lite plugin</strong>. For further analysis the statistic language <strong>R</strong> (<a href="http://www.r-project.org/">http://www.r-project.org/</a>) will be used.</p>
+
+<p>To access the data in the database the R package <strong>metaR</strong>, provided with pipeline have to be loaded:</p>
+
+<div class="highlight highlight-bash"><pre>library<span class="o">(</span>metaR<span class="o">)</span>
+</pre></div>
+
+<p>Now the database can be loaded with following command:</p>
+
+<div class="highlight highlight-bash"><pre>complete_db &lt;- taxonomyReportDBConnect<span class="o">(</span><span class="s2">"result/analysis/annotated.db"</span><span class="o">)</span>
+</pre></div>
+
+<p>To see, that the database is correctly loaded, calling the object complete will print you something like that:</p>
+
+<div class="highlight highlight-bash"><pre>‘taxonomyReportDB’ object with:
+| 79 querys | 99 hits | 99 hsps | 99 taxonomies |
+</pre></div>
+
+<p>To be continued ...</p>
 
 <h3>
 <a name="5-contact" class="anchor" href="#5-contact"><span class="octicon octicon-link"></span></a>5.) Contact</h3>
