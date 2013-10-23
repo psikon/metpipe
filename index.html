@@ -1,61 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <title>metPipe by psikon</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>Metpipe by psikon</title>
   </head>
-
   <body>
-    <div id="container">
-      <div class="inner">
+    <div class="wrapper">
+      <header>
+        <h1 class="header">metPipe</h1>
+        <p class="header">A metagenomic pipeline from proprocessing to annotations and analysis for metagenomic Reads</p>
 
-        <header>
-          <h1>Metpipe</h1>
-          <h2>A metagenomic pipeline from proprocessing to annotations and analysis for metagenomic Reads</h2>
-        </header>
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/psikon/metpipe/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/psikon/metpipe/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/psikon/metpipe">View On GitHub</a></li>
+        </ul>
 
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/psikon/metpipe/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/psikon/metpipe/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/psikon/metpipe" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/psikon">psikon</a></p>
 
-        <hr>
 
-        <section id="main_content">
-          <h1>
+      </header>
+      <section>
+        <h1>
 <a name="metpipe" class="anchor" href="#metpipe"><span class="octicon octicon-link"></span></a>metPipe</h1>
 
 <p>The metagenomic pipeline metPipe bundles a number of bioinformatical tools for analyising metagenomic short read datasets 
 from RAW data to complete taxonomically annotated data. </p>
 
 <h2>
-<a name="summary" class="anchor" href="#summary"><span class="octicon octicon-link"></span></a>Summary</h2>
+<a name="1-requirements" class="anchor" href="#1-requirements"><span class="octicon octicon-link"></span></a>1.) Requirements</h2>
 
-<pre><code>    A) Hardware Requirements
-    B) Software Requirements
-    C) Installation of metpipe
-    D) Usage
-    E) Quickstart
-    F) Contact
-    G) Citing
-</code></pre>
-
-<h2>
-<a name="a-hardware-requirements" class="anchor" href="#a-hardware-requirements"><span class="octicon octicon-link"></span></a>A) Hardware Requirements</h2>
+<h3>
+<a name="a-hardware" class="anchor" href="#a-hardware"><span class="octicon octicon-link"></span></a>a) Hardware</h3>
 
 <p>The metPipe Pipeline was designed to run on s standard 64-bit Linux computer. For the analysis of short datasets and tutorial purposes (without a run of MetaCV) a minimum of 8 GB RAM is required. To analyse larger datasets and include a run of MetaCV 32 GB RAM and a multiple CPU-Cores are recommended. For the installation of the pipeline and the required databases a disk space 77 GB will be used. </p>
 
-<h2>
-<a name="b-software-requirements" class="anchor" href="#b-software-requirements"><span class="octicon octicon-link"></span></a>B) Software Requirements</h2>
+<h3>
+<a name="b-software" class="anchor" href="#b-software"><span class="octicon octicon-link"></span></a>b) Software</h3>
 
 <p>The Pipeline was developed with Python 2.7 and R 2.15 for standard Linux 64-bit workstations.  Before running the install script please check the following dependencies:</p>
 
@@ -70,7 +60,7 @@ from RAW data to complete taxonomically annotated data. </p>
 <li>libxerces-c-dev </li>
 <li>libsqlite3-dev</li>
 </ul><h3>
-<a name="c-installation" class="anchor" href="#c-installation"><span class="octicon octicon-link"></span></a>C) Installation</h3>
+<a name="2-installation" class="anchor" href="#2-installation"><span class="octicon octicon-link"></span></a>2.) Installation</h3>
 
 <p>After downloading the software from <a href="https://github.com/psikon/metpipe">https://github.com/psikon/metpipe</a>, unpack the files and run the installation script with following command :</p>
 
@@ -80,7 +70,7 @@ from RAW data to complete taxonomically annotated data. </p>
 <p>All external dependencies will be downloaded and installed in a local folder. The installation process may take some minutes or hours, depending on the connection speed and the databases.</p>
 
 <h3>
-<a name="d-usage" class="anchor" href="#d-usage"><span class="octicon octicon-link"></span></a>D) Usage:</h3>
+<a name="3-usage" class="anchor" href="#3-usage"><span class="octicon octicon-link"></span></a>3.) Usage:</h3>
 
 <pre><code>usage: metpipe.py [-h] [--version] [-v] [-t THREADS] [-p PARAM]
                   [-s {preprocessing,assembly,annotation,analysis}]
@@ -118,7 +108,7 @@ optional arguments:
 <p>All step specific settings can be found in the parameter.conf file in the root dir of this program.</p>
 
 <h3>
-<a name="e-quickstart" class="anchor" href="#e-quickstart"><span class="octicon octicon-link"></span></a>E) Quickstart</h3>
+<a name="4-quickstart" class="anchor" href="#4-quickstart"><span class="octicon octicon-link"></span></a>4.) Quickstart</h3>
 
 <p>For testing/tutorial purporses a little test dataset is included in the root folder. This data include 15.000 paired-end MiSeq reads with a length of 250bp.</p>
 
@@ -137,7 +127,7 @@ optional arguments:
 </code></pre>
 
 <h3>
-<a name="f-contact" class="anchor" href="#f-contact"><span class="octicon octicon-link"></span></a>F) Contact</h3>
+<a name="5-contact" class="anchor" href="#5-contact"><span class="octicon octicon-link"></span></a>5.) Contact</h3>
 
 <p>If you encounter a problem/bug, please first check the wiki page:
 <a href="https://github.com/psikon/metpipe/wiki">https://github.com/psikon/metpipe/wiki</a>
@@ -152,16 +142,13 @@ and every log file produced by your run.</p>
 <p>Philipp Sehnert: <a href="mailto:philipp.sehnert@gmail.com">philipp.sehnert@gmail.com</a></p>
 
 <h3>
-<a name="g-citing" class="anchor" href="#g-citing"><span class="octicon octicon-link"></span></a>G) Citing</h3>
-        </section>
-
-        <footer>
-          Metpipe is maintained by <a href="https://github.com/psikon">psikon</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
-
-        
-      </div>
+<a name="6-citing" class="anchor" href="#6-citing"><span class="octicon octicon-link"></span></a>6.) Citing</h3>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
     </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
   </body>
 </html>
