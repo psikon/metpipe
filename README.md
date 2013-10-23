@@ -3,20 +3,13 @@
 The metagenomic pipeline metPipe bundles a number of bioinformatical tools for analyising metagenomic short read datasets 
 from RAW data to complete taxonomically annotated data. 
 
-## Summary 
-		A) Hardware Requirements
-		B) Software Requirements
-		C) Installation of metpipe
-		D) Usage
-		E) Quickstart
-		F) Contact
-		G) Citing
+## 1. Requirements
 
-## A) Hardware Requirements
+### a) Hardware
 
 The metPipe Pipeline was designed to run on s standard 64-bit Linux computer. For the analysis of short datasets and tutorial purposes (without a run of MetaCV) a minimum of 8 GB RAM is required. To analyse larger datasets and include a run of MetaCV 32 GB RAM and a multiple CPU-Cores are recommended. For the installation of the pipeline and the required databases a disk space 77 GB will be used. 
 
-## B) Software Requirements
+### b) Software
 
 The Pipeline was developed with Python 2.7 and R 2.15 for standard Linux 64-bit workstations.  Before running the install script please check the following dependencies:
 
@@ -30,7 +23,7 @@ The Pipeline was developed with Python 2.7 and R 2.15 for standard Linux 64-bit 
 * libxerces-c-dev 
 * libsqlite3-dev
 
-### C) Installation
+## 2.) Installation
 
 After downloading the software from https://github.com/psikon/metpipe, unpack the files and run the installation script with following command :
 
@@ -40,7 +33,7 @@ After downloading the software from https://github.com/psikon/metpipe, unpack th
 
 All external dependencies will be downloaded and installed in a local folder. The installation process may take some minutes or hours, depending on the connection speed and the databases.
 
-### D) Usage:
+## 3.) Usage:
 
 ```
 usage: metpipe.py [-h] [--version] [-v] [-t THREADS] [-p PARAM]
@@ -78,7 +71,7 @@ optional arguments:
 
 All step specific settings can be found in the parameter.conf file in the root dir of this program.
 
-### E) Quickstart
+## 4. Quickstart
 
 For testing/tutorial purporses a little test dataset is included in the root folder. This data include 15.000 paired-end MiSeq reads with a length of 250bp.
 
@@ -96,7 +89,7 @@ After processing you will get 5 files in the analysis folder:
 	- eukaryota.db    - seperated eukaryota from SQL Lite DB
 	- metpipe.html    - interactic HTML5 piechart of taxonomies
 
-### F) Contact
+## 5. Contact
 
 If you encounter a problem/bug, please first check the wiki page:
 https://github.com/psikon/metpipe/wiki
@@ -110,7 +103,7 @@ and every log file produced by your run.
 
 Philipp Sehnert: philipp.sehnert@gmail.com
 
-### G) Citing
+## 6. Citing
 
 
 
