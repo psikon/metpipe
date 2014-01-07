@@ -124,8 +124,9 @@ try:
         results = pre.manage_preprocessing()
         # update pipeline variables with results
         settings.set_step_number(results[0])
-        files.set_input(absolute_path(results[1]))
-        files.set_preprocessed_output(absolute_path(results[1]))
+        if len(result) > 1:
+            files.set_input(absolute_path(results[1]))
+            files.set_preprocessed_output(absolute_path(results[1]))
 
     if skip in 'assembly' and skip:
         skip_msg(skip)

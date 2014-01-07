@@ -55,8 +55,9 @@ class Preprocess:
                 self.trim_and_filter()
                 # raise the step number for cmd output
                 self.step_number += 1
-        return [self.step_number, update_reads(self.trim_dir, 'val', 'fq')]
-        
+                return [self.step_number, update_reads(self.trim_dir, 'val', 'fq')]
+        else:
+            return [self.step_number]
         
     def qualityCheck(self):
         
