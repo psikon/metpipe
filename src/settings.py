@@ -10,15 +10,15 @@ class General:
     # general settings
     threads = 8
     verbose = False
-    skip = ''
-    starting_time = ''
-    actual_time = ''
+    skip = None
+    starting_time = None
+    actual_time = None
     step_number = 1
     # Program Settings
     trim = True
     quality = True
     use_contigs = False
-    assembler = ''
+    assembler = None
     classify = 'both'
     
     
@@ -89,22 +89,22 @@ class General:
 class Executables:
     
     conf = ConfigParser.SafeConfigParser()
-    FASTQC = ''
-    TRIMGALORE = ''
-    VELVETH = ''
-    VELVETG = ''
-    METAVELVET = ''
-    FLASH = ''
-    BLASTN = ''
-    BLAST_DB = ''
-    METACV_DB = ''
-    blastn = ''
-    CONVERTER = ''
-    PARSER = ''
-    ANNOTATE = ''
-    SUBSET = ''
-    KRONA_BLAST = ''
-    KRONA_TEXT = ''
+    FASTQC = None
+    TRIMGALORE = None
+    VELVETH = None
+    VELVETG = None
+    METAVELVET = None
+    FLASH = None
+    BLASTN = None
+    BLAST_DB = None
+    METACV_DB = None
+    blastn = None
+    CONVERTER = None
+    PARSER = None
+    ANNOTATE = None
+    SUBSET = None
+    KRONA_BLAST = None
+    KRONA_TEXT = None
     
     def __init__(self, parameter_file):
         
@@ -186,18 +186,18 @@ class Executables:
 class FileSettings:
     
     # important dirs for the pipeline
-    output = ''
-    logdir = ''
-    paramfile = ''
-    quality_dir = ''
-    trim_dir = ''
-    concat_dir = ''
-    assembly_dir = ''
-    blastn_dir = ''
-    metacv_dir = ''
-    parsed_db_dir = ''
-    annotated_db_dir = ''
-    subseted_db_dir = ''
+    output = None
+    logdir = None
+    paramfile = None
+    quality_dir = None
+    trim_dir = None
+    concat_dir = None
+    assembly_dir = None
+    blastn_dir = None
+    metacv_dir = None
+    parsed_db_dir = None
+    annotated_db_dir = None
+    subseted_db_dir = None
     # variables for the input and output of the programs
     raw = []
     input = []
@@ -341,8 +341,8 @@ class FileSettings:
 class FastQC_Parameter:
 
     nogroup = False
-    contaminants = '' 
-    kmers = ''
+    contaminants = None
+    kmers = None
     # dict with the arguments string
     arguments = {'nogroup' : '--nogroup ', 'contaminants': '-c ', 'kmers': '-k '}
     
@@ -358,16 +358,16 @@ class FastQC_Parameter:
 class TrimGalore_Parameter:
 
     quality = 20 
-    phred = ''
-    adapter = ''
-    adapter2 = ''
-    stringency = ''
+    phred = None
+    adapter = None
+    adapter2 = None
+    stringency = None
     error_rate = 0.1
     length = 150
     paired = False
     retain_unpaired = False
-    length_1 = ''
-    length_2 = ''
+    length_1 = None
+    length_2 = None
     trim = False
     # dict with the arguments string
     arguments = {'quality':'-q ', 'phred':'--phred', 'adapter':'-a ', 'adapter2':'-a2 ', 'stringency':'-s ',
@@ -394,8 +394,8 @@ class TrimGalore_Parameter:
 class FLASH_Parameter:
     
     minOverlap = 10
-    maxOverlap = ''
-    maxMismatchDensity = ''
+    maxOverlap = None
+    maxMismatchDensity = None
     phred = 33
     readLength = 250
     fragmentLength = 400
@@ -424,8 +424,8 @@ class FLASH_Parameter:
 class Velveth_Parameter:
     
     kmer = 85
-    file_layout = ''
-    read_type = ''
+    file_layout = None
+    read_type = None
     strand_specific = False
     reuse_Sequences = False
     noHash = False
@@ -453,21 +453,21 @@ class Velveth_Parameter:
 # Parameter for velvetg
 class Velvetg_Parameter:
 
-    cov_cutoff = ''
-    ins_length = ''
+    cov_cutoff = None
+    ins_length = None
     read_trkg = False
     min_contig_lgth = 250
     exp_cov = 'auto'
-    long_cov_cutoff = ''
-    ins_length_long = ''
-    ins_length_sd = ''
+    long_cov_cutoff = None
+    ins_length_long = None
+    ins_length_sd = None
     scaffolding = True
     max_branch_length = 100
     max_divergence = 0.2
     max_gap_count = 3
     min_pair_count = 5
     max_coverage = False
-    coverage_mask = ''
+    coverage_mask = None
     long_mult_cutoff = 2
     unused_reads = False
     alignments = False
@@ -519,25 +519,25 @@ class Velvetg_Parameter:
 class MetaVelvet_Parameter:
 
     discard_chimera = False
-    max_chimera_rate = '' 
-    repeat_cov_sd = '' 
-    min_split_length = ''
-    valid_connections = '' 
-    noise_connections = '' 
+    max_chimera_rate = None
+    repeat_cov_sd = None
+    min_split_length = None
+    valid_connections = None
+    noise_connections = None
     use_connections = True 
     report_split_detail = False
     report_subgraph = False 
-    exp_covs_meta = ''  
-    min_peak_cov = '' 
-    max_peak_cov = ''      
-    histo_bin_width = ''  
-    histo_sn_ratio = ''
+    exp_covs_meta = None
+    min_peak_cov = None
+    max_peak_cov = None    
+    histo_bin_width = None  
+    histo_sn_ratio = None
     amos_file = False
-    coverage_mask = ''
+    coverage_mask = None
     unused_reads_meta = False 
     alignments_meta = False
     exportFiltered_meta = False
-    paired_exp_fraction_meta = ''
+    paired_exp_fraction_meta = None
     # dict with the arguments string 
     arguments = {'discard_chimera':'-discard_chimera ', 'max_chimera_rate':'-max_chimera_rate ',
 				'repeat_cov_sd':'-repeat_cov_sd ', 'min_split_length':'-min_split_length ',
@@ -613,49 +613,49 @@ class MetaCV_Parameter:
 # Parameter for blastn        
 class Blastn_Parameter:
 
-    import_search_strategy = ''
-    dbsize = ''
-    gilist = ''
-    seqidlist = ''
-    negative_gilist = ''
-    entrez_query = ''
-    db_soft_mask = ''
-    db_hard_mask = ''
-    evalue = ''
-    word_size = ''
-    gapopen = ''
-    gapextend = ''
+    import_search_strategy = None
+    dbsize = None
+    gilist = None
+    seqidlist = None
+    negative_gilist = None
+    entrez_query = None
+    db_soft_mask = None
+    db_hard_mask = None
+    evalue = None
+    word_size = None
+    gapopen = None
+    gapextend = None
     perc_identity = 100.0
-    xdrop_ungap = ''
-    xdrop_gap = ''
-    xdrop_gap_final = ''
-    searchsp = ''
-    max_hsps_per_subject = ''
-    penalty = ''
-    reward = ''
+    xdrop_ungap = None
+    xdrop_gap = None
+    xdrop_gap_final = None
+    searchsp = None
+    max_hsps_per_subject = None
+    penalty = None
+    reward = None
     no_greedy = False
-    min_raw_gapped_score = ''
-    dust = ''
-    filtering_db = ''
-    window_masker_taxid = ''
-    window_masker_db = ''
-    soft_masking = ''
+    min_raw_gapped_score = None
+    dust = None
+    filtering_db = None
+    window_masker_taxid = None
+    window_masker_db = None
+    soft_masking = None
     ungapped = False
-    culling_limit = ''
-    best_hit_overhang = ''
-    best_hit_score_edge = ''
-    window_size = ''
-    off_diagonal_range = ''
+    culling_limit = None
+    best_hit_overhang = None
+    best_hit_score_edge = None
+    window_size = None
+    off_diagonal_range = None
     lcase_masking = False
-    query_loc = ''
-    strand = ''
+    query_loc = None
+    strand = None
     parse_deflines = False
     outfmt = 5
     show_gis = False
-    num_descriptions = ''
-    num_alignments = ''
+    num_descriptions = None
+    num_alignments = None
     html = False
-    max_target_seqs = ''
+    max_target_seqs = None
     arguments = {'import_search_strategy' : '-import_search_strategy ', 
                  'dbsize' : '-dbsize ','gilist' : '-gilist ', 
                  'seqidlist' : '-seqidlist ', 'negative_gilist' : '-negative_gilist ',
@@ -762,9 +762,9 @@ class Rannotate_Parameter:
         return os.path.normpath(self.conf.get('Taxonomical Annotation', 'taxon_db') if self.conf.has_option('Taxonomical Annotation', 'taxon_db') else '')
         
 class subsetDB_Parameter:
-    classifier = ''
+    classifier = None
     bitscore = 0.98
-    rank = ''
+    rank = None
     conf = ConfigParser.SafeConfigParser()
     
     def __init__(self, parameter_file):

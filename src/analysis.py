@@ -12,18 +12,18 @@ from src.exceptions import ParserException, AnnotateDBException, SubsetDBExcepti
 class Analysis:
     
     # input 
-    blast_output = ''
-    metacv_output = ''
+    blast_output = None
+    metacv_output = None
     
     # output
-    parsed_db_out = ''
-    annotated_db_out = ''
-    subseted_db_out = ''
+    parsed_db_out = None
+    annotated_db_out = None
+    subseted_db_out = None
     logdir = ''
     # misc
-    parameter_file = ''
+    parameter_file = None
     krona = False
-    exitcode = ''
+    exitcode = None
     
     def __init__(self, threads, step_number, verbose, time, logdir, classify, output, 
                  parsed_db_dir, annotated_db_dir, subseted_db_dir, krona_report_dir, 

@@ -6,9 +6,8 @@ from src.exceptions import NoExecutable, FastQException
 #@author:Philipp Sehnert
 #@contact: philipp.sehnert[a]gmail.com
 
-# convert the input to a string
 def to_string(value):
-    
+    '''convert the value to string'''
     if len(value) > 1:
         return str(' '.join(str(i)for i in value))
     else:

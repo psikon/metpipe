@@ -13,9 +13,8 @@ from src.exceptions import FastQConvertException
 #@author: Philipp Sehnert
 #@contact: philipp.sehnert[a]gmail.com
 
-# function to create a dir for the results of processing
 def create_outputdir(path):
-    
+    '''create a dir for the results of processing'''
         try:
             os.makedirs(path)
         except OSError:
@@ -23,18 +22,16 @@ def create_outputdir(path):
             if not os.path.isdir(path):
                 raise
 
-# traverse through the given directory and filter out the new input 
-# for given parameters
 def update_reads(directory, word, extension): 
+    '''traverse through a directory and filter out the new input for parameters'''
     
    # find all files that fit in the given command
    files = glob.glob1(directory, '*%s*.%s' % (word, extension))
    # and return the files as list
    return [(directory + os.sep +  f) for f in files]
 
-# combine the content many files in one file
 def merge_files(input, output, name, extension):
-    
+    '''combine the content of many files in one file'''
     try:
         # open file for merging
         merge = open(output + os.sep + name + '.' + extension, 'w')
@@ -48,8 +45,8 @@ def merge_files(input, output, name, extension):
     except IOError:
         print 'Error: '+ e.message
 
-# convert fastq files to fasta
 def convert_fastq(input, output, CONVERTER):
+    '''convert fastq files to fasta'''
     
     for i in range(len(input)):
         p = subprocess.Popen(shlex.split('%s -n -Q33 -i %s -o %s' % 
