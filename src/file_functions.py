@@ -15,20 +15,19 @@ from src.exceptions import FastQConvertException
 
 def create_outputdir(path):
     '''create a dir for the results of processing'''
-        try:
-            os.makedirs(path)
-        except OSError:
-            # if dir exists and is dir go ahead
-            if not os.path.isdir(path):
-                raise
+    try:
+        os.makedirs(path)
+    except OSError:
+        # if dir exists and is dir go ahead
+        if not os.path.isdir(path):
+            raise
 
 def update_reads(directory, word, extension): 
-    '''traverse through a directory and filter out the new input for parameters'''
-    
-   # find all files that fit in the given command
-   files = glob.glob1(directory, '*%s*.%s' % (word, extension))
-   # and return the files as list
-   return [(directory + os.sep +  f) for f in files]
+    '''traverse through a directory and filter out the new input for parameters''' 
+    # find all files that fit in the given command
+    files = glob.glob1(directory, '*%s*.%s' % (word, extension))
+    # and return the files as list
+    return [(directory + os.sep +  f) for f in files]
 
 def merge_files(input, output, name, extension):
     '''combine the content of many files in one file'''
